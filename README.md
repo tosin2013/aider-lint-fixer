@@ -57,7 +57,7 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 ### 🚀 **Installation**
 
 #### **Prerequisites**
-- **Python 3.8 or higher**
+- **Python 3.11 or higher**
 - **Git**
 - **pip3** (usually included with Python)
 - **Node.js/npm** (for Node.js linters)
@@ -187,7 +187,7 @@ python3 -m aider_lint_fixer . --linters flake8 --dry-run --verbose
 **1. Python Version Issues**
 ```bash
 # Check Python version
-python3 --version  # Should be 3.8+
+python3 --version  # Should be 3.11+
 
 # If python3 not found, try:
 python --version   # On some systems

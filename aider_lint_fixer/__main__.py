@@ -7,7 +7,8 @@ This allows the package to be executed with:
 """
 
 import sys
+
 from .main import main
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

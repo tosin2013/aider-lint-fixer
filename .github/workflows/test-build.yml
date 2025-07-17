@@ -18,7 +18,7 @@ on:
         - linters-only
 
 env:
-  PYTHON_VERSION_DEFAULT: '3.9'
+  PYTHON_VERSION_DEFAULT: '3.11'
 
 jobs:
   # Job 1: Quick validation and linting
@@ -73,13 +73,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.11', '3.12']
         exclude:
           # Reduce matrix size for faster builds
           - os: macos-latest
-            python-version: '3.8'
+            python-version: '3.12'
           - os: windows-latest
-            python-version: '3.8'
+            python-version: '3.12'
     
     steps:
     - name: 📥 Checkout code
