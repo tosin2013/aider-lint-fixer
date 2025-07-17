@@ -1,0 +1,12 @@
+---
+- name: Example playbook for localhost
+  hosts: localhost
+  tasks:
+  - command: echo "test"
+  - debug:
+      msg: "test"
+  - name: Task with issues
+    shell: |
+      echo "multiline"
+      echo "command"
+    when: ansible_os_family == "RedHat"

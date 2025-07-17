@@ -19,16 +19,23 @@ from .project_detector import ProjectInfo
 # Import modular linters - delay import to avoid circular dependencies
 MODULAR_LINTERS_AVAILABLE = False
 AnsibleLintLinter = None
+Flake8Linter = None
+PylintLinter = None
 
 def _import_modular_linters():
     """Import modular linters with error handling."""
-    global MODULAR_LINTERS_AVAILABLE, AnsibleLintLinter
+    global MODULAR_LINTERS_AVAILABLE, AnsibleLintLinter, Flake8Linter, PylintLinter
     if not MODULAR_LINTERS_AVAILABLE:
         try:
             from .linters.ansible_lint import AnsibleLintLinter as _AnsibleLintLinter
+            from .linters.flake8_linter import Flake8Linter as _Flake8Linter
+            from .linters.pylint_linter import PylintLinter as _PylintLinter
+
             AnsibleLintLinter = _AnsibleLintLinter
+            Flake8Linter = _Flake8Linter
+            PylintLinter = _PylintLinter
             MODULAR_LINTERS_AVAILABLE = True
-            logger.debug("Successfully imported modular ansible-lint linter")
+            logger.debug("Successfully imported modular linters: ansible-lint, flake8, pylint")
         except ImportError as e:
             logger.error(f"Failed to import modular linters: {e}")
             MODULAR_LINTERS_AVAILABLE = False
@@ -230,10 +237,14 @@ class LintRunner:
             LintResult object containing the results
         """
         # Try to use modular linter implementation first
-        if linter_name == 'ansible-lint':
-            _import_modular_linters()
-            if MODULAR_LINTERS_AVAILABLE:
+        _import_modular_linters()
+        if MODULAR_LINTERS_AVAILABLE:
+            if linter_name == 'ansible-lint':
                 return self._run_modular_ansible_lint(file_paths, **kwargs)
+            elif linter_name == 'flake8':
+                return self._run_modular_flake8(file_paths, **kwargs)
+            elif linter_name == 'pylint':
+                return self._run_modular_pylint(file_paths, **kwargs)
 
         if linter_name not in self.LINTER_COMMANDS:
             raise ValueError(f"Unknown linter: {linter_name}")
@@ -384,10 +395,69 @@ class LintRunner:
             # Fallback to legacy implementation
             return self._run_legacy_ansible_lint(file_paths, **kwargs)
 
+    def _run_modular_flake8(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
+        """Run flake8 using the modular implementation."""
+        try:
+            logger.info("Using modular flake8 implementation")
+            linter = Flake8Linter(self.project_info.root_path)
+
+            if not linter.is_available():
+                return LintResult(success=False, errors=[], warnings=[], raw_output="flake8 not available")
+
+            # Check for profile in kwargs
+            profile = kwargs.get('profile', 'default')
+            if hasattr(linter, 'run_with_profile'):
+                result = linter.run_with_profile(profile, file_paths)
+            else:
+                result = linter.run(file_paths, **kwargs)
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Error running modular flake8: {e}")
+            # Fallback to legacy implementation
+            return self._run_legacy_flake8(file_paths, **kwargs)
+
+    def _run_modular_pylint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
+        """Run pylint using the modular implementation."""
+        try:
+            logger.info("Using modular pylint implementation")
+            linter = PylintLinter(self.project_info.root_path)
+
+            if not linter.is_available():
+                return LintResult(success=False, errors=[], warnings=[], raw_output="pylint not available")
+
+            # Check for profile in kwargs
+            profile = kwargs.get('profile', 'default')
+            if hasattr(linter, 'run_with_profile'):
+                result = linter.run_with_profile(profile, file_paths)
+            else:
+                result = linter.run(file_paths, **kwargs)
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Error running modular pylint: {e}")
+            # Fallback to legacy implementation
+            return self._run_legacy_pylint(file_paths, **kwargs)
+
+    def _run_legacy_flake8(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
+        """Fallback to legacy flake8 implementation."""
+        logger.info("Using legacy flake8 implementation")
+        return self._run_legacy_linter('flake8', file_paths)
+
+    def _run_legacy_pylint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
+        """Fallback to legacy pylint implementation."""
+        logger.info("Using legacy pylint implementation")
+        return self._run_legacy_linter('pylint', file_paths)
+
     def _run_legacy_ansible_lint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Fallback to legacy ansible-lint implementation."""
         logger.info("Using legacy ansible-lint implementation")
-        # Call the original run_linter logic without the modular check
+        return self._run_legacy_linter('ansible-lint', file_paths)
+
+    def _run_legacy_linter(self, linter_name: str, file_paths: Optional[List[str]] = None) -> LintResult:
+        """Run linter using the original legacy implementation."""
         linter_name = 'ansible-lint'
 
         if linter_name not in self.LINTER_COMMANDS:

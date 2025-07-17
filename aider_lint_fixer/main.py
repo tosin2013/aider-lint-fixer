@@ -132,6 +132,64 @@ def print_fix_summary(sessions):
         aider_successful = len([r for r in session.results if r.success])
         print(f"   📄 {Path(session.file_path).name}: {aider_successful}/{len(session.errors_to_fix)} attempted")
 
+        # Show what errors were attempted to be fixed
+        if session.errors_to_fix:
+            print(f"      🎯 Errors Attempted:")
+            for i, error_analysis in enumerate(session.errors_to_fix[:5]):  # Show first 5 attempted errors
+                error = error_analysis.error
+                print(f"         {i+1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})")
+            if len(session.errors_to_fix) > 5:
+                print(f"         ... and {len(session.errors_to_fix) - 5} more")
+
+
+def create_progress_callback(verbose: bool = False):
+    """Create a progress callback function for long-running operations.
+
+    Args:
+        verbose: Whether to show detailed progress information
+
+    Returns:
+        Progress callback function
+    """
+    def progress_callback(progress_info: dict):
+        """Handle progress updates during lint fixing."""
+        stage = progress_info.get('stage', 'unknown')
+
+        if stage == 'processing_file':
+            current = progress_info.get('current_file', 0)
+            total = progress_info.get('total_files', 0)
+            file_path = progress_info.get('current_file_path', 'unknown')
+            file_errors = progress_info.get('file_errors', 0)
+
+            print(f"\n{Fore.CYAN}📁 Processing file {current}/{total}: {Path(file_path).name} ({file_errors} errors){Style.RESET_ALL}")
+
+        elif stage == 'fixing_error_group':
+            complexity = progress_info.get('complexity', 'unknown')
+            group_errors = progress_info.get('group_errors', 0)
+            session_id = progress_info.get('session_id', 'unknown')[:8]
+
+            if verbose:
+                print(f"   🔧 Fixing {group_errors} {complexity} errors (session {session_id})...")
+            else:
+                print(f"   🔧 Fixing {group_errors} {complexity} errors...")
+
+        elif stage == 'file_completed':
+            completed = progress_info.get('completed_files', 0)
+            total = progress_info.get('total_files', 0)
+            processed_errors = progress_info.get('processed_errors', 0)
+            total_errors = progress_info.get('total_errors', 0)
+            session_results = progress_info.get('session_results', 0)
+
+            print(f"   ✅ File completed: {session_results} successful fixes")
+
+            # Show overall progress
+            file_progress = (completed / total * 100) if total > 0 else 0
+            error_progress = (processed_errors / total_errors * 100) if total_errors > 0 else 0
+
+            print(f"   📊 Progress: {completed}/{total} files ({file_progress:.1f}%), {processed_errors}/{total_errors} errors ({error_progress:.1f}%)")
+
+    return progress_callback
+
 
 def print_verification_summary(verification_results):
     """Print verification summary showing actual fixes.
@@ -150,6 +208,26 @@ def print_verification_summary(verification_results):
 
         success_rate = result['success_rate'] * 100
         print(f"   📄 Session {session_id[:8]}: {result['errors_fixed']}/{result['total_original_errors']} fixed ({success_rate:.1f}%)")
+
+        # Show detailed information about what was fixed
+        if result['fixed_errors']:
+            print(f"      ✅ Successfully Fixed:")
+            for i, error in enumerate(result['fixed_errors'][:5]):  # Show first 5 fixed errors
+                print(f"         {i+1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})")
+            if len(result['fixed_errors']) > 5:
+                print(f"         ... and {len(result['fixed_errors']) - 5} more")
+
+        # Show remaining errors if any
+        if result['remaining_errors']:
+            print(f"      ❌ Still Present:")
+            for i, error in enumerate(result['remaining_errors'][:3]):  # Show first 3 remaining errors
+                print(f"         {i+1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})")
+            if len(result['remaining_errors']) > 3:
+                print(f"         ... and {len(result['remaining_errors']) - 3} more")
+
+        # Show new errors if any
+        if result['new_errors'] > 0:
+            print(f"      ⚠️  New errors introduced: {result['new_errors']}")
 
     overall_rate = (total_fixed / total_attempted * 100) if total_attempted > 0 else 0
     print(f"   🎯 Overall: {total_fixed}/{total_attempted} errors actually fixed ({overall_rate:.1f}%)")
@@ -296,9 +374,12 @@ def main(project_path: str, config: Optional[str], llm: Optional[str],
                 print("Aborted by user.")
                 return 0
         
-        # Fix errors
+        # Create progress callback for long-running operations
+        progress_callback = create_progress_callback(verbose)
+
+        # Fix errors with progress tracking
         sessions = aider_integration.fix_multiple_files(
-            file_analyses, max_files, max_errors
+            file_analyses, max_files, max_errors, progress_callback
         )
         
         print_fix_summary(sessions)

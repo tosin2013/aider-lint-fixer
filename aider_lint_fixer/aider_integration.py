@@ -43,7 +43,13 @@ class FixSession:
 
 class AiderIntegration:
     """Integrates with aider.chat for automated lint fixing."""
-    
+
+    # Configuration for scalability
+    MAX_ERRORS_PER_BATCH = 10  # Maximum errors to fix in one aider call
+    MAX_PROMPT_LENGTH = 8000   # Maximum prompt length to avoid token limits
+    AIDER_TIMEOUT = 300        # 5 minutes timeout for aider operations
+    BATCH_DELAY = 2            # Seconds to wait between batches
+
     def __init__(self, config: Config, project_root: str, config_manager=None):
         """Initialize the aider integration.
 
@@ -147,8 +153,9 @@ class AiderIntegration:
 
         return None
     
-    def fix_errors_in_file(self, file_analysis: FileAnalysis, 
-                          max_errors: Optional[int] = None) -> FixSession:
+    def fix_errors_in_file(self, file_analysis: FileAnalysis,
+                          max_errors: Optional[int] = None,
+                          progress_callback: Optional[callable] = None) -> FixSession:
         """Fix errors in a single file.
         
         Args:
@@ -187,16 +194,31 @@ class AiderIntegration:
         
         # Group errors by complexity for batch fixing
         error_groups = self._group_errors_by_complexity(fixable_errors)
-        
+
+        total_groups = len([g for g in error_groups.values() if g])
+        processed_groups = 0
+
         for complexity, errors in error_groups.items():
             if not errors:
                 continue
-                
+
             logger.info(f"Fixing {len(errors)} {complexity.value} errors")
-            
+
+            # Progress callback for error group
+            if progress_callback:
+                progress_callback({
+                    'stage': 'fixing_error_group',
+                    'complexity': complexity.value,
+                    'group_errors': len(errors),
+                    'processed_groups': processed_groups,
+                    'total_groups': total_groups,
+                    'session_id': session_id
+                })
+
             # Fix errors in this complexity group
             group_results = self._fix_error_group(errors, session_id)
             session.results.extend(group_results)
+            processed_groups += 1
         
         session.total_time = time.time() - start_time
         
@@ -221,42 +243,91 @@ class AiderIntegration:
         return groups
     
     def _fix_error_group(self, errors: List[ErrorAnalysis], session_id: str) -> List[FixResult]:
-        """Fix a group of errors with similar complexity.
-        
+        """Fix a group of errors with similar complexity using intelligent batching.
+
         Args:
             errors: List of error analyses to fix
             session_id: Session identifier
-            
+
         Returns:
             List of fix results
         """
         results = []
-        
+
         if not errors:
             return results
-        
+
         # Group errors by file (should all be the same file)
         file_path = errors[0].error.file_path
-        
-        # Create a comprehensive prompt for all errors
-        prompt = self._create_fix_prompt(errors)
-        
-        # Run aider to fix the errors
-        aider_result = self._run_aider_fix(file_path, prompt, session_id)
-        
-        # Create results for each error
-        for error_analysis in errors:
-            result = FixResult(
-                error_analysis=error_analysis,
-                success=aider_result['success'],
-                changes_made=aider_result['changes_made'],
-                fix_description=aider_result['description'],
-                aider_output=aider_result['output'],
-                error_message=aider_result.get('error', '')
-            )
-            results.append(result)
-        
+
+        # Split into batches if we have too many errors
+        batches = self._create_error_batches(errors)
+
+        logger.info(f"Processing {len(errors)} errors in {len(batches)} batches")
+
+        for batch_num, batch_errors in enumerate(batches, 1):
+            logger.info(f"Processing batch {batch_num}/{len(batches)} ({len(batch_errors)} errors)")
+
+            # Create a prompt for this batch
+            prompt = self._create_fix_prompt(batch_errors)
+
+            # Run aider to fix the errors in this batch
+            aider_result = self._run_aider_fix(file_path, prompt, f"{session_id}-batch{batch_num}")
+
+            # Create results for each error in this batch
+            for error_analysis in batch_errors:
+                result = FixResult(
+                    error_analysis=error_analysis,
+                    success=aider_result['success'],
+                    changes_made=aider_result['changes_made'],
+                    fix_description=aider_result['description'],
+                    aider_output=aider_result['output'],
+                    error_message=aider_result.get('error', '')
+                )
+                results.append(result)
+
+            # Add delay between batches to avoid overwhelming the LLM
+            if batch_num < len(batches):
+                import time
+                time.sleep(self.BATCH_DELAY)
+
         return results
+
+    def _create_error_batches(self, errors: List[ErrorAnalysis]) -> List[List[ErrorAnalysis]]:
+        """Split errors into manageable batches.
+
+        Args:
+            errors: List of error analyses
+
+        Returns:
+            List of error batches
+        """
+        batches = []
+        current_batch = []
+        current_prompt_length = 0
+
+        for error in errors:
+            # Estimate prompt length for this error
+            error_prompt_length = len(f"{error.error.rule_id}: {error.error.message}")
+
+            # Check if adding this error would exceed limits
+            if (len(current_batch) >= self.MAX_ERRORS_PER_BATCH or
+                current_prompt_length + error_prompt_length > self.MAX_PROMPT_LENGTH):
+
+                # Start a new batch
+                if current_batch:
+                    batches.append(current_batch)
+                    current_batch = []
+                    current_prompt_length = 0
+
+            current_batch.append(error)
+            current_prompt_length += error_prompt_length
+
+        # Add the last batch if it has errors
+        if current_batch:
+            batches.append(current_batch)
+
+        return batches
     
     def _create_fix_prompt(self, errors: List[ErrorAnalysis]) -> str:
         """Create a comprehensive prompt for fixing errors.
@@ -336,7 +407,7 @@ class AiderIntegration:
                 command,
                 capture_output=True,
                 text=True,
-                timeout=300,
+                timeout=self.AIDER_TIMEOUT,
                 cwd=self.project_root
             )
 
@@ -623,47 +694,88 @@ class AiderIntegration:
         
         return verification_summary
     
-    def fix_multiple_files(self, file_analyses: Dict[str, FileAnalysis], 
+    def fix_multiple_files(self, file_analyses: Dict[str, FileAnalysis],
                           max_files: Optional[int] = None,
-                          max_errors_per_file: Optional[int] = None) -> List[FixSession]:
-        """Fix errors in multiple files.
-        
+                          max_errors_per_file: Optional[int] = None,
+                          progress_callback: Optional[callable] = None) -> List[FixSession]:
+        """Fix errors in multiple files with progress tracking.
+
         Args:
             file_analyses: Dictionary of file analyses
             max_files: Maximum number of files to process
             max_errors_per_file: Maximum errors to fix per file
-            
+            progress_callback: Optional callback for progress updates
+
         Returns:
             List of fix sessions
         """
         sessions = []
-        
+
         # Sort files by complexity (easier files first)
         sorted_files = sorted(
             file_analyses.items(),
             key=lambda x: (x[1].complexity_score, len(x[1].error_analyses))
         )
-        
+
         if max_files:
             sorted_files = sorted_files[:max_files]
-        
+
+        total_files = len(sorted_files)
+        total_errors = sum(len(fa.error_analyses) for _, fa in sorted_files)
+        processed_files = 0
+        processed_errors = 0
+
+        logger.info(f"Starting batch processing: {total_files} files, {total_errors} total errors")
+
         for file_path, file_analysis in sorted_files:
             if not file_analysis.error_analyses:
                 continue
-            
-            logger.info(f"Processing file: {file_path}")
-            
+
+            file_errors = len(file_analysis.error_analyses)
+            logger.info(f"Processing file {processed_files + 1}/{total_files}: {file_path} ({file_errors} errors)")
+
+            # Progress callback
+            if progress_callback:
+                progress_callback({
+                    'stage': 'processing_file',
+                    'current_file': processed_files + 1,
+                    'total_files': total_files,
+                    'current_file_path': file_path,
+                    'file_errors': file_errors,
+                    'processed_errors': processed_errors,
+                    'total_errors': total_errors
+                })
+
             try:
-                session = self.fix_errors_in_file(file_analysis, max_errors_per_file)
+                session = self.fix_errors_in_file(file_analysis, max_errors_per_file, progress_callback)
                 sessions.append(session)
-                
+
+                processed_files += 1
+                processed_errors += len(session.errors_to_fix)
+
+                # Progress update after file completion
+                if progress_callback:
+                    progress_callback({
+                        'stage': 'file_completed',
+                        'completed_files': processed_files,
+                        'total_files': total_files,
+                        'processed_errors': processed_errors,
+                        'total_errors': total_errors,
+                        'session_results': len([r for r in session.results if r.success])
+                    })
+
                 # Add a small delay between files to avoid overwhelming the LLM
                 import time
                 time.sleep(1)
-                
+
+            except KeyboardInterrupt:
+                logger.info("Process interrupted by user")
+                break
             except Exception as e:
                 logger.error(f"Failed to fix errors in {file_path}: {e}")
+                processed_files += 1
                 continue
-        
+
+        logger.info(f"Batch processing complete: {processed_files}/{total_files} files processed")
         return sessions
 
