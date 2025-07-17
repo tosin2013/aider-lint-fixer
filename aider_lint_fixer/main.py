@@ -260,6 +260,7 @@ def print_verification_summary(verification_results):
 
 @click.command()
 @click.argument("project_path", default=".", type=click.Path(exists=True))
+@click.option("--version", is_flag=True, help="Show version and exit")
 @click.option("--config", "-c", help="Path to configuration file")
 @click.option("--llm", help="LLM provider (deepseek, openrouter, ollama)")
 @click.option("--model", help="Specific model to use")
@@ -269,8 +270,18 @@ def print_verification_summary(verification_results):
 @click.option("--dry-run", is_flag=True, help="Show what would be fixed without making changes")
 @click.option("--interactive", is_flag=True, help="Confirm each fix before applying")
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
+@click.option("--quiet", "-q", is_flag=True, help="Suppress non-error output")
+@click.option("--no-color", is_flag=True, help="Disable colored output")
 @click.option("--log-file", help="Path to log file")
 @click.option("--no-banner", is_flag=True, help="Disable banner output")
+@click.option("--check-only", is_flag=True, help="Only check for issues, don't fix them")
+@click.option(
+    "--output-format",
+    type=click.Choice(["text", "json"]),
+    default="text",
+    help="Output format (text or json)",
+)
+@click.option("--list-linters", is_flag=True, help="List all available linters and exit")
 @click.option(
     "--ansible-profile",
     default="basic",
@@ -284,13 +295,23 @@ def print_verification_summary(verification_results):
     help="Linter profile to use (basic, default, or strict)",
 )
 @click.option(
+    "--include",
+    multiple=True,
+    help="Include patterns (can be used multiple times)",
+)
+@click.option(
     "--exclude",
     multiple=True,
-    help="Exclude patterns for ansible-lint (can be used multiple times)",
+    help="Exclude patterns (can be used multiple times)",
+)
+@click.option(
+    "--extensions",
+    help="Comma-separated list of file extensions to process (e.g., py,js,yml)",
 )
 @click.option("--target-dir", help="Target directory to lint (e.g., roles/)")
 def main(
     project_path: str,
+    version: bool,
     config: Optional[str],
     llm: Optional[str],
     model: Optional[str],
@@ -300,24 +321,77 @@ def main(
     dry_run: bool,
     interactive: bool,
     verbose: bool,
+    quiet: bool,
+    no_color: bool,
     log_file: Optional[str],
     no_banner: bool,
+    check_only: bool,
+    output_format: str,
+    list_linters: bool,
     ansible_profile: str,
     profile: str,
+    include: tuple,
     exclude: tuple,
+    extensions: Optional[str],
     target_dir: Optional[str],
 ):
     """Aider Lint Fixer - Automated lint error detection and fixing.
 
     PROJECT_PATH: Path to the project directory (default: current directory)
     """
+    # Handle version flag
+    if version:
+        from . import __version__
+
+        print(f"aider-lint-fixer {__version__}")
+        return
+
+    # Handle list-linters flag
+    if list_linters:
+        from .supported_versions import get_supported_linters
+
+        linters_list = get_supported_linters()
+        if output_format == "json":
+            import json
+
+            print(json.dumps({"available_linters": linters_list}, indent=2))
+        else:
+            print("Available linters:")
+            for linter in linters_list:
+                print(f"  • {linter}")
+            print(f"\nTotal: {len(linters_list)} linters available")
+            print("Use --linters <name1,name2> to specify which linters to run")
+        return
+
+    # Handle quiet mode
+    if quiet:
+        import logging
+
+        logging.getLogger().setLevel(logging.ERROR)
+
     try:
         # Set up logging
-        log_level = "DEBUG" if verbose else "INFO"
+        log_level = "DEBUG" if verbose else ("ERROR" if quiet else "INFO")
         setup_logging(log_level, log_file)
 
+        # Handle color output
+        if no_color:
+            # Disable colorama colors
+            import os
+
+            os.environ["NO_COLOR"] = "1"
+            # Reset colorama colors to empty strings
+            from colorama import Fore, Style
+
+            for attr in dir(Fore):
+                if not attr.startswith("_"):
+                    setattr(Fore, attr, "")
+            for attr in dir(Style):
+                if not attr.startswith("_"):
+                    setattr(Style, attr, "")
+
         # Print banner
-        if not no_banner:
+        if not no_banner and not quiet:
             print_banner()
 
         # Load configuration
@@ -381,20 +455,53 @@ def main(
         # Prepare linter options
         linter_options = {"ansible_profile": ansible_profile, "profile": profile}
 
-        # Add exclude patterns for ansible-lint
+        # Add include/exclude patterns and extensions
+        if include:
+            linter_options["include"] = list(include)
         if exclude:
             linter_options["exclude"] = list(exclude)
+        if extensions:
+            linter_options["extensions"] = [ext.strip() for ext in extensions.split(",")]
 
         results = lint_runner.run_all_available_linters(enabled_linters, **linter_options)
 
-        print_lint_summary(results)
+        # Handle output format
+        if output_format == "json":
+            import json
+
+            json_results = {}
+            for linter, result in results.items():
+                json_results[linter] = {
+                    "errors": [
+                        {"file": e.file, "line": e.line, "message": e.message, "rule_id": e.rule_id}
+                        for e in result.errors
+                    ],
+                    "warnings": [
+                        {"file": w.file, "line": w.line, "message": w.message, "rule_id": w.rule_id}
+                        for w in result.warnings
+                    ],
+                }
+            print(json.dumps(json_results, indent=2))
+        else:
+            print_lint_summary(results)
 
         # Check if there are any errors to fix
         total_errors = sum(len(result.errors) + len(result.warnings) for result in results.values())
 
         if total_errors == 0:
-            print(f"\n{Fore.GREEN}🎉 No lint errors found! Your code is clean.{Style.RESET_ALL}")
+            if not quiet:
+                print(
+                    f"\n{Fore.GREEN}🎉 No lint errors found! Your code is clean.{Style.RESET_ALL}"
+                )
             return 0
+
+        # Handle check-only mode
+        if check_only:
+            if not quiet:
+                print(
+                    f"\n{Fore.YELLOW}Check-only mode: Found {total_errors} issues. Exiting without fixing.{Style.RESET_ALL}"
+                )
+            return 1 if total_errors > 0 else 0
 
         # Step 3: Analyze errors
         print(f"\n{Fore.CYAN}Step 3: Analyzing errors...{Style.RESET_ALL}")
