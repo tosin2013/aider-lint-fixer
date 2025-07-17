@@ -10,6 +10,7 @@ from typing import Dict, List, Set, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
+from pathlib import Path
 
 from .lint_runner import LintError, LintResult, ErrorSeverity
 
@@ -62,6 +63,7 @@ class FileAnalysis:
     total_errors: int
     error_analyses: List[ErrorAnalysis] = field(default_factory=list)
     file_content: Optional[str] = None
+    file_exists: bool = True
     language: Optional[str] = None
     complexity_score: float = 0.0
 
@@ -164,9 +166,13 @@ class ErrorAnalyzer:
         ErrorSeverity.STYLE: 2,
     }
     
-    def __init__(self):
-        """Initialize the error analyzer."""
-        pass
+    def __init__(self, project_root: Optional[str] = None):
+        """Initialize the error analyzer.
+
+        Args:
+            project_root: Root directory of the project for resolving relative paths
+        """
+        self.project_root = Path(project_root) if project_root else Path.cwd()
     
     def analyze_errors(self, results: Dict[str, LintResult]) -> Dict[str, FileAnalysis]:
         """Analyze all lint errors and group by file.
@@ -213,11 +219,23 @@ class ErrorAnalyzer:
         )
         
         # Load file content for context
+        # Resolve file path relative to project root
+        if Path(file_path).is_absolute():
+            full_path = Path(file_path)
+        else:
+            full_path = self.project_root / file_path
+
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(full_path, 'r', encoding='utf-8') as f:
                 file_analysis.file_content = f.read()
+        except FileNotFoundError:
+            logger.debug(f"File not found (referenced but doesn't exist): {full_path}")
+            file_analysis.file_content = ""
+            file_analysis.file_exists = False
         except Exception as e:
-            logger.warning(f"Could not read file {file_path}: {e}")
+            logger.warning(f"Could not read file {full_path}: {e}")
+            file_analysis.file_content = ""
+            file_analysis.file_exists = False
         
         # Analyze each error
         for error in errors:

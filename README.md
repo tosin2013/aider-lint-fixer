@@ -8,21 +8,43 @@
 
 Aider Lint Fixer is an intelligent tool that automatically detects lint errors in your codebase and fixes them using AI-powered code generation through [aider.chat](https://aider.chat).
 
-**🎉 v0.1.0 Release**: Now available with DeepSeek API support and flake8 linting!
+**🎉 v1.3.0 Release**: Enterprise-ready with Node.js, Python, and Ansible support!
 
-## ✨ Features (v0.1.0)
+## ✨ Features (v1.3.0)
 
-- 🔍 **Python Support**: Automatic Python project detection
-- 🤖 **AI-Powered Fixing**: Uses aider.chat with DeepSeek API
+- � **Python Support**: Flake8, Pylint with profile support (basic/strict)
+- 🟨 **Node.js Support**: ESLint, JSHint, Prettier with comprehensive error detection
+- 📋 **Ansible Support**: ansible-lint with production-ready profiles
+- 🤖 **AI-Powered Fixing**: Uses aider.chat with multiple LLM providers
 - 🎯 **Smart Error Analysis**: Categorizes and prioritizes errors for optimal fixing
-- 🛠️ **Flake8 Integration**: Detects and fixes Python style and syntax errors
-- ⚙️ **Simple Configuration**: Environment variable based setup
-- 📊 **Detailed Reporting**: Comprehensive progress and success rate reporting
+- � **Enterprise Scalability**: Handles 200+ lint issues with intelligent batching
+- ⚙️ **Profile System**: Basic (development) vs Strict (production) configurations
+- 📊 **Progress Tracking**: Real-time progress with detailed reporting
 
-### 🚧 Coming Soon
-- **v0.2.0**: OpenRouter API support, additional linters (black, isort, pylint)
-- **v0.3.0**: Ollama local LLM support
-- **v0.4.0**: Multi-language support (JavaScript, Go, Rust)
+## 📋 **Supported Linter Versions**
+
+### **Ansible Linters**
+| Linter | Tested Version | Supported Versions | Profile Support |
+|--------|----------------|-------------------|-----------------|
+| **ansible-lint** | `25.6.1` | `25.6.1`, `25.6.x`, `25.x` | ✅ basic, production |
+
+### **Python Linters**
+| Linter | Tested Version | Supported Versions | Profile Support |
+|--------|----------------|-------------------|-----------------|
+| **flake8** | `7.3.0` | `7.3.0`, `7.2.x`, `7.1.x`, `7.0.x`, `6.x` | ✅ basic, strict |
+| **pylint** | `3.3.7` | `3.3.7`, `3.3.x`, `3.2.x`, `3.1.x`, `3.0.x`, `2.x` | ✅ basic, strict |
+
+### **Node.js Linters**
+| Linter | Tested Version | Supported Versions | Profile Support |
+|--------|----------------|-------------------|-----------------|
+| **ESLint** | `8.57.1` | `8.57.1`, `8.57.x`, `8.5.x`, `8.x`, `7.x` | ✅ basic, strict |
+| **JSHint** | `2.13.6` | `2.13.6`, `2.13.x`, `2.1.x`, `2.x` | ✅ basic, strict |
+| **Prettier** | `3.6.2` | `3.6.2`, `3.6.x`, `3.x`, `2.x` | ✅ basic, strict |
+
+### **Version Compatibility Notes**
+- **Tested Version**: Explicitly tested and validated in our CI/CD
+- **Supported Versions**: Expected to work based on API compatibility
+- **Profile Support**: Configurable strictness levels for different environments
 
 ## 🚀 Quick Start
 
@@ -234,6 +256,36 @@ make ci            # Full CI pipeline
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+### 🔧 **Development Setup for Contributors**
+
+Before contributing, ensure you have the supported linter versions installed:
+
+```bash
+# Check your current versions
+./scripts/check_supported_versions.sh
+
+# Install supported versions
+pip install flake8==7.3.0 pylint==3.3.7 ansible-lint==25.6.1
+npm install -g eslint@8.57.1 jshint@2.13.6 prettier@3.6.2
+```
+
+### 📋 **Version Testing**
+```bash
+# Test Python linters
+./scripts/version_tests/python_linters_test.sh
+
+# Test Node.js linters
+./scripts/version_tests/nodejs_linters_test.sh
+
+# Run integration tests
+python -m pytest tests/ -v
+```
+
+### 📚 **Version Reference**
+- **Supported Versions**: See table above or `aider_lint_fixer/supported_versions.py`
+- **Testing Guide**: `docs/LINTER_TESTING_GUIDE.md`
+- **Node.js Guide**: `docs/NODEJS_LINTERS_GUIDE.md`
 
 ## 📄 License
 

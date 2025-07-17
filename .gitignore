@@ -328,3 +328,4 @@ site/
 .cache/
 cache/
 test/autotrain-repo
+.ansible

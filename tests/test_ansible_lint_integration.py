@@ -216,7 +216,7 @@ class TestAnsibleLintIntegration(unittest.TestCase):
         
         if len(result.errors) > 0:
             # Analyze errors - need to pass results in the expected format
-            analyzer = ErrorAnalyzer()
+            analyzer = ErrorAnalyzer(project_root=self.temp_dir)
             results_dict = {'ansible-lint': result}
             analyzed_errors = analyzer.analyze_errors(results_dict)
 

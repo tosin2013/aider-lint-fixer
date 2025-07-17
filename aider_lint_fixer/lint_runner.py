@@ -21,21 +21,30 @@ MODULAR_LINTERS_AVAILABLE = False
 AnsibleLintLinter = None
 Flake8Linter = None
 PylintLinter = None
+ESLintLinter = None
+JSHintLinter = None
+PrettierLinter = None
 
 def _import_modular_linters():
     """Import modular linters with error handling."""
-    global MODULAR_LINTERS_AVAILABLE, AnsibleLintLinter, Flake8Linter, PylintLinter
+    global MODULAR_LINTERS_AVAILABLE, AnsibleLintLinter, Flake8Linter, PylintLinter, ESLintLinter, JSHintLinter, PrettierLinter
     if not MODULAR_LINTERS_AVAILABLE:
         try:
             from .linters.ansible_lint import AnsibleLintLinter as _AnsibleLintLinter
             from .linters.flake8_linter import Flake8Linter as _Flake8Linter
             from .linters.pylint_linter import PylintLinter as _PylintLinter
+            from .linters.eslint_linter import ESLintLinter as _ESLintLinter
+            from .linters.jshint_linter import JSHintLinter as _JSHintLinter
+            from .linters.prettier_linter import PrettierLinter as _PrettierLinter
 
             AnsibleLintLinter = _AnsibleLintLinter
             Flake8Linter = _Flake8Linter
             PylintLinter = _PylintLinter
+            ESLintLinter = _ESLintLinter
+            JSHintLinter = _JSHintLinter
+            PrettierLinter = _PrettierLinter
             MODULAR_LINTERS_AVAILABLE = True
-            logger.debug("Successfully imported modular linters: ansible-lint, flake8, pylint")
+            logger.debug("Successfully imported modular linters: ansible-lint, flake8, pylint, eslint, jshint, prettier")
         except ImportError as e:
             logger.error(f"Failed to import modular linters: {e}")
             MODULAR_LINTERS_AVAILABLE = False
@@ -122,6 +131,12 @@ class LintRunner:
             'check_installed': ['npx', 'eslint', '--version'],
             'output_format': 'json',
             'file_extensions': ['.js', '.jsx', '.ts', '.tsx']
+        },
+        'jshint': {
+            'command': ['npx', 'jshint', '--reporter=json'],
+            'check_installed': ['npx', 'jshint', '--version'],
+            'output_format': 'json',
+            'file_extensions': ['.js', '.mjs', '.cjs']
         },
         'prettier': {
             'command': ['npx', 'prettier', '--check'],
@@ -245,6 +260,12 @@ class LintRunner:
                 return self._run_modular_flake8(file_paths, **kwargs)
             elif linter_name == 'pylint':
                 return self._run_modular_pylint(file_paths, **kwargs)
+            elif linter_name == 'eslint':
+                return self._run_modular_eslint(file_paths, **kwargs)
+            elif linter_name == 'jshint':
+                return self._run_modular_jshint(file_paths, **kwargs)
+            elif linter_name == 'prettier':
+                return self._run_modular_prettier(file_paths, **kwargs)
 
         if linter_name not in self.LINTER_COMMANDS:
             raise ValueError(f"Unknown linter: {linter_name}")
@@ -440,6 +461,75 @@ class LintRunner:
             logger.error(f"Error running modular pylint: {e}")
             # Fallback to legacy implementation
             return self._run_legacy_pylint(file_paths, **kwargs)
+
+    def _run_modular_eslint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
+        """Run ESLint using modular implementation."""
+        logger.info("Using modular ESLint implementation")
+
+        if ESLintLinter is None:
+            logger.warning("ESLintLinter not available, falling back to legacy implementation")
+            return self._run_legacy_linter('eslint', file_paths)
+
+        try:
+            linter = ESLintLinter(project_root=str(self.project_info.root_path))
+
+            # Handle profile-based execution
+            profile = kwargs.get('profile', 'default')
+            if hasattr(linter, 'run_with_profile'):
+                result = linter.run_with_profile(profile, file_paths)
+            else:
+                result = linter.run(file_paths, **kwargs)
+
+            return result
+        except Exception as e:
+            logger.error(f"Error running modular ESLint: {e}")
+            return self._run_legacy_linter('eslint', file_paths)
+
+    def _run_modular_jshint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
+        """Run JSHint using modular implementation."""
+        logger.info("Using modular JSHint implementation")
+
+        if JSHintLinter is None:
+            logger.warning("JSHintLinter not available, falling back to legacy implementation")
+            return self._run_legacy_linter('jshint', file_paths)
+
+        try:
+            linter = JSHintLinter(project_root=str(self.project_info.root_path))
+
+            # Handle profile-based execution
+            profile = kwargs.get('profile', 'default')
+            if hasattr(linter, 'run_with_profile'):
+                result = linter.run_with_profile(profile, file_paths)
+            else:
+                result = linter.run(file_paths, **kwargs)
+
+            return result
+        except Exception as e:
+            logger.error(f"Error running modular JSHint: {e}")
+            return self._run_legacy_linter('jshint', file_paths)
+
+    def _run_modular_prettier(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
+        """Run Prettier using modular implementation."""
+        logger.info("Using modular Prettier implementation")
+
+        if PrettierLinter is None:
+            logger.warning("PrettierLinter not available, falling back to legacy implementation")
+            return self._run_legacy_linter('prettier', file_paths)
+
+        try:
+            linter = PrettierLinter(project_root=str(self.project_info.root_path))
+
+            # Handle profile-based execution
+            profile = kwargs.get('profile', 'default')
+            if hasattr(linter, 'run_with_profile'):
+                result = linter.run_with_profile(profile, file_paths)
+            else:
+                result = linter.run(file_paths, **kwargs)
+
+            return result
+        except Exception as e:
+            logger.error(f"Error running modular Prettier: {e}")
+            return self._run_legacy_linter('prettier', file_paths)
 
     def _run_legacy_flake8(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Fallback to legacy flake8 implementation."""

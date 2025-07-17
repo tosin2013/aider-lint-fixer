@@ -1,10 +1,18 @@
 #!/bin/bash
 # Version-specific test for Python linters (flake8, pylint, black, mypy)
+#
+# Supported Versions (as of v1.3.0):
+# - flake8: 7.3.0 (tested), 7.2.x, 7.1.x, 7.0.x, 6.x (supported)
+# - pylint: 3.3.7 (tested), 3.3.x, 3.2.x, 3.1.x, 3.0.x, 2.x (supported)
 
 set -e
 
 echo "🧪 Python Linters Integration Test"
 echo "=================================="
+echo "📋 Supported Versions:"
+echo "  • flake8: 7.3.0 (tested), 7.2.x, 7.1.x, 7.0.x, 6.x"
+echo "  • pylint: 3.3.7 (tested), 3.3.x, 3.2.x, 3.1.x, 3.0.x, 2.x"
+echo ""
 
 # Check versions
 echo "📋 Checking linter versions:"

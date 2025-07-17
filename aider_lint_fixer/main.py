@@ -248,10 +248,12 @@ def print_verification_summary(verification_results):
 @click.option('--no-banner', is_flag=True, help='Disable banner output')
 @click.option('--ansible-profile', default='basic', type=click.Choice(['basic', 'production']),
               help='Ansible-lint profile to use (basic or production)')
+@click.option('--profile', default='default', type=click.Choice(['basic', 'default', 'strict']),
+              help='Linter profile to use (basic, default, or strict)')
 def main(project_path: str, config: Optional[str], llm: Optional[str],
          model: Optional[str], linters: Optional[str], max_files: Optional[int],
          max_errors: Optional[int], dry_run: bool, interactive: bool,
-         verbose: bool, log_file: Optional[str], no_banner: bool, ansible_profile: str):
+         verbose: bool, log_file: Optional[str], no_banner: bool, ansible_profile: str, profile: str):
     """Aider Lint Fixer - Automated lint error detection and fixing.
     
     PROJECT_PATH: Path to the project directory (default: current directory)
@@ -308,7 +310,7 @@ def main(project_path: str, config: Optional[str], llm: Optional[str],
         else:
             enabled_linters = project_config.linters.enabled if project_config.linters.auto_detect else None
         
-        results = lint_runner.run_all_available_linters(enabled_linters, ansible_profile=ansible_profile)
+        results = lint_runner.run_all_available_linters(enabled_linters, ansible_profile=ansible_profile, profile=profile)
         
         print_lint_summary(results)
         
@@ -322,7 +324,7 @@ def main(project_path: str, config: Optional[str], llm: Optional[str],
         # Step 3: Analyze errors
         print(f"\n{Fore.CYAN}Step 3: Analyzing errors...{Style.RESET_ALL}")
         
-        analyzer = ErrorAnalyzer()
+        analyzer = ErrorAnalyzer(project_root=str(project_info.root_path))
         file_analyses = analyzer.analyze_errors(results)
         
         # Get prioritized errors
