@@ -66,6 +66,7 @@ jobs:
   test-installation:
     name: 🔧 Test Installation (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     needs: quick-validation
     if: needs.quick-validation.outputs.should_run_full == 'true'
     
@@ -131,6 +132,7 @@ jobs:
   test-linter-integrations:
     name: 🔍 Test Linter Integrations
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: quick-validation
     if: needs.quick-validation.outputs.should_run_full == 'true'
     
@@ -202,6 +204,7 @@ jobs:
   test-install-script:
     name: 🤖 Test Install Script (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     needs: quick-validation
     if: needs.quick-validation.outputs.should_run_full == 'true'
     
@@ -232,6 +235,7 @@ jobs:
   test-documentation:
     name: 📚 Test Documentation
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: quick-validation
     if: needs.quick-validation.outputs.should_run_full == 'true'
     
@@ -278,6 +282,7 @@ jobs:
   test-package-build:
     name: 📦 Test Package Build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: quick-validation
     if: needs.quick-validation.outputs.should_run_full == 'true'
     

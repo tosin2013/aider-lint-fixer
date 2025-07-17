@@ -1,0 +1,140 @@
+name: ⚡ Fast Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # Ultra-fast validation for immediate feedback
+  fast-validation:
+    name: ⚡ Fast Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install minimal dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort
+        
+    - name: 🔍 Quick syntax check
+      run: |
+        echo "## ⚡ Fast Check Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Python syntax check
+        if flake8 aider_lint_fixer --count --select=E9,F63,F7,F82 --show-source --statistics; then
+          echo "✅ Python syntax: PASS" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Python syntax: FAIL" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Import sorting check
+        if isort --check-only aider_lint_fixer/; then
+          echo "✅ Import sorting: PASS" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Import sorting: FAIL" >> $GITHUB_STEP_SUMMARY
+          echo "Run: \`isort aider_lint_fixer/\` to fix" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Code formatting check
+        if black --check aider_lint_fixer/; then
+          echo "✅ Code formatting: PASS" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Code formatting: FAIL" >> $GITHUB_STEP_SUMMARY
+          echo "Run: \`black aider_lint_fixer/\` to fix" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+    - name: 🧪 Basic functionality test
+      run: |
+        pip install -e .
+        
+        # Test version command
+        if python -m aider_lint_fixer --version; then
+          echo "✅ Version command: PASS" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Version command: FAIL" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test help command
+        if python -m aider_lint_fixer --help > /dev/null; then
+          echo "✅ Help command: PASS" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Help command: FAIL" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test list-linters command
+        if python -m aider_lint_fixer --list-linters > /dev/null; then
+          echo "✅ List linters: PASS" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ List linters: FAIL" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+    - name: 🎯 Success summary
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "---" >> $GITHUB_STEP_SUMMARY
+        echo "### 🎯 Fast Check Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ **All fast checks passed!**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "This commit is ready for:" >> $GITHUB_STEP_SUMMARY
+        echo "- Code review" >> $GITHUB_STEP_SUMMARY
+        echo "- Full test suite (if needed)" >> $GITHUB_STEP_SUMMARY
+        echo "- Merge to main branch" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "*Fast feedback in under 5 minutes!* ⚡" >> $GITHUB_STEP_SUMMARY
+
+  # Quick cross-platform test (only if fast validation passes)
+  quick-cross-platform:
+    name: 🌐 Quick Cross-Platform (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    needs: fast-validation
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Quick install test
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        
+    - name: 🧪 Platform compatibility test
+      run: |
+        # Test basic commands work on this platform
+        python -m aider_lint_fixer --version
+        python -m aider_lint_fixer --list-linters --output-format json > /dev/null
+        
+        echo "✅ Platform compatibility confirmed for ${{ matrix.os }}"

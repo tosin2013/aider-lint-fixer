@@ -1,6 +1,6 @@
 # Aider Lint Fixer
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -416,6 +416,38 @@ make self-test     # Run aider-lint-fixer on its own code
 make qa            # Run all quality checks
 make ci            # Full CI pipeline
 ```
+
+## 🤖 Automated Dependency Management
+
+This project uses **Dependabot** for automated dependency updates and security monitoring:
+
+### 📅 Update Schedule
+- **Python dependencies**: Weekly (Mondays) - `pip` ecosystem
+- **Node.js dependencies**: Weekly (Tuesdays) - `npm` ecosystem
+- **GitHub Actions**: Weekly (Wednesdays) - Workflow dependencies
+- **Docker images**: Weekly (Thursdays) - Base image updates
+- **Security updates**: **Immediate** - Critical vulnerabilities
+
+### 🔄 Auto-Merge Policy
+- ✅ **Security updates**: Auto-merged after tests pass
+- ✅ **Patch updates**: Auto-merged after validation
+- ✅ **Testing dependencies**: Auto-merged (pytest, coverage, mock)
+- ✅ **Code quality tools**: Auto-merged (black, isort, flake8, mypy)
+- ✅ **GitHub Actions**: Auto-merged (actions/*, github/*)
+- ⚠️ **Major updates**: Require manual review
+- ⚠️ **Core dependencies**: Require manual review (aider-chat, click)
+
+### 🔍 Weekly Health Checks (Sundays)
+- **🔒 Security audit**: Vulnerability scanning with `safety`, `bandit`, `pip-audit`
+- **📅 Outdated dependencies**: Tracking and automated PR creation
+- **📄 License compliance**: Monitoring for license compatibility
+- **🔍 Dependency conflicts**: Detecting version incompatibilities
+
+### 🛡️ Security Features
+- **Immediate security alerts**: Critical vulnerabilities trigger instant PRs
+- **Automated testing**: All updates tested before merge
+- **License monitoring**: GPL and unknown licenses flagged
+- **Conflict detection**: Dependency version conflicts identified
 
 ## 🤝 Contributing
 

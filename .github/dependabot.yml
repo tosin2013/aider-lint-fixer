@@ -1,0 +1,159 @@
+# Dependabot configuration for aider-lint-fixer
+# Automatically updates dependencies and creates PRs for security updates
+
+version: 2
+updates:
+  # Python dependencies (pip)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "tosin2013"
+    assignees:
+      - "tosin2013"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "python"
+      - "automated"
+    # Group related updates together
+    groups:
+      testing-dependencies:
+        patterns:
+          - "pytest*"
+          - "coverage*"
+          - "mock*"
+          - "responses*"
+      code-quality:
+        patterns:
+          - "black*"
+          - "isort*"
+          - "flake8*"
+          - "mypy*"
+      linter-dependencies:
+        patterns:
+          - "ansible-lint*"
+          - "pylint*"
+          - "flake8*"
+      core-dependencies:
+        patterns:
+          - "aider-chat*"
+          - "click*"
+          - "colorama*"
+          - "pyyaml*"
+    # Allow both direct and indirect updates
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    # Ignore specific packages if needed
+    ignore:
+      # Ignore major version updates for stable packages
+      - dependency-name: "click"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "colorama"
+        update-types: ["version-update:semver-major"]
+
+  # Node.js dependencies (npm)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "tosin2013"
+    assignees:
+      - "tosin2013"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "nodejs"
+      - "automated"
+    # Group Node.js linter updates
+    groups:
+      nodejs-linters:
+        patterns:
+          - "eslint*"
+          - "jshint*"
+          - "prettier*"
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    # Be more conservative with Node.js major updates
+    ignore:
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "tosin2013"
+    assignees:
+      - "tosin2013"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci"
+      - "automated"
+    # Group GitHub Actions updates
+    groups:
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "github/*"
+    allow:
+      - dependency-type: "direct"
+
+  # Docker (if we add Dockerfile later)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 2
+    reviewers:
+      - "tosin2013"
+    assignees:
+      - "tosin2013"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+    allow:
+      - dependency-type: "direct"
+    # Only patch and minor updates for base images
+    ignore:
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major"]
+
+# Security updates configuration
+# Dependabot will automatically create PRs for security vulnerabilities
+# regardless of the schedule above

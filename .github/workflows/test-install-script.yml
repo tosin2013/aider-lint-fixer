@@ -67,20 +67,17 @@ jobs:
   test-install-platforms:
     name: 🖥️ Test Installation (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     needs: test-script-syntax
     
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, ubuntu-20.04, macos-latest, macos-12]
+        os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
             package_manager: apt
-          - os: ubuntu-20.04
-            package_manager: apt
           - os: macos-latest
-            package_manager: brew
-          - os: macos-12
             package_manager: brew
     
     steps:
@@ -189,6 +186,7 @@ jobs:
   test-limited-install:
     name: 🚀 Test Limited Installation
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     needs: test-script-syntax
     
     steps:
