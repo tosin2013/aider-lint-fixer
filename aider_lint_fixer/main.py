@@ -348,17 +348,32 @@ def main(
 
     # Handle list-linters flag
     if list_linters:
-        from .supported_versions import get_supported_linters
+        from .supported_versions import get_supported_linters, get_platform_compatibility_info
+        import platform
 
         linters_list = get_supported_linters()
+        compatibility_info = get_platform_compatibility_info()
+
         if output_format == "json":
             import json
 
-            print(json.dumps({"available_linters": linters_list}, indent=2))
+            output_data = {
+                "available_linters": linters_list,
+                "platform": platform.system(),
+                "platform_notes": compatibility_info,
+            }
+            print(json.dumps(output_data, indent=2))
         else:
-            print("Available linters:")
+            print(f"Available linters on {platform.system()}:")
             for linter in linters_list:
                 print(f"  • {linter}")
+
+            # Show platform compatibility notes if any
+            if compatibility_info:
+                print(f"\nPlatform compatibility notes:")
+                for linter, note in compatibility_info.items():
+                    print(f"  ⚠️  {linter}: {note}")
+
             print(f"\nTotal: {len(linters_list)} linters available")
             print("Use --linters <name1,name2> to specify which linters to run")
         return

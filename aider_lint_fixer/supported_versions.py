@@ -142,12 +142,37 @@ def get_linter_info(linter_name: str) -> LinterVersion:
 
 
 def get_supported_linters() -> List[str]:
-    """Get list of all supported linter names.
+    """Get list of all supported linter names for the current platform.
 
     Returns:
-        List of supported linter names
+        List of supported linter names (filtered by platform compatibility)
     """
-    return list(ALL_LINTERS.keys())
+    import platform
+
+    all_linters = list(ALL_LINTERS.keys())
+
+    # Filter out platform-incompatible linters
+    if platform.system() == "Windows":
+        # ansible-lint has Unix-only dependencies (grp module)
+        all_linters = [linter for linter in all_linters if linter != "ansible-lint"]
+
+    return all_linters
+
+
+def get_platform_compatibility_info() -> Dict[str, str]:
+    """Get platform compatibility information for linters.
+
+    Returns:
+        Dictionary mapping linter names to compatibility notes
+    """
+    import platform
+
+    compatibility_info = {}
+
+    if platform.system() == "Windows":
+        compatibility_info["ansible-lint"] = "Not available on Windows (Unix-only dependencies)"
+
+    return compatibility_info
 
 
 def get_linters_by_language(language: str) -> Dict[str, LinterVersion]:

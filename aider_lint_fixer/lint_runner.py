@@ -264,6 +264,14 @@ class LintRunner:
                 available[linter_name] = False
                 continue
 
+            # Platform-specific linter availability
+            import platform
+
+            if linter_name == "ansible-lint" and platform.system() == "Windows":
+                logger.debug(f"Skipping {linter_name} on Windows (platform incompatibility)")
+                available[linter_name] = False
+                continue
+
             config = self.LINTER_COMMANDS[linter_name]
             try:
                 # Try to run the version command
