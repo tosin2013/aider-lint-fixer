@@ -1,0 +1,347 @@
+"""
+Main Module for Aider Lint Fixer
+
+This module provides the command-line interface and orchestrates the entire
+lint detection and fixing workflow.
+"""
+
+import os
+import sys
+import argparse
+import logging
+from pathlib import Path
+from typing import Optional, List
+import time
+
+import click
+from colorama import init, Fore, Style
+
+from .config_manager import ConfigManager
+from .project_detector import ProjectDetector
+from .lint_runner import LintRunner
+from .error_analyzer import ErrorAnalyzer
+from .aider_integration import AiderIntegration
+
+# Initialize colorama for cross-platform colored output
+init()
+
+logger = logging.getLogger(__name__)
+
+
+def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
+    """Set up logging configuration.
+    
+    Args:
+        level: Logging level
+        log_file: Optional log file path
+    """
+    log_level = getattr(logging, level.upper(), logging.INFO)
+    
+    # Create formatter
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Set up root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+    
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(formatter)
+    root_logger.addHandler(console_handler)
+    
+    # File handler if specified
+    if log_file:
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(log_level)
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
+
+
+def print_banner():
+    """Print the application banner."""
+    banner = f"""
+{Fore.CYAN}╔══════════════════════════════════════════════════════════════╗
+║                    Aider Lint Fixer v1.0.0                  ║
+║              Automated Lint Error Detection & Fixing         ║
+║                   Powered by aider.chat                      ║
+╚══════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
+"""
+    print(banner)
+
+
+def print_project_info(project_info):
+    """Print detected project information.
+    
+    Args:
+        project_info: ProjectInfo object
+    """
+    print(f"\n{Fore.GREEN}📁 Project Detection Results:{Style.RESET_ALL}")
+    print(f"   Root: {project_info.root_path}")
+    print(f"   Languages: {', '.join(project_info.languages) if project_info.languages else 'None detected'}")
+    print(f"   Package Managers: {', '.join(project_info.package_managers) if project_info.package_managers else 'None detected'}")
+    print(f"   Lint Configs: {', '.join(project_info.lint_configs.keys()) if project_info.lint_configs else 'None detected'}")
+    print(f"   Source Files: {len(project_info.source_files)}")
+
+
+def print_lint_summary(results):
+    """Print lint results summary.
+    
+    Args:
+        results: Dictionary of lint results
+    """
+    print(f"\n{Fore.YELLOW}🔍 Lint Results Summary:{Style.RESET_ALL}")
+    
+    total_errors = 0
+    total_warnings = 0
+    
+    for linter_name, result in results.items():
+        error_count = len(result.errors)
+        warning_count = len(result.warnings)
+        total_errors += error_count
+        total_warnings += warning_count
+        
+        status = "✅" if result.success else "❌"
+        print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
+    
+    print(f"\n   Total: {total_errors} errors, {total_warnings} warnings")
+
+
+def print_fix_summary(sessions):
+    """Print fix session summary.
+
+    Args:
+        sessions: List of fix sessions
+    """
+    print(f"\n{Fore.BLUE}🔧 Fix Results Summary:{Style.RESET_ALL}")
+
+    total_files = len(sessions)
+    total_errors_attempted = sum(len(session.errors_to_fix) for session in sessions)
+    # Count successful aider executions (not actual fixes)
+    total_aider_successful = sum(
+        len([r for r in session.results if r.success]) for session in sessions
+    )
+
+    print(f"   Files processed: {total_files}")
+    print(f"   Errors attempted: {total_errors_attempted}")
+    print(f"   Aider executions successful: {total_aider_successful}")
+
+    for session in sessions:
+        aider_successful = len([r for r in session.results if r.success])
+        print(f"   📄 {Path(session.file_path).name}: {aider_successful}/{len(session.errors_to_fix)} attempted")
+
+
+def print_verification_summary(verification_results):
+    """Print verification summary showing actual fixes.
+
+    Args:
+        verification_results: Dictionary of verification results per session
+    """
+    print(f"\n{Fore.BLUE}📊 Verification Results (Actual Fixes):{Style.RESET_ALL}")
+
+    total_attempted = 0
+    total_fixed = 0
+
+    for session_id, result in verification_results.items():
+        total_attempted += result['total_original_errors']
+        total_fixed += result['errors_fixed']
+
+        success_rate = result['success_rate'] * 100
+        print(f"   📄 Session {session_id[:8]}: {result['errors_fixed']}/{result['total_original_errors']} fixed ({success_rate:.1f}%)")
+
+    overall_rate = (total_fixed / total_attempted * 100) if total_attempted > 0 else 0
+    print(f"   🎯 Overall: {total_fixed}/{total_attempted} errors actually fixed ({overall_rate:.1f}%)")
+
+
+@click.command()
+@click.argument('project_path', default='.', type=click.Path(exists=True))
+@click.option('--config', '-c', help='Path to configuration file')
+@click.option('--llm', help='LLM provider (deepseek, openrouter, ollama)')
+@click.option('--model', help='Specific model to use')
+@click.option('--linters', help='Comma-separated list of linters to run')
+@click.option('--max-files', type=int, help='Maximum number of files to process')
+@click.option('--max-errors', type=int, help='Maximum number of errors to fix per file')
+@click.option('--dry-run', is_flag=True, help='Show what would be fixed without making changes')
+@click.option('--interactive', is_flag=True, help='Confirm each fix before applying')
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
+@click.option('--log-file', help='Path to log file')
+@click.option('--no-banner', is_flag=True, help='Disable banner output')
+def main(project_path: str, config: Optional[str], llm: Optional[str], 
+         model: Optional[str], linters: Optional[str], max_files: Optional[int],
+         max_errors: Optional[int], dry_run: bool, interactive: bool,
+         verbose: bool, log_file: Optional[str], no_banner: bool):
+    """Aider Lint Fixer - Automated lint error detection and fixing.
+    
+    PROJECT_PATH: Path to the project directory (default: current directory)
+    """
+    try:
+        # Set up logging
+        log_level = "DEBUG" if verbose else "INFO"
+        setup_logging(log_level, log_file)
+        
+        # Print banner
+        if not no_banner:
+            print_banner()
+        
+        # Load configuration
+        config_manager = ConfigManager()
+        if config:
+            # Load specific config file
+            project_config = config_manager._load_config_file(Path(config).parent)
+        else:
+            # Load default configuration
+            project_config = config_manager.load_config(project_path)
+        
+        # Override config with command line options
+        if llm:
+            project_config.llm.provider = llm
+        if model:
+            project_config.llm.model = model
+        
+        print(f"{Fore.GREEN}🚀 Starting Aider Lint Fixer{Style.RESET_ALL}")
+        print(f"   Project: {Path(project_path).resolve()}")
+        print(f"   LLM Provider: {project_config.llm.provider}")
+        print(f"   Model: {project_config.llm.model}")
+        
+        # Step 1: Detect project structure
+        print(f"\n{Fore.CYAN}Step 1: Detecting project structure...{Style.RESET_ALL}")
+        
+        detector = ProjectDetector(exclude_patterns=project_config.project.exclude_patterns)
+        project_info = detector.detect_project(project_path)
+        
+        print_project_info(project_info)
+        
+        if not project_info.languages:
+            print(f"{Fore.RED}❌ No supported programming languages detected.{Style.RESET_ALL}")
+            return 1
+        
+        # Step 2: Run linters
+        print(f"\n{Fore.CYAN}Step 2: Running linters...{Style.RESET_ALL}")
+        
+        lint_runner = LintRunner(project_info)
+        
+        # Determine which linters to run
+        if linters:
+            enabled_linters = [l.strip() for l in linters.split(',')]
+        else:
+            enabled_linters = project_config.linters.enabled if project_config.linters.auto_detect else None
+        
+        results = lint_runner.run_all_available_linters(enabled_linters)
+        
+        print_lint_summary(results)
+        
+        # Check if there are any errors to fix
+        total_errors = sum(len(result.errors) + len(result.warnings) for result in results.values())
+        
+        if total_errors == 0:
+            print(f"\n{Fore.GREEN}🎉 No lint errors found! Your code is clean.{Style.RESET_ALL}")
+            return 0
+        
+        # Step 3: Analyze errors
+        print(f"\n{Fore.CYAN}Step 3: Analyzing errors...{Style.RESET_ALL}")
+        
+        analyzer = ErrorAnalyzer()
+        file_analyses = analyzer.analyze_errors(results)
+        
+        # Get prioritized errors
+        prioritized_errors = analyzer.get_prioritized_errors(file_analyses, max_errors)
+        
+        print(f"   Analyzed {len(file_analyses)} files")
+        print(f"   Found {len(prioritized_errors)} fixable errors")
+        
+        if not prioritized_errors:
+            print(f"\n{Fore.YELLOW}⚠️  No automatically fixable errors found.{Style.RESET_ALL}")
+            return 0
+        
+        # Show what would be fixed in dry-run mode
+        if dry_run:
+            print(f"\n{Fore.YELLOW}🔍 Dry Run - Errors that would be fixed:{Style.RESET_ALL}")
+            
+            for i, error_analysis in enumerate(prioritized_errors[:10], 1):  # Show first 10
+                error = error_analysis.error
+                print(f"   {i}. {error.file_path}:{error.line} - {error.linter} {error.rule_id}")
+                print(f"      {error.message}")
+                print(f"      Category: {error_analysis.category.value}, Complexity: {error_analysis.complexity.value}")
+            
+            if len(prioritized_errors) > 10:
+                print(f"   ... and {len(prioritized_errors) - 10} more errors")
+            
+            return 0
+        
+        # Step 4: Fix errors
+        print(f"\n{Fore.CYAN}Step 4: Fixing errors with aider.chat...{Style.RESET_ALL}")
+        
+        try:
+            aider_integration = AiderIntegration(project_config, project_path, config_manager)
+        except RuntimeError as e:
+            print(f"{Fore.RED}❌ {e}{Style.RESET_ALL}")
+            print(f"   Please install aider-chat: pip install aider-chat")
+            return 1
+        
+        # Interactive confirmation
+        if interactive:
+            files_to_fix = list(file_analyses.keys())
+            if max_files:
+                files_to_fix = files_to_fix[:max_files]
+            
+            print(f"\n   Files to process: {len(files_to_fix)}")
+            for file_path in files_to_fix:
+                print(f"     - {file_path}")
+            
+            if not click.confirm(f"\nProceed with fixing {len(prioritized_errors)} errors?"):
+                print("Aborted by user.")
+                return 0
+        
+        # Fix errors
+        sessions = aider_integration.fix_multiple_files(
+            file_analyses, max_files, max_errors
+        )
+        
+        print_fix_summary(sessions)
+        
+        # Step 5: Verify fixes
+        print(f"\n{Fore.CYAN}Step 5: Verifying fixes...{Style.RESET_ALL}")
+
+        total_fixed = 0
+        total_attempted = 0
+        verification_results = {}
+
+        for session in sessions:
+            verification = aider_integration.verify_fixes(session, lint_runner)
+            verification_results[session.session_id] = verification
+            total_fixed += verification['errors_fixed']
+            total_attempted += verification['total_original_errors']
+
+        # Print detailed verification results
+        print_verification_summary(verification_results)
+        
+        # Final summary
+        overall_success_rate = (total_fixed / total_attempted * 100) if total_attempted > 0 else 0
+        
+        print(f"\n{Fore.GREEN}✅ Fixing Complete!{Style.RESET_ALL}")
+        print(f"   Total errors fixed: {total_fixed}/{total_attempted}")
+        print(f"   Overall success rate: {overall_success_rate:.1f}%")
+        
+        if overall_success_rate >= 80:
+            print(f"\n{Fore.GREEN}🎉 Excellent! Most errors were successfully fixed.{Style.RESET_ALL}")
+        elif overall_success_rate >= 50:
+            print(f"\n{Fore.YELLOW}👍 Good progress! Some errors may need manual attention.{Style.RESET_ALL}")
+        else:
+            print(f"\n{Fore.RED}⚠️  Many errors may require manual fixing.{Style.RESET_ALL}")
+        
+        return 0
+        
+    except KeyboardInterrupt:
+        print(f"\n{Fore.YELLOW}⚠️  Interrupted by user{Style.RESET_ALL}")
+        return 1
+    except Exception as e:
+        logger.exception("Unexpected error occurred")
+        print(f"\n{Fore.RED}❌ Error: {e}{Style.RESET_ALL}")
+        return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+

@@ -1,0 +1,20 @@
+---
+- name: 
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - httpd
+    - mod_ssl
+    
+- shell: systemctl start httpd
+
+- name: copy config
+  copy:
+    src: httpd.conf
+    dest: /etc/httpd/conf/httpd.conf
+    mode: 644
+    
+- command: systemctl enable httpd
+  when: true
+
