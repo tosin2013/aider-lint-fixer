@@ -398,9 +398,10 @@ class LintRunner:
 
             # Extract profile from kwargs, default to 'basic'
             profile = kwargs.get('profile', 'basic')
+            logger.debug(f"ansible-lint profile from kwargs: {profile}, all kwargs: {kwargs}")
 
-            # Run the linter
-            modular_result = ansible_linter.run_with_profile(profile, file_paths)
+            # Run the linter with all kwargs
+            modular_result = ansible_linter.run(file_paths, **kwargs)
 
             # Convert modular result to our LintResult format
             return LintResult(
@@ -926,9 +927,16 @@ class LintRunner:
 
                 # Pass linter-specific options
                 linter_kwargs = {}
-                if linter_name == 'ansible-lint' and 'ansible_profile' in linter_options:
-                    linter_kwargs['profile'] = linter_options['ansible_profile']
+                if linter_name == 'ansible-lint':
+                    if 'ansible_profile' in linter_options:
+                        linter_kwargs['profile'] = linter_options['ansible_profile']
+                        logger.debug(f"Setting ansible-lint profile to: {linter_options['ansible_profile']}")
 
+                    if 'exclude' in linter_options:
+                        linter_kwargs['exclude'] = linter_options['exclude']
+                        logger.debug(f"Setting ansible-lint exclude patterns: {linter_options['exclude']}")
+
+                logger.debug(f"Running {linter_name} with kwargs: {linter_kwargs}")
                 results[linter_name] = self.run_linter(linter_name, **linter_kwargs)
             else:
                 logger.warning(f"Skipping unavailable linter: {linter_name}")

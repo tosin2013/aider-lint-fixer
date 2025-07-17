@@ -250,10 +250,13 @@ def print_verification_summary(verification_results):
               help='Ansible-lint profile to use (basic or production)')
 @click.option('--profile', default='default', type=click.Choice(['basic', 'default', 'strict']),
               help='Linter profile to use (basic, default, or strict)')
+@click.option('--exclude', multiple=True, help='Exclude patterns for ansible-lint (can be used multiple times)')
+@click.option('--target-dir', help='Target directory to lint (e.g., roles/)')
 def main(project_path: str, config: Optional[str], llm: Optional[str],
          model: Optional[str], linters: Optional[str], max_files: Optional[int],
          max_errors: Optional[int], dry_run: bool, interactive: bool,
-         verbose: bool, log_file: Optional[str], no_banner: bool, ansible_profile: str, profile: str):
+         verbose: bool, log_file: Optional[str], no_banner: bool, ansible_profile: str, profile: str,
+         exclude: tuple, target_dir: Optional[str]):
     """Aider Lint Fixer - Automated lint error detection and fixing.
     
     PROJECT_PATH: Path to the project directory (default: current directory)
@@ -282,16 +285,29 @@ def main(project_path: str, config: Optional[str], llm: Optional[str],
         if model:
             project_config.llm.model = model
         
-        print(f"{Fore.GREEN}🚀 Starting Aider Lint Fixer{Style.RESET_ALL}")
-        print(f"   Project: {Path(project_path).resolve()}")
+        # Handle target directory
+        if target_dir:
+            actual_project_path = str(Path(project_path) / target_dir)
+            print(f"{Fore.GREEN}🚀 Starting Aider Lint Fixer{Style.RESET_ALL}")
+            print(f"   Project: {Path(project_path).resolve()}")
+            print(f"   Target Directory: {target_dir}")
+            print(f"   Actual Path: {Path(actual_project_path).resolve()}")
+        else:
+            actual_project_path = project_path
+            print(f"{Fore.GREEN}🚀 Starting Aider Lint Fixer{Style.RESET_ALL}")
+            print(f"   Project: {Path(project_path).resolve()}")
+
         print(f"   LLM Provider: {project_config.llm.provider}")
         print(f"   Model: {project_config.llm.model}")
-        
+
+        if exclude:
+            print(f"   Exclude Patterns: {list(exclude)}")
+
         # Step 1: Detect project structure
         print(f"\n{Fore.CYAN}Step 1: Detecting project structure...{Style.RESET_ALL}")
-        
+
         detector = ProjectDetector(exclude_patterns=project_config.project.exclude_patterns)
-        project_info = detector.detect_project(project_path)
+        project_info = detector.detect_project(actual_project_path)
         
         print_project_info(project_info)
         
@@ -310,7 +326,17 @@ def main(project_path: str, config: Optional[str], llm: Optional[str],
         else:
             enabled_linters = project_config.linters.enabled if project_config.linters.auto_detect else None
         
-        results = lint_runner.run_all_available_linters(enabled_linters, ansible_profile=ansible_profile, profile=profile)
+        # Prepare linter options
+        linter_options = {
+            'ansible_profile': ansible_profile,
+            'profile': profile
+        }
+
+        # Add exclude patterns for ansible-lint
+        if exclude:
+            linter_options['exclude'] = list(exclude)
+
+        results = lint_runner.run_all_available_linters(enabled_linters, **linter_options)
         
         print_lint_summary(results)
         

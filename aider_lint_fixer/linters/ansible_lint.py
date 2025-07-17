@@ -72,12 +72,33 @@ class AnsibleLintLinter(BaseLinter):
     
     def build_command(self, file_paths: Optional[List[str]] = None, profile: str = 'basic', **kwargs) -> List[str]:
         """Build ansible-lint command."""
+        self.logger.debug(f"Building ansible-lint command with profile: {profile}, kwargs: {kwargs}")
         command = [
             'ansible-lint',
             '--format=json',
             '--strict',
             f'--profile={profile}'
         ]
+
+        # Add exclude patterns if provided
+        exclude_patterns = kwargs.get('exclude', [])
+        if isinstance(exclude_patterns, str):
+            exclude_patterns = [exclude_patterns]
+
+        for pattern in exclude_patterns:
+            command.extend(['--exclude', pattern])
+
+        # Add other ansible-lint specific options
+        if 'config' in kwargs:
+            command.extend(['--config-file', kwargs['config']])
+
+        if 'tags' in kwargs:
+            command.extend(['--tags', kwargs['tags']])
+
+        if 'skip_list' in kwargs:
+            command.extend(['--skip-list', kwargs['skip_list']])
+
+        self.logger.debug(f"Built command: {' '.join(command)}")
 
         # Add file paths or find ansible files in current directory
         if file_paths:
