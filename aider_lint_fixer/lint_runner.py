@@ -16,6 +16,26 @@ import logging
 
 from .project_detector import ProjectInfo
 
+# Import modular linters - delay import to avoid circular dependencies
+MODULAR_LINTERS_AVAILABLE = False
+AnsibleLintLinter = None
+
+def _import_modular_linters():
+    """Import modular linters with error handling."""
+    global MODULAR_LINTERS_AVAILABLE, AnsibleLintLinter
+    if not MODULAR_LINTERS_AVAILABLE:
+        try:
+            from .linters.ansible_lint import AnsibleLintLinter as _AnsibleLintLinter
+            AnsibleLintLinter = _AnsibleLintLinter
+            MODULAR_LINTERS_AVAILABLE = True
+            logger.debug("Successfully imported modular ansible-lint linter")
+        except ImportError as e:
+            logger.error(f"Failed to import modular linters: {e}")
+            MODULAR_LINTERS_AVAILABLE = False
+        except Exception as e:
+            logger.error(f"Unexpected error importing modular linters: {e}")
+            MODULAR_LINTERS_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -139,10 +159,11 @@ class LintRunner:
         
         # Ansible linters
         'ansible-lint': {
-            'command': ['ansible-lint', '--format=json'],
+            'command': ['ansible-lint', '--format=json', '--strict', '--profile=basic'],
             'check_installed': ['ansible-lint', '--version'],
             'output_format': 'json',
-            'file_extensions': ['.yml', '.yaml']
+            'file_extensions': ['.yml', '.yaml'],
+            'profiles': ['basic', 'production']  # Supported profiles
         }
     }
     
@@ -198,7 +219,7 @@ class LintRunner:
 
         return available
     
-    def run_linter(self, linter_name: str, file_paths: Optional[List[str]] = None) -> LintResult:
+    def run_linter(self, linter_name: str, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Run a specific linter on the project or specific files.
         
         Args:
@@ -208,9 +229,19 @@ class LintRunner:
         Returns:
             LintResult object containing the results
         """
+        # Try to use modular linter implementation first
+        if linter_name == 'ansible-lint':
+            _import_modular_linters()
+            if MODULAR_LINTERS_AVAILABLE:
+                return self._run_modular_ansible_lint(file_paths, **kwargs)
+
         if linter_name not in self.LINTER_COMMANDS:
             raise ValueError(f"Unknown linter: {linter_name}")
-        
+
+        # Check availability if not already checked
+        if linter_name not in self.available_linters:
+            self.available_linters.update(self._detect_available_linters([linter_name]))
+
         if not self.available_linters.get(linter_name, False):
             logger.warning(f"Linter {linter_name} is not available")
             return LintResult(linter=linter_name, success=False, raw_output="Linter not available")
@@ -302,7 +333,11 @@ class LintRunner:
         raw_output = stdout + stderr
         
         # Success is typically return_code == 0, but some linters use different codes
-        success = return_code == 0
+        # For ansible-lint, exit code 2 means violations found, which is still valid output
+        if linter_name == 'ansible-lint':
+            success = return_code in [0, 2]  # 0 = no issues, 2 = issues found
+        else:
+            success = return_code == 0
         
         try:
             if output_format == 'json':
@@ -322,7 +357,78 @@ class LintRunner:
             warnings=warnings,
             raw_output=raw_output
         )
-    
+
+    def _run_modular_ansible_lint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
+        """Run ansible-lint using the modular implementation."""
+        try:
+            # Create ansible-lint linter instance
+            ansible_linter = AnsibleLintLinter(self.project_info.root_path)
+
+            # Extract profile from kwargs, default to 'basic'
+            profile = kwargs.get('profile', 'basic')
+
+            # Run the linter
+            modular_result = ansible_linter.run_with_profile(profile, file_paths)
+
+            # Convert modular result to our LintResult format
+            return LintResult(
+                linter=modular_result.linter,
+                success=modular_result.success,
+                errors=modular_result.errors,
+                warnings=modular_result.warnings,
+                raw_output=modular_result.raw_output
+            )
+
+        except Exception as e:
+            logger.error(f"Error running modular ansible-lint: {e}")
+            # Fallback to legacy implementation
+            return self._run_legacy_ansible_lint(file_paths, **kwargs)
+
+    def _run_legacy_ansible_lint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
+        """Fallback to legacy ansible-lint implementation."""
+        logger.info("Using legacy ansible-lint implementation")
+        # Call the original run_linter logic without the modular check
+        linter_name = 'ansible-lint'
+
+        if linter_name not in self.LINTER_COMMANDS:
+            raise ValueError(f"Unknown linter: {linter_name}")
+
+        # Check availability if not already checked
+        if linter_name not in self.available_linters:
+            self.available_linters.update(self._detect_available_linters([linter_name]))
+
+        if not self.available_linters.get(linter_name, False):
+            logger.warning(f"Linter {linter_name} is not available")
+            return LintResult(linter=linter_name, success=False, raw_output="Linter not available")
+
+        # Continue with legacy implementation...
+        config = self.LINTER_COMMANDS[linter_name]
+        command = config['command'].copy()
+
+        # Add file paths or project root
+        if file_paths:
+            # Filter files by supported extensions
+            supported_extensions = config.get('file_extensions', [])
+            if supported_extensions:
+                filtered_files = [
+                    f for f in file_paths
+                    if any(f.endswith(ext) for ext in supported_extensions)
+                ]
+                if not filtered_files:
+                    return LintResult(
+                        linter=linter_name,
+                        success=True,
+                        errors=[],
+                        warnings=[],
+                        raw_output="No supported files found"
+                    )
+                command.extend(filtered_files)
+        else:
+            command.append('.')
+
+        # Run the command
+        return self._execute_linter_command(linter_name, command, config.get('output_format', 'text'))
+
     def _parse_json_output(self, linter_name: str, output: str) -> Tuple[List[LintError], List[LintError]]:
         """Parse JSON format linter output.
         
@@ -407,23 +513,35 @@ class LintRunner:
                             warnings.append(lint_error)
             
             elif linter_name == 'ansible-lint':
-                # Ansible-lint JSON format
+                # Ansible-lint JSON format (new format)
                 data = json.loads(output)
                 for item in data:
-                    if isinstance(item, dict):
-                        # Extract error information
-                        file_path = item.get('filename', '')
-                        line_num = item.get('linenumber', 0)
-                        column = item.get('column', 0)
-                        rule_id = item.get('rule', {}).get('id', '') if isinstance(item.get('rule'), dict) else str(item.get('rule', ''))
-                        message = item.get('message', '')
-                        severity_str = item.get('level', 'error').lower()
-                        
-                        # Map ansible-lint levels to our severity
-                        if severity_str in ['error', 'very_high']:
+                    if isinstance(item, dict) and item.get('type') == 'issue':
+                        # Extract error information from new format
+                        location = item.get('location', {})
+                        file_path = location.get('path', '')
+
+                        # Handle different location formats
+                        if 'lines' in location:
+                            line_num = location['lines'].get('begin', 0)
+                            column = 0
+                        elif 'positions' in location:
+                            begin_pos = location['positions'].get('begin', {})
+                            line_num = begin_pos.get('line', 0)
+                            column = begin_pos.get('column', 0)
+                        else:
+                            line_num = 0
+                            column = 0
+
+                        rule_id = item.get('check_name', '')
+                        message = item.get('description', '')
+                        severity_str = item.get('severity', 'major').lower()
+
+                        # Map ansible-lint severity levels to our severity
+                        if severity_str in ['critical', 'blocker']:
                             severity = ErrorSeverity.ERROR
-                        elif severity_str in ['warning', 'high', 'medium']:
-                            severity = ErrorSeverity.WARNING
+                        elif severity_str in ['major', 'minor']:
+                            severity = ErrorSeverity.ERROR  # Treat major and minor as errors for ansible-lint
                         else:
                             severity = ErrorSeverity.WARNING
                         
@@ -620,7 +738,7 @@ class LintRunner:
         
         return errors, warnings
     
-    def run_all_available_linters(self, enabled_linters: Optional[List[str]] = None) -> Dict[str, LintResult]:
+    def run_all_available_linters(self, enabled_linters: Optional[List[str]] = None, **linter_options) -> Dict[str, LintResult]:
         """Run all available linters on the project.
 
         Args:
@@ -645,7 +763,13 @@ class LintRunner:
         for linter_name in linters_to_check:
             if self.available_linters.get(linter_name, False):
                 logger.info(f"Running linter: {linter_name}")
-                results[linter_name] = self.run_linter(linter_name)
+
+                # Pass linter-specific options
+                linter_kwargs = {}
+                if linter_name == 'ansible-lint' and 'ansible_profile' in linter_options:
+                    linter_kwargs['profile'] = linter_options['ansible_profile']
+
+                results[linter_name] = self.run_linter(linter_name, **linter_kwargs)
             else:
                 logger.warning(f"Skipping unavailable linter: {linter_name}")
 

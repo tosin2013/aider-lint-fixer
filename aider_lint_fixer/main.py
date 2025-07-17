@@ -168,10 +168,12 @@ def print_verification_summary(verification_results):
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.option('--log-file', help='Path to log file')
 @click.option('--no-banner', is_flag=True, help='Disable banner output')
-def main(project_path: str, config: Optional[str], llm: Optional[str], 
+@click.option('--ansible-profile', default='basic', type=click.Choice(['basic', 'production']),
+              help='Ansible-lint profile to use (basic or production)')
+def main(project_path: str, config: Optional[str], llm: Optional[str],
          model: Optional[str], linters: Optional[str], max_files: Optional[int],
          max_errors: Optional[int], dry_run: bool, interactive: bool,
-         verbose: bool, log_file: Optional[str], no_banner: bool):
+         verbose: bool, log_file: Optional[str], no_banner: bool, ansible_profile: str):
     """Aider Lint Fixer - Automated lint error detection and fixing.
     
     PROJECT_PATH: Path to the project directory (default: current directory)
@@ -228,7 +230,7 @@ def main(project_path: str, config: Optional[str], llm: Optional[str],
         else:
             enabled_linters = project_config.linters.enabled if project_config.linters.auto_detect else None
         
-        results = lint_runner.run_all_available_linters(enabled_linters)
+        results = lint_runner.run_all_available_linters(enabled_linters, ansible_profile=ansible_profile)
         
         print_lint_summary(results)
         
