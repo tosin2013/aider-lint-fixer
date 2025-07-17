@@ -128,9 +128,11 @@ jobs:
     - name: 🧪 Run integration tests
       run: |
         # Run pytest if available
-        if [ -f "requirements.txt" ] && grep -q pytest requirements.txt; then
-          pip install -r requirements.txt
+        if [ -f "requirements-test.txt" ]; then
+          pip install -r requirements-test.txt
           python -m pytest tests/ -v --tb=short || true
+        elif [ -d "tests" ]; then
+          echo "Tests directory found but no test requirements, skipping tests"
         fi
 
   # Build package

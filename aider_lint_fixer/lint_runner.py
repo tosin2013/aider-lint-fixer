@@ -27,33 +27,74 @@ PrettierLinter = None
 
 
 def _import_modular_linters():
-    """Import modular linters with error handling."""
+    """Import modular linters with individual error handling for platform compatibility."""
     global MODULAR_LINTERS_AVAILABLE, AnsibleLintLinter, Flake8Linter, PylintLinter, ESLintLinter, JSHintLinter, PrettierLinter
     if not MODULAR_LINTERS_AVAILABLE:
+        imported_linters = []
+
+        # Import each linter individually to handle platform-specific issues
         try:
             from .linters.ansible_lint import AnsibleLintLinter as _AnsibleLintLinter
-            from .linters.eslint_linter import ESLintLinter as _ESLintLinter
-            from .linters.flake8_linter import Flake8Linter as _Flake8Linter
-            from .linters.jshint_linter import JSHintLinter as _JSHintLinter
-            from .linters.prettier_linter import PrettierLinter as _PrettierLinter
-            from .linters.pylint_linter import PylintLinter as _PylintLinter
 
             AnsibleLintLinter = _AnsibleLintLinter
-            Flake8Linter = _Flake8Linter
-            PylintLinter = _PylintLinter
-            ESLintLinter = _ESLintLinter
-            JSHintLinter = _JSHintLinter
-            PrettierLinter = _PrettierLinter
-            MODULAR_LINTERS_AVAILABLE = True
-            logger.debug(
-                "Successfully imported modular linters: ansible-lint, flake8, pylint, eslint, jshint, prettier"
-            )
+            imported_linters.append("ansible-lint")
         except ImportError as e:
-            logger.error(f"Failed to import modular linters: {e}")
-            MODULAR_LINTERS_AVAILABLE = False
+            logger.debug(f"Ansible-lint linter not available (platform compatibility): {e}")
+            AnsibleLintLinter = None
         except Exception as e:
-            logger.error(f"Unexpected error importing modular linters: {e}")
-            MODULAR_LINTERS_AVAILABLE = False
+            logger.debug(f"Unexpected error importing ansible-lint: {e}")
+            AnsibleLintLinter = None
+
+        try:
+            from .linters.flake8_linter import Flake8Linter as _Flake8Linter
+
+            Flake8Linter = _Flake8Linter
+            imported_linters.append("flake8")
+        except ImportError as e:
+            logger.debug(f"Flake8 linter not available: {e}")
+            Flake8Linter = None
+
+        try:
+            from .linters.pylint_linter import PylintLinter as _PylintLinter
+
+            PylintLinter = _PylintLinter
+            imported_linters.append("pylint")
+        except ImportError as e:
+            logger.debug(f"Pylint linter not available: {e}")
+            PylintLinter = None
+
+        try:
+            from .linters.eslint_linter import ESLintLinter as _ESLintLinter
+
+            ESLintLinter = _ESLintLinter
+            imported_linters.append("eslint")
+        except ImportError as e:
+            logger.debug(f"ESLint linter not available: {e}")
+            ESLintLinter = None
+
+        try:
+            from .linters.jshint_linter import JSHintLinter as _JSHintLinter
+
+            JSHintLinter = _JSHintLinter
+            imported_linters.append("jshint")
+        except ImportError as e:
+            logger.debug(f"JSHint linter not available: {e}")
+            JSHintLinter = None
+
+        try:
+            from .linters.prettier_linter import PrettierLinter as _PrettierLinter
+
+            PrettierLinter = _PrettierLinter
+            imported_linters.append("prettier")
+        except ImportError as e:
+            logger.debug(f"Prettier linter not available: {e}")
+            PrettierLinter = None
+
+        MODULAR_LINTERS_AVAILABLE = True
+        if imported_linters:
+            logger.debug(f"Successfully imported modular linters: {', '.join(imported_linters)}")
+        else:
+            logger.debug("No modular linters could be imported")
 
 
 logger = logging.getLogger(__name__)
@@ -399,6 +440,13 @@ class LintRunner:
         self, file_paths: Optional[List[str]] = None, **kwargs
     ) -> LintResult:
         """Run ansible-lint using the modular implementation."""
+        # Check if ansible-lint is available (may be None on Windows)
+        if AnsibleLintLinter is None:
+            logger.debug(
+                "Ansible-lint modular implementation not available, falling back to legacy"
+            )
+            return self._run_legacy_ansible_lint(file_paths, **kwargs)
+
         try:
             # Create ansible-lint linter instance
             ansible_linter = AnsibleLintLinter(self.project_info.root_path)
@@ -426,6 +474,10 @@ class LintRunner:
 
     def _run_modular_flake8(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Run flake8 using the modular implementation."""
+        if Flake8Linter is None:
+            logger.debug("Flake8 modular implementation not available, falling back to legacy")
+            return self._run_legacy_flake8(file_paths, **kwargs)
+
         try:
             logger.info("Using modular flake8 implementation")
             linter = Flake8Linter(self.project_info.root_path)
@@ -451,6 +503,10 @@ class LintRunner:
 
     def _run_modular_pylint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Run pylint using the modular implementation."""
+        if PylintLinter is None:
+            logger.debug("Pylint modular implementation not available, falling back to legacy")
+            return self._run_legacy_pylint(file_paths, **kwargs)
+
         try:
             logger.info("Using modular pylint implementation")
             linter = PylintLinter(self.project_info.root_path)

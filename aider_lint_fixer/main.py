@@ -381,8 +381,6 @@ def main(
 
             os.environ["NO_COLOR"] = "1"
             # Reset colorama colors to empty strings
-            from colorama import Fore, Style
-
             for attr in dir(Fore):
                 if not attr.startswith("_"):
                     setattr(Fore, attr, "")
