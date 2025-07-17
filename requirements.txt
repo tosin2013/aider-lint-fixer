@@ -62,7 +62,7 @@ oslex==0.1.3
 packaging==25.0
 pathspec==0.12.1
 pexpect==4.9.0
-pillow==11.2.1
+pillow==11.3.0
 posthog==5.4.0
 prompt_toolkit==3.0.51
 propcache==0.3.2
