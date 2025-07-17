@@ -1,0 +1,336 @@
+name: 🧪 Test Build & Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: 'Test scope'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - quick
+        - linters-only
+
+env:
+  PYTHON_VERSION_DEFAULT: '3.9'
+
+jobs:
+  # Job 1: Quick validation and linting
+  quick-validation:
+    name: 🚀 Quick Validation
+    runs-on: ubuntu-latest
+    outputs:
+      should_run_full: ${{ steps.check.outputs.should_run_full }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort mypy
+        
+    - name: 🔍 Code quality checks
+      run: |
+        # Check Python syntax
+        flake8 aider_lint_fixer --count --select=E9,F63,F7,F82 --show-source --statistics
+        
+        # Check import sorting
+        isort --check-only aider_lint_fixer/
+        
+        # Check code formatting
+        black --check aider_lint_fixer/
+        
+    - name: 📋 Check if full tests should run
+      id: check
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.test_scope }}" == "quick" ]]; then
+          echo "should_run_full=false" >> $GITHUB_OUTPUT
+        else
+          echo "should_run_full=true" >> $GITHUB_OUTPUT
+        fi
+
+  # Job 2: Test installation methods
+  test-installation:
+    name: 🔧 Test Installation (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: quick-validation
+    if: needs.quick-validation.outputs.should_run_full == 'true'
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+        exclude:
+          # Reduce matrix size for faster builds
+          - os: macos-latest
+            python-version: '3.8'
+          - os: windows-latest
+            python-version: '3.8'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: 🟨 Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: 📦 Test pip installation
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        
+    - name: 🔍 Test basic functionality
+      run: |
+        python -m aider_lint_fixer --version
+        python -m aider_lint_fixer --help
+        
+    - name: 📋 Install test linters
+      run: |
+        # Python linters
+        pip install flake8==7.3.0 pylint==3.3.7
+        
+        # Ansible linters
+        pip install ansible-lint==25.6.1
+        
+        # Node.js linters
+        npm install -g eslint@8.57.1 jshint@2.13.6 prettier@3.6.2
+        
+    - name: ✅ Verify linter installations
+      shell: bash
+      run: |
+        # Test linter availability
+        flake8 --version
+        pylint --version
+        ansible-lint --version
+        npx eslint --version
+        npx jshint --version
+        npx prettier --version
+
+  # Job 3: Test linter integrations
+  test-linter-integrations:
+    name: 🔍 Test Linter Integrations
+    runs-on: ubuntu-latest
+    needs: quick-validation
+    if: needs.quick-validation.outputs.should_run_full == 'true'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+        
+    - name: 🟨 Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: 📦 Install aider-lint-fixer
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r requirements.txt
+        
+    - name: 📋 Install all supported linters
+      run: |
+        # Python linters
+        pip install flake8==7.3.0 pylint==3.3.7
+        
+        # Ansible linters  
+        pip install ansible-lint==25.6.1
+        
+        # Node.js linters
+        npm install -g eslint@8.57.1 jshint@2.13.6 prettier@3.6.2
+        
+    - name: 🧪 Run integration tests
+      env:
+        DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      run: |
+        # Run pytest with coverage
+        python -m pytest tests/ -v --tb=short
+        
+    - name: 🔧 Test version checker script
+      run: |
+        chmod +x scripts/check_supported_versions.sh
+        ./scripts/check_supported_versions.sh
+        
+    - name: 🎯 Test real-world scenarios
+      run: |
+        # Test Python linting
+        python -m aider_lint_fixer test_python --linters flake8 --dry-run --verbose --max-errors 5
+        
+        # Test Ansible linting
+        python -m aider_lint_fixer test_ansible --linters ansible-lint --dry-run --verbose --max-errors 5
+        
+        # Test Node.js linting
+        python -m aider_lint_fixer test_nodejs --linters eslint --dry-run --verbose --max-errors 5
+
+  # Job 4: Test automated installation script
+  test-install-script:
+    name: 🤖 Test Install Script (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: quick-validation
+    if: needs.quick-validation.outputs.should_run_full == 'true'
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Test installation script
+      run: |
+        # Make script executable
+        chmod +x scripts/install.sh
+        
+        # Test script with dry-run simulation
+        # Note: We can't run the full script in CI, but we can test its logic
+        bash -n scripts/install.sh  # Syntax check
+        
+        # Test prerequisite checking functions
+        grep -q "check_prerequisites" scripts/install.sh
+        grep -q "install_linters" scripts/install.sh
+        grep -q "verify_installation" scripts/install.sh
+
+  # Job 5: Test documentation and examples
+  test-documentation:
+    name: 📚 Test Documentation
+    runs-on: ubuntu-latest
+    needs: quick-validation
+    if: needs.quick-validation.outputs.should_run_full == 'true'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        
+    - name: 📋 Check documentation files
+      run: |
+        # Check that all documentation files exist
+        test -f README.md
+        test -f docs/INSTALLATION_GUIDE.md
+        test -f docs/CONTRIBUTOR_VERSION_GUIDE.md
+        test -f docs/NODEJS_LINTERS_GUIDE.md
+        test -f docs/LINTER_TESTING_GUIDE.md
+        
+    - name: 🔍 Validate documentation examples
+      run: |
+        # Check that CLI help works
+        python -m aider_lint_fixer --help
+        
+        # Test version constants module
+        python -c "from aider_lint_fixer.supported_versions import *; print(get_supported_linters())"
+        
+        # Test that examples in README are valid
+        python -c "
+        import subprocess
+        result = subprocess.run(['python', '-m', 'aider_lint_fixer', '--help'], capture_output=True, text=True)
+        assert 'usage:' in result.stdout.lower()
+        print('✅ CLI help command works')
+        "
+
+  # Job 6: Build and test package
+  test-package-build:
+    name: 📦 Test Package Build
+    runs-on: ubuntu-latest
+    needs: quick-validation
+    if: needs.quick-validation.outputs.should_run_full == 'true'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+        
+    - name: 📦 Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+        
+    - name: 🔨 Build package
+      run: |
+        python -m build
+        
+    - name: 🔍 Check package
+      run: |
+        twine check dist/*
+        
+    - name: 📋 Test package installation
+      run: |
+        # Install from built wheel
+        pip install dist/*.whl
+        
+        # Test that it works
+        python -c "import aider_lint_fixer; print(f'✅ Package version: {aider_lint_fixer.__version__}')"
+        python -m aider_lint_fixer --version
+
+  # Job 7: Summary and results
+  test-summary:
+    name: 📊 Test Summary
+    runs-on: ubuntu-latest
+    needs: [quick-validation, test-installation, test-linter-integrations, test-install-script, test-documentation, test-package-build]
+    if: always()
+    
+    steps:
+    - name: 📊 Generate test summary
+      run: |
+        echo "## 🧪 Test Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Quick Validation | ${{ needs.quick-validation.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Installation Tests | ${{ needs.test-installation.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Linter Integration | ${{ needs.test-linter-integrations.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Install Script | ${{ needs.test-install-script.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Documentation | ${{ needs.test-documentation.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Package Build | ${{ needs.test-package-build.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [[ "${{ needs.test-linter-integrations.result }}" == "success" ]]; then
+          echo "✅ **All linter integrations working correctly!**" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Some linter integrations failed - check logs**" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+    - name: 🎉 Success notification
+      if: needs.quick-validation.result == 'success' && needs.test-installation.result == 'success' && needs.test-linter-integrations.result == 'success'
+      run: |
+        echo "🎉 All tests passed! aider-lint-fixer is ready for release."

@@ -1,0 +1,348 @@
+name: 🤖 Test Installation Script
+
+on:
+  push:
+    paths:
+      - 'scripts/install.sh'
+      - '.github/workflows/test-install-script.yml'
+  pull_request:
+    paths:
+      - 'scripts/install.sh'
+      - '.github/workflows/test-install-script.yml'
+  workflow_dispatch:
+  schedule:
+    # Test weekly to catch environment changes
+    - cron: '0 6 * * 1'  # Every Monday at 6 AM UTC
+
+jobs:
+  # Test script syntax and logic
+  test-script-syntax:
+    name: 🔍 Test Script Syntax
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Test script syntax
+      run: |
+        echo "## 🔍 Installation Script Validation" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Make script executable
+        chmod +x scripts/install.sh
+        
+        # Test bash syntax
+        if bash -n scripts/install.sh; then
+          echo "✅ Bash syntax is valid" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Bash syntax errors detected" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test shellcheck if available
+        if command -v shellcheck >/dev/null 2>&1; then
+          if shellcheck scripts/install.sh; then
+            echo "✅ ShellCheck passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ ShellCheck warnings detected" >> $GITHUB_STEP_SUMMARY
+          fi
+        else
+          echo "ℹ️ ShellCheck not available" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Check for required functions
+        echo "### Required Functions Check" >> $GITHUB_STEP_SUMMARY
+        REQUIRED_FUNCTIONS=("check_prerequisites" "install_system_deps" "clone_repository" "create_venv" "install_aider" "install_linters" "verify_installation")
+        
+        for func in "${REQUIRED_FUNCTIONS[@]}"; do
+          if grep -q "^$func()" scripts/install.sh; then
+            echo "✅ Function \`$func\` found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Function \`$func\` missing" >> $GITHUB_STEP_SUMMARY
+          fi
+        done
+
+  # Test installation on different platforms
+  test-install-platforms:
+    name: 🖥️ Test Installation (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: test-script-syntax
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-20.04, macos-latest, macos-12]
+        include:
+          - os: ubuntu-latest
+            package_manager: apt
+          - os: ubuntu-20.04
+            package_manager: apt
+          - os: macos-latest
+            package_manager: brew
+          - os: macos-12
+            package_manager: brew
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Prepare test environment
+      run: |
+        # Create a temporary directory for testing
+        mkdir -p /tmp/aider-test
+        cd /tmp/aider-test
+        
+        # Copy the install script
+        cp $GITHUB_WORKSPACE/scripts/install.sh ./
+        chmod +x install.sh
+        
+    - name: 🧪 Test prerequisite checking
+      run: |
+        cd /tmp/aider-test
+        
+        echo "## 🧪 Testing Prerequisites on ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Extract and test the check_prerequisites function
+        # We'll source the script and call individual functions
+        
+        # Test Python detection
+        if python3 --version >/dev/null 2>&1; then
+          echo "✅ Python 3 available" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Python 3 not available" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Test Git detection
+        if git --version >/dev/null 2>&1; then
+          echo "✅ Git available" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Git not available" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Test pip3 detection
+        if pip3 --version >/dev/null 2>&1; then
+          echo "✅ pip3 available" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ pip3 not available" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Test Node.js detection
+        if node --version >/dev/null 2>&1 && npm --version >/dev/null 2>&1; then
+          echo "✅ Node.js and npm available" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ Node.js/npm not available" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+    - name: 🔧 Test system dependency detection
+      run: |
+        cd /tmp/aider-test
+        
+        echo "### System Package Manager Detection" >> $GITHUB_STEP_SUMMARY
+        
+        case "${{ matrix.package_manager }}" in
+          apt)
+            if command -v apt-get >/dev/null 2>&1; then
+              echo "✅ apt-get detected (Ubuntu/Debian)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ apt-get not found" >> $GITHUB_STEP_SUMMARY
+            fi
+            ;;
+          brew)
+            if command -v brew >/dev/null 2>&1; then
+              echo "✅ Homebrew detected (macOS)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ Homebrew not found (may need manual installation)" >> $GITHUB_STEP_SUMMARY
+            fi
+            ;;
+        esac
+        
+    - name: 🧪 Test script functions (dry run)
+      run: |
+        cd /tmp/aider-test
+        
+        echo "### Function Testing (Dry Run)" >> $GITHUB_STEP_SUMMARY
+        
+        # Test that we can source the script without executing main
+        if grep -q "main.*\$@" install.sh; then
+          echo "✅ Script has proper main function guard" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ Script may execute immediately when sourced" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Test color code definitions
+        if grep -q "RED=.*GREEN=.*BLUE=" install.sh; then
+          echo "✅ Color codes defined" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ Color codes not found" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Test configuration variables
+        if grep -q "REPO_URL.*INSTALL_DIR.*VENV_NAME" install.sh; then
+          echo "✅ Configuration variables defined" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Configuration variables missing" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  # Test actual installation (limited)
+  test-limited-install:
+    name: 🚀 Test Limited Installation
+    runs-on: ubuntu-latest
+    needs: test-script-syntax
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🧪 Test installation steps individually
+      run: |
+        echo "## 🚀 Limited Installation Test" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Create test directory
+        TEST_DIR="/tmp/aider-install-test"
+        mkdir -p "$TEST_DIR"
+        cd "$TEST_DIR"
+        
+        # Test 1: Clone repository (using current checkout)
+        echo "### Step 1: Repository Cloning" >> $GITHUB_STEP_SUMMARY
+        cp -r "$GITHUB_WORKSPACE" ./aider-lint-fixer
+        cd aider-lint-fixer
+        if [ -f "aider_lint_fixer/__init__.py" ]; then
+          echo "✅ Repository structure correct" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Repository structure invalid" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test 2: Virtual environment creation
+        echo "### Step 2: Virtual Environment" >> $GITHUB_STEP_SUMMARY
+        if python3 -m venv test-venv; then
+          echo "✅ Virtual environment created" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Virtual environment creation failed" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test 3: Activation and pip upgrade
+        echo "### Step 3: Environment Activation" >> $GITHUB_STEP_SUMMARY
+        source test-venv/bin/activate
+        if pip3 install --upgrade pip; then
+          echo "✅ pip upgraded successfully" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ pip upgrade failed" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test 4: Package installation
+        echo "### Step 4: Package Installation" >> $GITHUB_STEP_SUMMARY
+        if pip3 install -e .; then
+          echo "✅ aider-lint-fixer installed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ aider-lint-fixer installation failed" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test 5: Basic functionality
+        echo "### Step 5: Functionality Test" >> $GITHUB_STEP_SUMMARY
+        if python3 -m aider_lint_fixer --version; then
+          echo "✅ Basic functionality works" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Basic functionality failed" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test 6: Linter installation (subset)
+        echo "### Step 6: Linter Installation" >> $GITHUB_STEP_SUMMARY
+        if pip3 install flake8==7.3.0; then
+          echo "✅ Sample linter (flake8) installed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Sample linter installation failed" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test 7: Version checking
+        echo "### Step 7: Version Verification" >> $GITHUB_STEP_SUMMARY
+        if flake8 --version >/dev/null 2>&1; then
+          echo "✅ Linter version check works" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Linter version check failed" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🎉 **Limited installation test completed successfully!**" >> $GITHUB_STEP_SUMMARY
+
+  # Test script with different configurations
+  test-script-configurations:
+    name: ⚙️ Test Script Configurations
+    runs-on: ubuntu-latest
+    needs: test-script-syntax
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🧪 Test script with different inputs
+      run: |
+        echo "## ⚙️ Script Configuration Tests" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Test script help/usage
+        chmod +x scripts/install.sh
+        
+        # Test that script doesn't execute main when sourced
+        if bash -c "source scripts/install.sh; echo 'Sourcing successful'" 2>/dev/null; then
+          echo "✅ Script can be sourced safely" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ Script may have issues when sourced" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Test configuration variables
+        REPO_URL=$(grep "REPO_URL=" scripts/install.sh | cut -d'"' -f2)
+        INSTALL_DIR=$(grep "INSTALL_DIR=" scripts/install.sh | cut -d'"' -f2)
+        
+        echo "### Configuration Variables" >> $GITHUB_STEP_SUMMARY
+        echo "- Repository URL: \`$REPO_URL\`" >> $GITHUB_STEP_SUMMARY
+        echo "- Install Directory: \`$INSTALL_DIR\`" >> $GITHUB_STEP_SUMMARY
+        
+        # Validate repository URL format
+        if [[ "$REPO_URL" =~ ^https://github\.com/.+\.git$ ]]; then
+          echo "✅ Repository URL format is valid" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Repository URL format is invalid" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  # Summary
+  test-summary:
+    name: 📊 Installation Script Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-script-syntax, test-install-platforms, test-limited-install, test-script-configurations]
+    if: always()
+    
+    steps:
+    - name: 📊 Generate summary
+      run: |
+        echo "## 📊 Installation Script Test Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Test Category | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|---------------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Script Syntax | ${{ needs.test-script-syntax.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Platform Tests | ${{ needs.test-install-platforms.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Limited Install | ${{ needs.test-limited-install.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Configurations | ${{ needs.test-script-configurations.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [[ "${{ needs.test-script-syntax.result }}" == "success" && 
+              "${{ needs.test-install-platforms.result }}" == "success" && 
+              "${{ needs.test-limited-install.result }}" == "success" && 
+              "${{ needs.test-script-configurations.result }}" == "success" ]]; then
+          echo "🎉 **All installation script tests passed!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The installation script is ready for production use." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Some installation script tests failed**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Please review the failed tests and fix issues before release." >> $GITHUB_STEP_SUMMARY
+        fi

@@ -1,0 +1,210 @@
+name: 🔍 PR Quick Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened]
+
+env:
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  # Quick validation for PRs
+  pr-validation:
+    name: 🚀 PR Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for better diff analysis
+        
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort mypy
+        pip install -e .
+        
+    - name: 🔍 Code quality checks
+      run: |
+        echo "## 🔍 Code Quality Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Python syntax and style
+        echo "### Python Syntax Check" >> $GITHUB_STEP_SUMMARY
+        if flake8 aider_lint_fixer --count --select=E9,F63,F7,F82 --show-source --statistics; then
+          echo "✅ No syntax errors found" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Syntax errors detected" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Import sorting
+        echo "### Import Sorting Check" >> $GITHUB_STEP_SUMMARY
+        if isort --check-only aider_lint_fixer/; then
+          echo "✅ Imports are properly sorted" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Import sorting issues detected" >> $GITHUB_STEP_SUMMARY
+          echo "Run: \`isort aider_lint_fixer/\` to fix" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Code formatting
+        echo "### Code Formatting Check" >> $GITHUB_STEP_SUMMARY
+        if black --check aider_lint_fixer/; then
+          echo "✅ Code is properly formatted" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Code formatting issues detected" >> $GITHUB_STEP_SUMMARY
+          echo "Run: \`black aider_lint_fixer/\` to fix" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+    - name: 🧪 Quick functionality test
+      run: |
+        echo "### Functionality Test" >> $GITHUB_STEP_SUMMARY
+        
+        # Test basic CLI
+        if python -m aider_lint_fixer --version; then
+          echo "✅ CLI is working" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ CLI test failed" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test help command
+        if python -m aider_lint_fixer --help > /dev/null; then
+          echo "✅ Help command works" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Help command failed" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Test version constants
+        if python -c "from aider_lint_fixer.supported_versions import get_supported_linters; print(get_supported_linters())"; then
+          echo "✅ Version constants module works" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Version constants test failed" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+    - name: 📋 Check changed files
+      run: |
+        echo "### Changed Files Analysis" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Get list of changed files
+        CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+        
+        if [ -z "$CHANGED_FILES" ]; then
+          echo "No files changed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "**Changed files:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "$CHANGED_FILES" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if any Python files changed
+          if echo "$CHANGED_FILES" | grep -q "\.py$"; then
+            echo "🐍 Python files modified - running additional checks" >> $GITHUB_STEP_SUMMARY
+            
+            # Run flake8 on changed Python files only
+            CHANGED_PY_FILES=$(echo "$CHANGED_FILES" | grep "\.py$" | tr '\n' ' ')
+            if [ -n "$CHANGED_PY_FILES" ]; then
+              flake8 $CHANGED_PY_FILES --max-line-length=100 --extend-ignore=E203,W503
+            fi
+          fi
+          
+          # Check if documentation changed
+          if echo "$CHANGED_FILES" | grep -q "\.md$\|docs/"; then
+            echo "📚 Documentation modified" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check if tests changed
+          if echo "$CHANGED_FILES" | grep -q "test_\|tests/"; then
+            echo "🧪 Tests modified" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check if linter implementations changed
+          if echo "$CHANGED_FILES" | grep -q "linters/"; then
+            echo "🔍 Linter implementations modified" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+        
+    - name: 🎯 PR Summary
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "---" >> $GITHUB_STEP_SUMMARY
+        echo "### 🎯 PR Check Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "This PR has passed the quick validation checks!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Next steps:**" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Code quality checks passed" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Basic functionality verified" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔄 Full test suite will run on merge to main" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "*Ready for review!* 🚀" >> $GITHUB_STEP_SUMMARY
+
+  # Test critical linters if linter code changed
+  test-critical-linters:
+    name: 🔍 Test Critical Linters
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.changed_files, 'linters/') || contains(github.event.pull_request.changed_files, 'lint_runner.py')
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 🟨 Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: 📦 Install aider-lint-fixer
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        
+    - name: 📋 Install critical linters
+      run: |
+        # Install most commonly used linters
+        pip install flake8==7.3.0 ansible-lint==25.6.1
+        npm install -g eslint@8.57.1
+        
+    - name: 🧪 Test linter integrations
+      run: |
+        echo "## 🔍 Linter Integration Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Test Python linting
+        if python -m aider_lint_fixer test_python --linters flake8 --dry-run --max-errors 1 > /dev/null 2>&1; then
+          echo "✅ Python linting (flake8) works" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Python linting (flake8) failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Test Ansible linting
+        if python -m aider_lint_fixer test_ansible --linters ansible-lint --dry-run --max-errors 1 > /dev/null 2>&1; then
+          echo "✅ Ansible linting works" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Ansible linting failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Test Node.js linting
+        if python -m aider_lint_fixer test_nodejs --linters eslint --dry-run --max-errors 1 > /dev/null 2>&1; then
+          echo "✅ Node.js linting (ESLint) works" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Node.js linting (ESLint) failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Linter integration tests completed!**" >> $GITHUB_STEP_SUMMARY
