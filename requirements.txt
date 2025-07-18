@@ -12,4 +12,4 @@ pydantic_core==2.33.2
 Pygments==2.19.2
 PyYAML==6.0.2
 subprocess.run==0.0.8
-typing_extensions==4.14.0
+typing_extensions==4.14.1
