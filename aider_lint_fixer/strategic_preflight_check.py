@@ -8,7 +8,6 @@ chaotic codebases before attempting automated fixes.
 """
 
 import json
-import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
@@ -280,20 +279,20 @@ class StrategicPreFlightChecker:
 
         # Only show blocking issues if they actually block
         if result.blocking_issues and not result.should_proceed:
-            print(f"\n🚫 Blocking Issues:")
+            print("\n🚫 Blocking Issues:")
             for issue in result.blocking_issues:
                 print(f"   • {issue}")
         elif result.blocking_issues and result.should_proceed:
-            print(f"\n⚠️  Issues Detected (proceeding with caution):")
+            print("\n⚠️  Issues Detected (proceeding with caution):")
             for issue in result.blocking_issues[:2]:
                 print(f"   • {issue}")
 
         if result.recommended_actions and not result.should_proceed:
-            print(f"\n💡 Recommended Actions:")
+            print("\n💡 Recommended Actions:")
             for action in result.recommended_actions[:3]:
                 print(f"   {action}")
         elif result.recommended_actions and result.should_proceed:
-            print(f"\n💡 Consider addressing later:")
+            print("\n💡 Consider addressing later:")
             for action in result.recommended_actions[:2]:
                 print(f"   {action}")
 
@@ -345,7 +344,7 @@ class StrategicPreFlightChecker:
             engine.display_recommendations(recommendations)
 
         except ImportError:
-            print(f"\n💡 Manual Cleanup Recommendations:")
+            print("\n💡 Manual Cleanup Recommendations:")
             print("Since aider recommendations are not available, here are manual steps:")
 
             for indicator in indicators:
@@ -353,14 +352,14 @@ class StrategicPreFlightChecker:
                     print(f"\n• {indicator.description}")
                     print(f"  Files: {', '.join(indicator.evidence[:3])}")
                     if indicator.type == "file_organization":
-                        print(f"  → Create src/ directory and move Python files")
-                        print(f"  → Organize related files into modules")
+                        print("  → Create src/ directory and move Python files")
+                        print("  → Organize related files into modules")
                     elif indicator.type == "code_structure":
-                        print(f"  → Move experimental files to experiments/ directory")
-                        print(f"  → Delete obsolete demo/debug files")
+                        print("  → Move experimental files to experiments/ directory")
+                        print("  → Delete obsolete demo/debug files")
                     elif indicator.type == "documentation":
-                        print(f"  → Update README.md to match actual structure")
-                        print(f"  → Fix references to non-existent files")
+                        print("  → Update README.md to match actual structure")
+                        print("  → Fix references to non-existent files")
 
         except Exception as e:
             print(f"\n⚠️  Could not generate aider recommendations: {e}")

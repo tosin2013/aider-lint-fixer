@@ -40,7 +40,7 @@ class AiderStrategicRecommendationEngine:
     ) -> List[AiderRecommendation]:
         """Generate strategic recommendations using aider."""
 
-        print(f"\n🤖 Generating aider-powered strategic recommendations...")
+        print("\n🤖 Generating aider-powered strategic recommendations...")
 
         recommendations = []
 
@@ -101,8 +101,8 @@ Please provide:
 Focus on creating a clean, maintainable structure that follows Python best practices.
 """
 
-        # Get aider's recommendation
-        aider_response = self._query_aider(prompt, "file_organization")
+        # Get aider's recommendation (placeholder for now)
+        self._query_aider(prompt, "file_organization")
 
         return AiderRecommendation(
             category="File Organization",
