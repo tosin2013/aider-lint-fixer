@@ -5,7 +5,7 @@ This package provides automated lint error detection and fixing capabilities
 using aider.chat with support for multiple LLM providers.
 """
 
-__version__ = "1.5.0"
+__version__ = "1.6.0"
 __author__ = "Aider Lint Fixer Team"
 __email__ = "support@aider-lint-fixer.com"
 

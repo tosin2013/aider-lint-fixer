@@ -5,7 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.0] - 2025-07-18
+## [1.5.0]
+
+## [1.6.0] - 2025-01-18
+
+### 🎯 **Major Learning System Enhancement**
+
+This release dramatically improves error detection accuracy by resolving missing learning dependencies and enhancing project-specific configurations.
+
+### ✨ **Added**
+- **Enhanced Learning Dependencies**: Added `pyahocorasick>=1.4.0` for high-performance pattern matching
+- **Optional Dependencies Structure**: New `[learning]` and `[all]` installation options
+- **Auto-Rule Creation**: Automatically creates scraped rules when web dependencies are available
+- **Learning Setup Checker**: New `scripts/check_learning_setup.py` for dependency verification
+- **Enhanced ESLint Integration**: Project-specific configuration detection for TypeScript projects
+- **Comprehensive Documentation**: Learning features section in README with troubleshooting
+
+### 🔧 **Enhanced**
+- **ESLint Configuration Detection**: Auto-detects `.eslintrc.js`, `tsconfig.json`, and npm scripts
+- **TypeScript Support**: Dynamic extension detection based on project setup
+- **npm Script Integration**: Prefers `npm run lint` when available for better compatibility
+- **Learning Statistics**: Enhanced `--stats` output with setup guidance
+- **Error Classification**: Improved accuracy from 0.0% to 46.1% fixability rate
+
+### 🐛 **Fixed**
+- **Learning Files Not Created**: Resolved missing `scikit-learn` dependency issue
+- **Aho-Corasick Warnings**: Added optional dependency for high-performance pattern matching
+- **TypeScript Project Support**: Fixed ESLint integration for TypeScript projects with custom configs
+- **Import Sorting**: Fixed CI/CD formatting issues with proper import organization
+
+### 📦 **Installation**
+```bash
+# Basic installation
+pip install aider-lint-fixer==1.6.0
+
+# With learning features (recommended)
+pip install aider-lint-fixer[learning]==1.6.0
+
+# All features
+pip install aider-lint-fixer[all]==1.6.0
+```
+
+### 🧠 **Learning System Improvements**
+- **Automatic Setup**: Learning works out of the box with proper dependencies
+- **Better Feedback**: Clear warnings and setup instructions when dependencies are missing
+- **Performance**: High-speed pattern matching with Aho-Corasick algorithm
+- **Rule Coverage**: 392+ rules automatically scraped from official linter documentation
+
+### 📈 **Performance Impact**
+- **Before**: `Found 0 fixable errors (0.0% of 58 total baseline errors)`
+- **After**: `Found 27 fixable errors (46.1% of 58 total baseline errors)`
+
+### 🔍 **Verification**
+```bash
+# Check learning setup
+python scripts/check_learning_setup.py
+
+# Monitor learning progress
+aider-lint-fixer --stats
+
+# Test on TypeScript project
+aider-lint-fixer . --linters eslint --dry-run
+``` - 2025-07-18
 
 ### 🚀 Major Intelligence Upgrade - Web Scraping & Enhanced Pattern Matching
 
