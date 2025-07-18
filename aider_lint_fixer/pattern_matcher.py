@@ -16,6 +16,7 @@ from typing import Dict, List, Optional, Tuple
 
 try:
     import ahocorasick
+
     AHOCORASICK_AVAILABLE = True
 except ImportError:
     AHOCORASICK_AVAILABLE = False
@@ -24,6 +25,7 @@ except ImportError:
 try:
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.naive_bayes import MultinomialNB
+
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
@@ -35,7 +37,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ErrorPattern:
     """Represents a pattern for matching lint errors."""
-    
+
     pattern: str
     error_type: str
     language: str
@@ -48,7 +50,7 @@ class ErrorPattern:
 @dataclass
 class PatternMatchResult:
     """Result of pattern matching operation."""
-    
+
     fixable: bool
     confidence: float
     method: str  # "pattern_match", "ml_prediction", "fallback"
@@ -58,111 +60,344 @@ class PatternMatchResult:
 
 class LanguagePatternMatcher:
     """Fast pattern matching using Aho-Corasick algorithm per language."""
-    
+
     def __init__(self):
         self.matchers = {}  # One automaton per language
         self.patterns_by_language = {}
         self._build_language_patterns()
-    
+
     def _build_language_patterns(self):
         """Build language-specific pattern automatons."""
         patterns = {
             "python": [
-                ErrorPattern("line too long", "formatting", "python", "flake8", True, 0.95,
-                           "Line length exceeds maximum allowed"),
-                ErrorPattern("undefined name", "import", "python", "flake8", False, 0.9,
-                           "Variable or function not defined"),
-                ErrorPattern("imported but unused", "unused", "python", "flake8", True, 0.98,
-                           "Import statement not used"),
-                ErrorPattern("missing docstring", "style", "python", "pylint", True, 0.8,
-                           "Function/class missing documentation"),
-                ErrorPattern("would reformat", "formatting", "python", "black", True, 1.0,
-                           "Code formatting required"),
-                ErrorPattern("Imports are incorrectly sorted", "import", "python", "isort", True, 0.95,
-                           "Import statements need sorting"),
-                ErrorPattern("error: ", "type", "python", "mypy", False, 0.7,
-                           "Type checking error"),
+                ErrorPattern(
+                    "line too long",
+                    "formatting",
+                    "python",
+                    "flake8",
+                    True,
+                    0.95,
+                    "Line length exceeds maximum allowed",
+                ),
+                ErrorPattern(
+                    "undefined name",
+                    "import",
+                    "python",
+                    "flake8",
+                    False,
+                    0.9,
+                    "Variable or function not defined",
+                ),
+                ErrorPattern(
+                    "imported but unused",
+                    "unused",
+                    "python",
+                    "flake8",
+                    True,
+                    0.98,
+                    "Import statement not used",
+                ),
+                ErrorPattern(
+                    "missing docstring",
+                    "style",
+                    "python",
+                    "pylint",
+                    True,
+                    0.8,
+                    "Function/class missing documentation",
+                ),
+                ErrorPattern(
+                    "would reformat",
+                    "formatting",
+                    "python",
+                    "black",
+                    True,
+                    1.0,
+                    "Code formatting required",
+                ),
+                ErrorPattern(
+                    "Imports are incorrectly sorted",
+                    "import",
+                    "python",
+                    "isort",
+                    True,
+                    0.95,
+                    "Import statements need sorting",
+                ),
+                ErrorPattern(
+                    "error: ", "type", "python", "mypy", False, 0.7, "Type checking error"
+                ),
             ],
             "javascript": [
-                ErrorPattern("Missing semicolon", "formatting", "javascript", "eslint", True, 0.95,
-                           "Semicolon required"),
-                ErrorPattern("is defined but never used", "unused", "javascript", "eslint", True, 0.9,
-                           "Unused variable declaration"),
-                ErrorPattern("Unexpected token", "syntax", "javascript", "eslint", False, 0.7,
-                           "Syntax error in code"),
-                ErrorPattern("Replace", "formatting", "javascript", "prettier", True, 1.0,
-                           "Code formatting required"),
-                ErrorPattern("Expected", "syntax", "javascript", "jshint", False, 0.6,
-                           "Syntax expectation not met"),
+                ErrorPattern(
+                    "Missing semicolon",
+                    "formatting",
+                    "javascript",
+                    "eslint",
+                    True,
+                    0.95,
+                    "Semicolon required",
+                ),
+                ErrorPattern(
+                    "is defined but never used",
+                    "unused",
+                    "javascript",
+                    "eslint",
+                    True,
+                    0.9,
+                    "Unused variable declaration",
+                ),
+                ErrorPattern(
+                    "Unexpected token",
+                    "syntax",
+                    "javascript",
+                    "eslint",
+                    False,
+                    0.7,
+                    "Syntax error in code",
+                ),
+                ErrorPattern(
+                    "Replace",
+                    "formatting",
+                    "javascript",
+                    "prettier",
+                    True,
+                    1.0,
+                    "Code formatting required",
+                ),
+                ErrorPattern(
+                    "Expected",
+                    "syntax",
+                    "javascript",
+                    "jshint",
+                    False,
+                    0.6,
+                    "Syntax expectation not met",
+                ),
             ],
             "typescript": [
-                ErrorPattern("Missing semicolon", "formatting", "typescript", "eslint", True, 0.95,
-                           "Semicolon required"),
-                ErrorPattern("is defined but never used", "unused", "typescript", "eslint", True, 0.9,
-                           "Unused variable declaration"),
-                ErrorPattern("Type", "type", "typescript", "eslint", False, 0.8,
-                           "TypeScript type error"),
-                ErrorPattern("Replace", "formatting", "typescript", "prettier", True, 1.0,
-                           "Code formatting required"),
+                ErrorPattern(
+                    "Missing semicolon",
+                    "formatting",
+                    "typescript",
+                    "eslint",
+                    True,
+                    0.95,
+                    "Semicolon required",
+                ),
+                ErrorPattern(
+                    "is defined but never used",
+                    "unused",
+                    "typescript",
+                    "eslint",
+                    True,
+                    0.9,
+                    "Unused variable declaration",
+                ),
+                ErrorPattern(
+                    "Type", "type", "typescript", "eslint", False, 0.8, "TypeScript type error"
+                ),
+                ErrorPattern(
+                    "Replace",
+                    "formatting",
+                    "typescript",
+                    "prettier",
+                    True,
+                    1.0,
+                    "Code formatting required",
+                ),
             ],
             "ansible": [
-                ErrorPattern("expected token ','", "jinja_syntax", "ansible", "ansible-lint", True, 0.9,
-                           "Jinja2 template syntax error"),
-                ErrorPattern("got '", "jinja_variable", "ansible", "ansible-lint", True, 0.85,
-                           "Jinja2 variable error"),
-                ErrorPattern("unexpected end of template", "jinja_template", "ansible", "ansible-lint", True, 0.8,
-                           "Jinja2 template incomplete"),
-                ErrorPattern("yaml[key-duplicates]", "yaml_structure", "ansible", "ansible-lint", True, 0.95,
-                           "Duplicate YAML keys"),
-                ErrorPattern("All plays should be named", "style", "ansible", "ansible-lint", True, 0.9,
-                           "Play naming convention"),
-                ErrorPattern("name[play]", "style", "ansible", "ansible-lint", True, 0.9,
-                           "Play should have a name"),
+                ErrorPattern(
+                    "expected token ','",
+                    "jinja_syntax",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.9,
+                    "Jinja2 template syntax error",
+                ),
+                ErrorPattern(
+                    "got '",
+                    "jinja_variable",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.85,
+                    "Jinja2 variable error",
+                ),
+                ErrorPattern(
+                    "unexpected end of template",
+                    "jinja_template",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.8,
+                    "Jinja2 template incomplete",
+                ),
+                ErrorPattern(
+                    "yaml[key-duplicates]",
+                    "yaml_structure",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.95,
+                    "Duplicate YAML keys",
+                ),
+                ErrorPattern(
+                    "All plays should be named",
+                    "style",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.9,
+                    "Play naming convention",
+                ),
+                ErrorPattern(
+                    "name[play]",
+                    "style",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.9,
+                    "Play should have a name",
+                ),
                 # YAML formatting patterns
-                ErrorPattern("yaml[line-length]", "formatting", "ansible", "ansible-lint", True, 0.95,
-                           "YAML line too long"),
-                ErrorPattern("Line too long", "formatting", "ansible", "ansible-lint", True, 0.95,
-                           "Line length exceeds maximum"),
-                ErrorPattern("yaml[comments]", "formatting", "ansible", "ansible-lint", True, 0.9,
-                           "YAML comment formatting"),
-                ErrorPattern("Missing starting space in comment", "formatting", "ansible", "ansible-lint", True, 0.9,
-                           "Comment spacing issue"),
-                ErrorPattern("yaml[document-start]", "formatting", "ansible", "ansible-lint", True, 0.8,
-                           "YAML document start formatting"),
-                ErrorPattern("jinja[spacing]", "formatting", "ansible", "ansible-lint", True, 0.95,
-                           "Jinja2 template spacing"),
-                ErrorPattern("risky-file-permissions", "security", "ansible", "ansible-lint", True, 0.85,
-                           "File permissions security issue"),
+                ErrorPattern(
+                    "yaml[line-length]",
+                    "formatting",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.95,
+                    "YAML line too long",
+                ),
+                ErrorPattern(
+                    "Line too long",
+                    "formatting",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.95,
+                    "Line length exceeds maximum",
+                ),
+                ErrorPattern(
+                    "yaml[comments]",
+                    "formatting",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.9,
+                    "YAML comment formatting",
+                ),
+                ErrorPattern(
+                    "Missing starting space in comment",
+                    "formatting",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.9,
+                    "Comment spacing issue",
+                ),
+                ErrorPattern(
+                    "yaml[document-start]",
+                    "formatting",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.8,
+                    "YAML document start formatting",
+                ),
+                ErrorPattern(
+                    "jinja[spacing]",
+                    "formatting",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.95,
+                    "Jinja2 template spacing",
+                ),
+                ErrorPattern(
+                    "risky-file-permissions",
+                    "security",
+                    "ansible",
+                    "ansible-lint",
+                    True,
+                    0.85,
+                    "File permissions security issue",
+                ),
             ],
             "go": [
-                ErrorPattern("should have comment", "style", "go", "golint", True, 0.8,
-                           "Missing comment for exported item"),
-                ErrorPattern("not formatted with gofmt", "formatting", "go", "gofmt", True, 1.0,
-                           "Code formatting required"),
-                ErrorPattern("unreachable code", "logic", "go", "govet", False, 0.9,
-                           "Dead code detected"),
-                ErrorPattern("printf", "logic", "go", "govet", False, 0.8,
-                           "Printf format issue"),
+                ErrorPattern(
+                    "should have comment",
+                    "style",
+                    "go",
+                    "golint",
+                    True,
+                    0.8,
+                    "Missing comment for exported item",
+                ),
+                ErrorPattern(
+                    "not formatted with gofmt",
+                    "formatting",
+                    "go",
+                    "gofmt",
+                    True,
+                    1.0,
+                    "Code formatting required",
+                ),
+                ErrorPattern(
+                    "unreachable code", "logic", "go", "govet", False, 0.9, "Dead code detected"
+                ),
+                ErrorPattern("printf", "logic", "go", "govet", False, 0.8, "Printf format issue"),
             ],
             "rust": [
-                ErrorPattern("not formatted", "formatting", "rust", "rustfmt", True, 1.0,
-                           "Code formatting required"),
-                ErrorPattern("this could be written as", "style", "rust", "clippy", True, 0.85,
-                           "Code style improvement suggestion"),
-                ErrorPattern("unused variable", "unused", "rust", "clippy", True, 0.9,
-                           "Variable declared but not used"),
-                ErrorPattern("unnecessary", "style", "rust", "clippy", True, 0.8,
-                           "Unnecessary code construct"),
-            ]
+                ErrorPattern(
+                    "not formatted",
+                    "formatting",
+                    "rust",
+                    "rustfmt",
+                    True,
+                    1.0,
+                    "Code formatting required",
+                ),
+                ErrorPattern(
+                    "this could be written as",
+                    "style",
+                    "rust",
+                    "clippy",
+                    True,
+                    0.85,
+                    "Code style improvement suggestion",
+                ),
+                ErrorPattern(
+                    "unused variable",
+                    "unused",
+                    "rust",
+                    "clippy",
+                    True,
+                    0.9,
+                    "Variable declared but not used",
+                ),
+                ErrorPattern(
+                    "unnecessary",
+                    "style",
+                    "rust",
+                    "clippy",
+                    True,
+                    0.8,
+                    "Unnecessary code construct",
+                ),
+            ],
         }
-        
+
         self.patterns_by_language = patterns
-        
+
         if AHOCORASICK_AVAILABLE:
             self._build_ahocorasick_automatons(patterns)
         else:
             logger.warning("Aho-Corasick not available, using fallback pattern matching")
-    
+
     def _build_ahocorasick_automatons(self, patterns: Dict[str, List[ErrorPattern]]):
         """Build Aho-Corasick automatons for each language."""
         for language, error_patterns in patterns.items():
@@ -172,14 +407,14 @@ class LanguagePatternMatcher:
             automaton.make_automaton()
             self.matchers[language] = automaton
             logger.debug(f"Built automaton for {language} with {len(error_patterns)} patterns")
-    
+
     def find_patterns(self, error_message: str, language: str) -> List[ErrorPattern]:
         """Find matching patterns for an error message."""
         if not error_message:
             return []
-        
+
         error_lower = error_message.lower()
-        
+
         if AHOCORASICK_AVAILABLE and language in self.matchers:
             # Fast Aho-Corasick matching
             matches = []
@@ -189,7 +424,7 @@ class LanguagePatternMatcher:
         else:
             # Fallback to simple string matching
             return self._fallback_pattern_matching(error_lower, language)
-    
+
     def _fallback_pattern_matching(self, error_message: str, language: str) -> List[ErrorPattern]:
         """Fallback pattern matching when Aho-Corasick is not available."""
         matches = []
@@ -198,18 +433,25 @@ class LanguagePatternMatcher:
                 if pattern.pattern.lower() in error_message:
                     matches.append(pattern)
         return matches
-    
+
     def get_best_match(self, error_message: str, language: str) -> Optional[ErrorPattern]:
         """Get the best matching pattern for an error message."""
         patterns = self.find_patterns(error_message, language)
         if not patterns:
             return None
-        
+
         # Return pattern with highest confidence
         return max(patterns, key=lambda p: p.confidence)
-    
-    def add_learned_pattern(self, pattern: str, error_type: str, language: str, 
-                          linter: str, fixable: bool, confidence: float = 0.7):
+
+    def add_learned_pattern(
+        self,
+        pattern: str,
+        error_type: str,
+        language: str,
+        linter: str,
+        fixable: bool,
+        confidence: float = 0.7,
+    ):
         """Add a new learned pattern to the matcher."""
         new_pattern = ErrorPattern(
             pattern=pattern,
@@ -218,14 +460,14 @@ class LanguagePatternMatcher:
             linter=linter,
             fixable=fixable,
             confidence=confidence,
-            description="Learned pattern"
+            description="Learned pattern",
         )
-        
+
         # Add to patterns list
         if language not in self.patterns_by_language:
             self.patterns_by_language[language] = []
         self.patterns_by_language[language].append(new_pattern)
-        
+
         # Rebuild automaton for this language
         if AHOCORASICK_AVAILABLE:
             automaton = ahocorasick.Automaton()
@@ -233,7 +475,7 @@ class LanguagePatternMatcher:
                 automaton.add_word(p.pattern.lower(), p)
             automaton.make_automaton()
             self.matchers[language] = automaton
-            
+
         logger.info(f"Added learned pattern for {language}: {pattern}")
 
 
@@ -248,19 +490,19 @@ class ErrorFeatures:
 
     # Message features
     contains_suggestion: bool = False  # Does message suggest a fix?
-    has_before_after: bool = False    # Shows before/after examples?
-    mentions_formatting: bool = False # Contains formatting keywords?
-    has_line_numbers: bool = False    # Contains line/column references
+    has_before_after: bool = False  # Shows before/after examples?
+    mentions_formatting: bool = False  # Contains formatting keywords?
+    has_line_numbers: bool = False  # Contains line/column references
 
     # Context features
-    file_type: str = ""           # .yml, .py, .js
-    linter_name: str = ""         # ansible-lint, eslint, flake8
-    project_context: str = ""     # ansible, react, django, etc.
+    file_type: str = ""  # .yml, .py, .js
+    linter_name: str = ""  # ansible-lint, eslint, flake8
+    project_context: str = ""  # ansible, react, django, etc.
 
     # Complexity indicators
-    requires_logic_change: bool = False    # vs simple formatting
-    affects_multiple_lines: bool = False   # Single vs multi-line fix
-    needs_domain_knowledge: bool = False   # Business logic understanding
+    requires_logic_change: bool = False  # vs simple formatting
+    affects_multiple_lines: bool = False  # Single vs multi-line fix
+    needs_domain_knowledge: bool = False  # Business logic understanding
 
     # Fixability hints
     auto_fixable_keywords: List[str] = field(default_factory=list)
@@ -284,36 +526,36 @@ class RuleKnowledgeBase:
                     "auto_fixable": True,
                     "complexity": "trivial",
                     "description": "Line exceeds maximum length",
-                    "fix_strategy": "line_wrapping"
+                    "fix_strategy": "line_wrapping",
                 },
                 "yaml[comments]": {
                     "category": "formatting",
                     "auto_fixable": True,
                     "complexity": "trivial",
                     "description": "Comment formatting issues",
-                    "fix_strategy": "spacing_adjustment"
+                    "fix_strategy": "spacing_adjustment",
                 },
                 "yaml[document-start]": {
                     "category": "formatting",
                     "auto_fixable": True,
                     "complexity": "simple",
                     "description": "Document start marker issues",
-                    "fix_strategy": "marker_adjustment"
+                    "fix_strategy": "marker_adjustment",
                 },
                 "jinja[spacing]": {
                     "category": "formatting",
                     "auto_fixable": True,
                     "complexity": "trivial",
                     "description": "Jinja2 template spacing",
-                    "fix_strategy": "whitespace_cleanup"
+                    "fix_strategy": "whitespace_cleanup",
                 },
                 "name[play]": {
                     "category": "style",
                     "auto_fixable": False,
                     "complexity": "manual",
                     "description": "Play should have a name",
-                    "fix_strategy": "requires_human_input"
-                }
+                    "fix_strategy": "requires_human_input",
+                },
             },
             # ESLint rules
             "eslint": {
@@ -322,15 +564,15 @@ class RuleKnowledgeBase:
                     "auto_fixable": True,
                     "complexity": "trivial",
                     "description": "Missing semicolon",
-                    "fix_strategy": "punctuation_addition"
+                    "fix_strategy": "punctuation_addition",
                 },
                 "no-unused-vars": {
                     "category": "unused",
                     "auto_fixable": True,
                     "complexity": "simple",
                     "description": "Unused variable",
-                    "fix_strategy": "removal"
-                }
+                    "fix_strategy": "removal",
+                },
             },
             # Flake8 rules
             "flake8": {
@@ -339,16 +581,16 @@ class RuleKnowledgeBase:
                     "auto_fixable": True,
                     "complexity": "simple",
                     "description": "Line too long",
-                    "fix_strategy": "line_wrapping"
+                    "fix_strategy": "line_wrapping",
                 },
                 "F401": {
                     "category": "unused",
                     "auto_fixable": True,
                     "complexity": "trivial",
                     "description": "Unused import",
-                    "fix_strategy": "removal"
-                }
-            }
+                    "fix_strategy": "removal",
+                },
+            },
         }
 
     def get_rule_info(self, linter: str, rule_id: str) -> Optional[Dict]:
@@ -363,14 +605,14 @@ class RuleKnowledgeBase:
     def _load_scraped_rules(self):
         """Load web-scraped rules from cache if available."""
         try:
-            from pathlib import Path
             import json
+            from pathlib import Path
 
             # Check for scraped rules in multiple locations
             cache_locations = [
                 Path(".aider-lint-cache") / "scraped_rules.json",
                 Path("scraped_ansible_rules.json"),  # Our test file
-                Path(".") / "scraped_rules.json"
+                Path(".") / "scraped_rules.json",
             ]
 
             scraped_file = None
@@ -380,7 +622,7 @@ class RuleKnowledgeBase:
                     break
 
             if scraped_file:
-                with open(scraped_file, 'r', encoding='utf-8') as f:
+                with open(scraped_file, "r", encoding="utf-8") as f:
                     scraped_rules = json.load(f)
 
                 # Merge scraped rules with hardcoded rules
@@ -392,7 +634,7 @@ class RuleKnowledgeBase:
                     # Add scraped rules, prioritizing scraped data over hardcoded
                     for rule_id, rule_info in rules.items():
                         # Skip invalid rules (like javascript:void(0))
-                        if rule_id.startswith(('javascript:', '.', '#')):
+                        if rule_id.startswith(("javascript:", ".", "#")):
                             continue
 
                         self.rule_database[linter][rule_id] = rule_info
@@ -431,7 +673,9 @@ class SmartErrorClassifier:
         else:
             logger.warning("scikit-learn not available, ML learning disabled")
 
-    def extract_features(self, error_message: str, language: str, linter: str, rule_id: str = "") -> ErrorFeatures:
+    def extract_features(
+        self, error_message: str, language: str, linter: str, rule_id: str = ""
+    ) -> ErrorFeatures:
         """Extract comprehensive features from an error message."""
         features = ErrorFeatures()
 
@@ -455,11 +699,13 @@ class SmartErrorClassifier:
         message_lower = error_message.lower()
 
         # Check for suggestions and examples
-        features.contains_suggestion = any(word in message_lower for word in
-                                         ["should", "try", "use", "consider", "->", "replace"])
+        features.contains_suggestion = any(
+            word in message_lower for word in ["should", "try", "use", "consider", "->", "replace"]
+        )
         features.has_before_after = "->" in error_message or "expected" in message_lower
-        features.has_line_numbers = any(word in message_lower for word in
-                                      ["line", "column", "position"])
+        features.has_line_numbers = any(
+            word in message_lower for word in ["line", "column", "position"]
+        )
 
         # Formatting indicators
         formatting_keywords = ["spacing", "indent", "format", "length", "comment", "style"]
@@ -473,26 +719,33 @@ class SmartErrorClassifier:
         features.requires_logic_change = any(word in message_lower for word in syntax_keywords)
 
         # Auto-fixable hints
-        auto_fixable_hints = ["too long", "missing space", "extra space", "semicolon",
-                             "unused", "import", "trailing", "whitespace"]
-        features.auto_fixable_keywords = [hint for hint in auto_fixable_hints
-                                        if hint in message_lower]
+        auto_fixable_hints = [
+            "too long",
+            "missing space",
+            "extra space",
+            "semicolon",
+            "unused",
+            "import",
+            "trailing",
+            "whitespace",
+        ]
+        features.auto_fixable_keywords = [
+            hint for hint in auto_fixable_hints if hint in message_lower
+        ]
 
         # Manual-only hints
         manual_hints = ["should be named", "missing name", "add description"]
-        features.manual_only_keywords = [hint for hint in manual_hints
-                                       if hint in message_lower]
+        features.manual_only_keywords = [hint for hint in manual_hints if hint in message_lower]
 
         return features
 
-    def classify_error(self, error_message: str, language: str, linter: str, rule_id: str = "") -> PatternMatchResult:
+    def classify_error(
+        self, error_message: str, language: str, linter: str, rule_id: str = ""
+    ) -> PatternMatchResult:
         """Classify an error message to determine if it's fixable using comprehensive analysis."""
         if not error_message or not language:
             return PatternMatchResult(
-                fixable=False,
-                confidence=0.1,
-                method="fallback",
-                error_type="unknown"
+                fixable=False, confidence=0.1, method="fallback", error_type="unknown"
             )
 
         # Extract comprehensive features
@@ -507,7 +760,7 @@ class SmartErrorClassifier:
                     confidence=0.95,
                     method="rule_knowledge",
                     error_type=features.rule_category or "known_rule",
-                    matched_pattern=rule_id
+                    matched_pattern=rule_id,
                 )
 
         # Priority 2: Pattern matching (high confidence)
@@ -518,7 +771,7 @@ class SmartErrorClassifier:
                 confidence=best_pattern.confidence,
                 method="pattern_match",
                 error_type=best_pattern.error_type,
-                matched_pattern=best_pattern.pattern
+                matched_pattern=best_pattern.pattern,
             )
 
         # Priority 3: Feature-based analysis (medium confidence)
@@ -538,7 +791,7 @@ class SmartErrorClassifier:
                     fixable=prediction == "fixable",
                     confidence=confidence,
                     method="ml_prediction",
-                    error_type="learned"
+                    error_type="learned",
                 )
             except Exception as e:
                 logger.debug(f"ML prediction failed for {language}: {e}")
@@ -546,10 +799,7 @@ class SmartErrorClassifier:
         # Fallback: Conservative approach based on linter
         fallback_fixable = self._get_fallback_fixability(linter, error_message)
         return PatternMatchResult(
-            fixable=fallback_fixable,
-            confidence=0.3,
-            method="fallback",
-            error_type="unknown"
+            fixable=fallback_fixable, confidence=0.3, method="fallback", error_type="unknown"
         )
 
     def _get_fallback_fixability(self, linter: str, error_message: str) -> bool:
@@ -612,11 +862,10 @@ class SmartErrorClassifier:
             fixable=fixable,
             confidence=min(confidence, 0.9),  # Cap at 0.9
             method="feature_analysis",
-            error_type=features.rule_category or "feature_based"
+            error_type=features.rule_category or "feature_based",
         )
 
-    def learn_from_fix(self, error_message: str, language: str,
-                      linter: str, fix_successful: bool):
+    def learn_from_fix(self, error_message: str, language: str, linter: str, fix_successful: bool):
         """Learn from fix attempts to improve future predictions."""
         if not SKLEARN_AVAILABLE:
             return
@@ -627,25 +876,27 @@ class SmartErrorClassifier:
         training_data = []
         if training_file.exists():
             try:
-                with open(training_file, 'r', encoding='utf-8') as f:
+                with open(training_file, "r", encoding="utf-8") as f:
                     training_data = json.load(f)
             except Exception as e:
                 logger.warning(f"Failed to load training data for {language}: {e}")
                 training_data = []
 
-        training_data.append({
-            "message": error_message,
-            "language": language,
-            "linter": linter,
-            "fixable": fix_successful,
-            "timestamp": time.time()
-        })
+        training_data.append(
+            {
+                "message": error_message,
+                "language": language,
+                "linter": linter,
+                "fixable": fix_successful,
+                "timestamp": time.time(),
+            }
+        )
 
         # Keep only recent data (last 1000 examples per language)
         training_data = training_data[-1000:]
 
         try:
-            with open(training_file, 'w', encoding='utf-8') as f:
+            with open(training_file, "w", encoding="utf-8") as f:
                 json.dump(training_data, f, indent=2)
         except Exception as e:
             logger.error(f"Failed to save training data for {language}: {e}")
@@ -679,7 +930,7 @@ class SmartErrorClassifier:
                             language=language,
                             linter=linter,
                             fixable=True,
-                            confidence=0.7
+                            confidence=0.7,
                         )
                         break
 
@@ -708,9 +959,9 @@ class SmartErrorClassifier:
                 self.vectorizers[language] = TfidfVectorizer(
                     max_features=500,  # Keep it lightweight
                     ngram_range=(1, 2),  # Unigrams and bigrams
-                    stop_words='english',
+                    stop_words="english",
                     lowercase=True,
-                    strip_accents='ascii'
+                    strip_accents="ascii",
                 )
 
             # Train vectorizer and transform data
@@ -741,10 +992,10 @@ class SmartErrorClassifier:
                 model_file = self.cache_dir / f"{language}_classifier.pkl"
                 vectorizer_file = self.cache_dir / f"{language}_vectorizer.pkl"
 
-                with open(model_file, 'wb') as f:
+                with open(model_file, "wb") as f:
                     pickle.dump(self.classifiers[language], f)
 
-                with open(vectorizer_file, 'wb') as f:
+                with open(vectorizer_file, "wb") as f:
                     pickle.dump(self.vectorizers[language], f)
 
             except Exception as e:
@@ -763,10 +1014,10 @@ class SmartErrorClassifier:
 
             if model_file.exists() and vectorizer_file.exists():
                 try:
-                    with open(model_file, 'rb') as f:
+                    with open(model_file, "rb") as f:
                         self.classifiers[language] = pickle.load(f)
 
-                    with open(vectorizer_file, 'rb') as f:
+                    with open(vectorizer_file, "rb") as f:
                         self.vectorizers[language] = pickle.load(f)
 
                     logger.debug(f"Loaded {language} model from cache")
@@ -782,13 +1033,13 @@ class SmartErrorClassifier:
                 "total_patterns": sum(
                     len(patterns) for patterns in self.pattern_matcher.patterns_by_language.values()
                 ),
-                "ahocorasick_available": AHOCORASICK_AVAILABLE
+                "ahocorasick_available": AHOCORASICK_AVAILABLE,
             },
             "ml_classifier": {
                 "sklearn_available": SKLEARN_AVAILABLE,
                 "trained_languages": list(self.classifiers.keys()) if SKLEARN_AVAILABLE else [],
-                "cache_dir": str(self.cache_dir)
-            }
+                "cache_dir": str(self.cache_dir),
+            },
         }
 
         # Add training data statistics
@@ -797,7 +1048,7 @@ class SmartErrorClassifier:
                 training_file = self.cache_dir / f"{language}_training.json"
                 if training_file.exists():
                     try:
-                        with open(training_file, 'r', encoding='utf-8') as f:
+                        with open(training_file, "r", encoding="utf-8") as f:
                             training_data = json.load(f)
                         stats["ml_classifier"][f"{language}_training_examples"] = len(training_data)
                     except Exception:
@@ -806,7 +1057,7 @@ class SmartErrorClassifier:
         # Add cache information
         stats["cache"] = {
             "cache_dir": str(self.cache_dir),
-            "cache_sizes": self.cache_manager.get_cache_size()
+            "cache_sizes": self.cache_manager.get_cache_size(),
         }
 
         return stats
@@ -857,11 +1108,17 @@ def detect_language_from_file_path(file_path: str) -> str:
     # Map extensions to languages
     ext_to_lang = {
         ".py": "python",
-        ".js": "javascript", ".jsx": "javascript", ".mjs": "javascript", ".cjs": "javascript",
-        ".ts": "typescript", ".tsx": "typescript", ".d.ts": "typescript",
+        ".js": "javascript",
+        ".jsx": "javascript",
+        ".mjs": "javascript",
+        ".cjs": "javascript",
+        ".ts": "typescript",
+        ".tsx": "typescript",
+        ".d.ts": "typescript",
         ".go": "go",
         ".rs": "rust",
-        ".yml": "ansible", ".yaml": "ansible"
+        ".yml": "ansible",
+        ".yaml": "ansible",
     }
 
     detected = ext_to_lang.get(extension, "unknown")
@@ -870,7 +1127,16 @@ def detect_language_from_file_path(file_path: str) -> str:
     if detected == "ansible":
         # Look for Ansible-specific indicators in the path
         path_str = str(path).lower()
-        ansible_indicators = ["playbook", "role", "task", "handler", "var", "inventory", "group_vars", "host_vars"]
+        ansible_indicators = [
+            "playbook",
+            "role",
+            "task",
+            "handler",
+            "var",
+            "inventory",
+            "group_vars",
+            "host_vars",
+        ]
         if not any(indicator in path_str for indicator in ansible_indicators):
             # Might just be regular YAML
             detected = "yaml"
@@ -896,21 +1162,22 @@ class PatternCacheManager:
         # Clean up old training data
         for training_file in self.cache_dir.glob("*_training.json"):
             try:
-                with open(training_file, 'r', encoding='utf-8') as f:
+                with open(training_file, "r", encoding="utf-8") as f:
                     training_data = json.load(f)
 
                 # Filter out old entries
                 fresh_data = [
-                    entry for entry in training_data
-                    if entry.get("timestamp", 0) > cutoff_time
+                    entry for entry in training_data if entry.get("timestamp", 0) > cutoff_time
                 ]
 
                 if len(fresh_data) != len(training_data):
-                    with open(training_file, 'w', encoding='utf-8') as f:
+                    with open(training_file, "w", encoding="utf-8") as f:
                         json.dump(fresh_data, f, indent=2)
 
-                    logger.info(f"Cleaned up {len(training_data) - len(fresh_data)} "
-                               f"old entries from {training_file.name}")
+                    logger.info(
+                        f"Cleaned up {len(training_data) - len(fresh_data)} "
+                        f"old entries from {training_file.name}"
+                    )
 
             except Exception as e:
                 logger.warning(f"Failed to clean up {training_file}: {e}")
@@ -926,7 +1193,7 @@ class PatternCacheManager:
         for training_file in self.cache_dir.glob("*_training.json"):
             language = training_file.stem.replace("_training", "")
             try:
-                with open(training_file, 'r', encoding='utf-8') as f:
+                with open(training_file, "r", encoding="utf-8") as f:
                     training_data = json.load(f)
                 if training_data:  # Only count if there's actual data
                     training_languages.add(language)
@@ -948,11 +1215,7 @@ class PatternCacheManager:
 
     def get_cache_size(self) -> Dict[str, int]:
         """Get cache directory size information."""
-        sizes = {
-            "training_files": 0,
-            "model_files": 0,
-            "total_files": 0
-        }
+        sizes = {"training_files": 0, "model_files": 0, "total_files": 0}
 
         try:
             for file_path in self.cache_dir.iterdir():
@@ -975,34 +1238,34 @@ class PatternCacheManager:
         Args:
             output_file: Path to export file
         """
-        export_data = {
-            "export_timestamp": time.time(),
-            "languages": {}
-        }
+        export_data = {"export_timestamp": time.time(), "languages": {}}
 
         for training_file in self.cache_dir.glob("*_training.json"):
             language = training_file.stem.replace("_training", "")
             try:
-                with open(training_file, 'r', encoding='utf-8') as f:
+                with open(training_file, "r", encoding="utf-8") as f:
                     training_data = json.load(f)
 
                 # Extract successful patterns
                 successful_patterns = [
-                    entry["message"] for entry in training_data
-                    if entry.get("fixable", False)
+                    entry["message"] for entry in training_data if entry.get("fixable", False)
                 ]
 
                 export_data["languages"][language] = {
                     "total_examples": len(training_data),
                     "successful_patterns": successful_patterns[:100],  # Limit for size
-                    "last_updated": max(entry.get("timestamp", 0) for entry in training_data) if training_data else 0
+                    "last_updated": (
+                        max(entry.get("timestamp", 0) for entry in training_data)
+                        if training_data
+                        else 0
+                    ),
                 }
 
             except Exception as e:
                 logger.warning(f"Failed to export patterns for {language}: {e}")
 
         try:
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(export_data, f, indent=2)
             logger.info(f"Exported patterns to {output_file}")
         except Exception as e:
@@ -1015,7 +1278,7 @@ class PatternCacheManager:
             import_file: Path to import file
         """
         try:
-            with open(import_file, 'r', encoding='utf-8') as f:
+            with open(import_file, "r", encoding="utf-8") as f:
                 import_data = json.load(f)
 
             for language, data in import_data.get("languages", {}).items():
@@ -1025,26 +1288,30 @@ class PatternCacheManager:
                 existing_data = []
                 if training_file.exists():
                     try:
-                        with open(training_file, 'r', encoding='utf-8') as f:
+                        with open(training_file, "r", encoding="utf-8") as f:
                             existing_data = json.load(f)
                     except Exception:
                         pass
 
                 # Add imported patterns as training examples
                 for pattern in data.get("successful_patterns", []):
-                    existing_data.append({
-                        "message": pattern,
-                        "language": language,
-                        "linter": "imported",
-                        "fixable": True,
-                        "timestamp": time.time()
-                    })
+                    existing_data.append(
+                        {
+                            "message": pattern,
+                            "language": language,
+                            "linter": "imported",
+                            "fixable": True,
+                            "timestamp": time.time(),
+                        }
+                    )
 
                 # Save updated data
-                with open(training_file, 'w', encoding='utf-8') as f:
+                with open(training_file, "w", encoding="utf-8") as f:
                     json.dump(existing_data[-1000:], f, indent=2)  # Keep last 1000
 
-                logger.info(f"Imported {len(data.get('successful_patterns', []))} patterns for {language}")
+                logger.info(
+                    f"Imported {len(data.get('successful_patterns', []))} patterns for {language}"
+                )
 
         except Exception as e:
             logger.error(f"Failed to import patterns: {e}")

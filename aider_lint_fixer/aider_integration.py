@@ -720,7 +720,9 @@ class AiderIntegration:
             for error in still_present:
                 error_analyzer.learn_from_fix_result(error, fix_successful=False)
 
-            logger.debug(f"Learned from {len(fixed_errors)} successful and {len(still_present)} failed fixes")
+            logger.debug(
+                f"Learned from {len(fixed_errors)} successful and {len(still_present)} failed fixes"
+            )
 
         verification_summary = {
             "total_original_errors": len(original_errors),

@@ -435,14 +435,14 @@ class ErrorAnalyzer:
         language = detect_language_from_file_path(error.file_path)
 
         # Use smart classifier for enhanced pattern matching
-        result = self.smart_classifier.classify_error(
-            error.message, language, error.linter
-        )
+        result = self.smart_classifier.classify_error(error.message, language, error.linter)
 
         # High confidence predictions override default logic
         if result.confidence > 0.8:
-            logger.debug(f"Smart classifier: {result.method} -> {result.fixable} "
-                        f"(confidence: {result.confidence:.2f}) for: {error.message[:50]}...")
+            logger.debug(
+                f"Smart classifier: {result.method} -> {result.fixable} "
+                f"(confidence: {result.confidence:.2f}) for: {error.message[:50]}..."
+            )
             return result.fixable
 
         # Medium confidence: combine with traditional logic
@@ -504,12 +504,12 @@ class ErrorAnalyzer:
         if error.linter == "ansible-lint":
             language = "ansible"
 
-        self.smart_classifier.learn_from_fix(
-            error.message, language, error.linter, fix_successful
-        )
+        self.smart_classifier.learn_from_fix(error.message, language, error.linter, fix_successful)
 
-        logger.debug(f"Learned from fix: {error.linter} -> {fix_successful} "
-                    f"(language: {language}) for: {error.message[:50]}...")
+        logger.debug(
+            f"Learned from fix: {error.linter} -> {fix_successful} "
+            f"(language: {language}) for: {error.message[:50]}..."
+        )
 
     def get_pattern_statistics(self) -> Dict:
         """Get statistics about the pattern matching system."""

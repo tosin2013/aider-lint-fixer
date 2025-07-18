@@ -36,6 +36,7 @@ def get_color(color_attr, no_color=False):
         return ""
     return getattr(Fore, color_attr, "") if hasattr(Fore, color_attr) else ""
 
+
 def get_style(style_attr, no_color=False):
     """Get style code safely, respecting no_color setting."""
     if no_color or os.environ.get("NO_COLOR"):
@@ -133,7 +134,9 @@ def print_lint_summary(results, baseline_results=None, baseline_total=None):
             baseline_warning_count = len(baseline_result.warnings)
 
             if baseline_error_count != error_count or baseline_warning_count != warning_count:
-                print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings (baseline: {baseline_error_count} errors, {baseline_warning_count} warnings)")
+                print(
+                    f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings (baseline: {baseline_error_count} errors, {baseline_warning_count} warnings)"
+                )
             else:
                 print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
         else:
@@ -141,7 +144,9 @@ def print_lint_summary(results, baseline_results=None, baseline_total=None):
 
     if baseline_total and baseline_total != total_errors:
         print(f"\n   Processing Total: {total_errors} errors, {total_warnings} warnings")
-        print(f"   Baseline Total: {baseline_total} errors (showing {total_errors/baseline_total*100:.1f}% of all errors)")
+        print(
+            f"   Baseline Total: {baseline_total} errors (showing {total_errors/baseline_total*100:.1f}% of all errors)"
+        )
     else:
         print(f"\n   Total: {total_errors} errors, {total_warnings} warnings")
 
@@ -374,6 +379,7 @@ def main(
 
     PROJECT_PATH: Path to the project directory (default: current directory)
     """
+
     # Set up color helpers for this function
     def c(color_attr):
         return get_color(color_attr, no_color)
@@ -431,12 +437,13 @@ def main(
 
         if output_format == "json":
             import json
+
             print(json.dumps(stats_data, indent=2))
         else:
             print(f"\n{c('CYAN')}📊 Pattern Cache Statistics{s('RESET_ALL')}")
             print(f"   Cache directory: {stats_data['cache']['cache_dir']}")
 
-            cache_sizes = stats_data['cache']['cache_sizes']
+            cache_sizes = stats_data["cache"]["cache_sizes"]
             print(f"   Training files: {cache_sizes['training_files']:,} bytes")
             print(f"   Model files: {cache_sizes['model_files']:,} bytes")
             print(f"   Total size: {cache_sizes['total_files']:,} bytes")
@@ -444,16 +451,20 @@ def main(
             print(f"\n{c('CYAN')}🧠 Pattern Matching{s('RESET_ALL')}")
             print(f"   Languages: {', '.join(stats_data['pattern_matcher']['languages'])}")
             print(f"   Total patterns: {stats_data['pattern_matcher']['total_patterns']}")
-            print(f"   Aho-Corasick available: {stats_data['pattern_matcher']['ahocorasick_available']}")
+            print(
+                f"   Aho-Corasick available: {stats_data['pattern_matcher']['ahocorasick_available']}"
+            )
 
             print(f"\n{c('CYAN')}🤖 Machine Learning{s('RESET_ALL')}")
             print(f"   scikit-learn available: {stats_data['ml_classifier']['sklearn_available']}")
-            print(f"   Trained languages: {', '.join(stats_data['ml_classifier']['trained_languages'])}")
+            print(
+                f"   Trained languages: {', '.join(stats_data['ml_classifier']['trained_languages'])}"
+            )
 
             # Show training data counts
-            for key, value in stats_data['ml_classifier'].items():
-                if key.endswith('_training_examples'):
-                    language = key.replace('_training_examples', '')
+            for key, value in stats_data["ml_classifier"].items():
+                if key.endswith("_training_examples"):
+                    language = key.replace("_training_examples", "")
                     print(f"   {language}: {value} training examples")
         return
 
@@ -472,6 +483,7 @@ def main(
         if no_color:
             # Disable colorama colors
             import os
+
             os.environ["NO_COLOR"] = "1"
 
         # Print banner
@@ -554,8 +566,12 @@ def main(
         baseline_options.pop("max_errors", None)
         baseline_options.pop("max_files", None)
 
-        baseline_results = lint_runner.run_all_available_linters(enabled_linters, **baseline_options)
-        baseline_total_errors = sum(len(result.errors) + len(result.warnings) for result in baseline_results.values())
+        baseline_results = lint_runner.run_all_available_linters(
+            enabled_linters, **baseline_options
+        )
+        baseline_total_errors = sum(
+            len(result.errors) + len(result.warnings) for result in baseline_results.values()
+        )
 
         # Step 2b: Run processing scan (may be limited)
         print(f"   🔍 Running processing scan...")
@@ -579,7 +595,9 @@ def main(
                 }
             print(json.dumps(json_results, indent=2))
         else:
-            print_lint_summary(results, baseline_results=baseline_results, baseline_total=baseline_total_errors)
+            print_lint_summary(
+                results, baseline_results=baseline_results, baseline_total=baseline_total_errors
+            )
 
         # Check if there are any errors to fix
         total_errors = sum(len(result.errors) + len(result.warnings) for result in results.values())
@@ -611,7 +629,9 @@ def main(
         print(f"   Analyzed {len(file_analyses)} files")
         if baseline_total_errors > 0:
             fixable_rate = len(prioritized_errors) / baseline_total_errors * 100
-            print(f"   Found {len(prioritized_errors)} fixable errors ({fixable_rate:.1f}% of {baseline_total_errors} total baseline errors)")
+            print(
+                f"   Found {len(prioritized_errors)} fixable errors ({fixable_rate:.1f}% of {baseline_total_errors} total baseline errors)"
+            )
         else:
             print(f"   Found {len(prioritized_errors)} fixable errors")
 
