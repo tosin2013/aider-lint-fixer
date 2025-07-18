@@ -348,8 +348,9 @@ def main(
 
     # Handle list-linters flag
     if list_linters:
-        from .supported_versions import get_supported_linters, get_platform_compatibility_info
         import platform
+
+        from .supported_versions import get_platform_compatibility_info, get_supported_linters
 
         linters_list = get_supported_linters()
         compatibility_info = get_platform_compatibility_info()
