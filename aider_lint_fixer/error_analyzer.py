@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from .lint_runner import ErrorSeverity, LintError, LintResult
+from .pattern_matcher import SmartErrorClassifier, detect_language_from_file_path
 
 logger = logging.getLogger(__name__)
 
@@ -179,6 +180,10 @@ class ErrorAnalyzer:
             project_root: Root directory of the project for resolving relative paths
         """
         self.project_root = Path(project_root) if project_root else Path.cwd()
+
+        # Initialize smart pattern matching system
+        cache_dir = self.project_root / ".aider-lint-cache"
+        self.smart_classifier = SmartErrorClassifier(cache_dir)
 
     def analyze_errors(self, results: Dict[str, LintResult]) -> Dict[str, FileAnalysis]:
         """Analyze all lint errors and group by file.
@@ -412,7 +417,7 @@ class ErrorAnalyzer:
     def _is_fixable(
         self, error: LintError, category: ErrorCategory, complexity: FixComplexity
     ) -> bool:
-        """Determine if an error is automatically fixable.
+        """Determine if an error is automatically fixable using smart classification.
 
         Args:
             error: The lint error
@@ -426,6 +431,43 @@ class ErrorAnalyzer:
         if complexity == FixComplexity.MANUAL:
             return False
 
+        # Detect language from file path
+        language = detect_language_from_file_path(error.file_path)
+
+        # Use smart classifier for enhanced pattern matching
+        result = self.smart_classifier.classify_error(
+            error.message, language, error.linter
+        )
+
+        # High confidence predictions override default logic
+        if result.confidence > 0.8:
+            logger.debug(f"Smart classifier: {result.method} -> {result.fixable} "
+                        f"(confidence: {result.confidence:.2f}) for: {error.message[:50]}...")
+            return result.fixable
+
+        # Medium confidence: combine with traditional logic
+        if result.confidence > 0.5:
+            smart_fixable = result.fixable
+            traditional_fixable = self._traditional_is_fixable(error, category, complexity)
+
+            # If both agree, use that result
+            if smart_fixable == traditional_fixable:
+                return smart_fixable
+
+            # If they disagree, be conservative for syntax errors
+            if category == ErrorCategory.SYNTAX:
+                return False
+
+            # For other categories, trust the smart classifier if it says fixable
+            return smart_fixable
+
+        # Low confidence: fall back to traditional logic
+        return self._traditional_is_fixable(error, category, complexity)
+
+    def _traditional_is_fixable(
+        self, error: LintError, category: ErrorCategory, complexity: FixComplexity
+    ) -> bool:
+        """Traditional fixability logic (preserved for fallback)."""
         # Special handling for Jinja2 template syntax errors
         if (
             error.linter == "ansible-lint"
@@ -448,6 +490,30 @@ class ErrorAnalyzer:
 
         # Most other categories can be fixed automatically
         return True
+
+    def learn_from_fix_result(self, error: LintError, fix_successful: bool):
+        """Learn from fix attempt results to improve future predictions.
+
+        Args:
+            error: The lint error that was attempted to be fixed
+            fix_successful: Whether the fix was successful
+        """
+        language = detect_language_from_file_path(error.file_path)
+
+        # Special case: if linter is ansible-lint, treat as ansible regardless of file extension
+        if error.linter == "ansible-lint":
+            language = "ansible"
+
+        self.smart_classifier.learn_from_fix(
+            error.message, language, error.linter, fix_successful
+        )
+
+        logger.debug(f"Learned from fix: {error.linter} -> {fix_successful} "
+                    f"(language: {language}) for: {error.message[:50]}...")
+
+    def get_pattern_statistics(self) -> Dict:
+        """Get statistics about the pattern matching system."""
+        return self.smart_classifier.get_statistics()
 
     def _extract_context(self, error: LintError, file_content: Optional[str]) -> List[str]:
         """Extract context lines around an error.

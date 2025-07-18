@@ -157,8 +157,8 @@ module.exports = badFunction;
         # Should detect JavaScript
         self.assertIn('javascript', project_info.languages)
         
-        # Should find the package.json
-        self.assertTrue(any('package.json' in str(f) for f in project_info.package_managers))
+        # Should find npm package manager (which indicates package.json was detected)
+        self.assertIn('npm', project_info.package_managers)
         
         print(f"✅ Project detection: languages={project_info.languages}, files={len(project_info.source_files)}")
 

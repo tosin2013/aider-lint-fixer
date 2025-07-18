@@ -13,3 +13,5 @@ Pygments==2.19.2
 PyYAML==6.0.2
 subprocess.run==0.0.8
 typing_extensions==4.14.0
+pyahocorasick>=2.0.0
+scikit-learn>=1.3.0

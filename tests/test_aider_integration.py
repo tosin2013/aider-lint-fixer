@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from aider_lint_fixer.aider_integration import AiderIntegration
 from aider_lint_fixer.config_manager import ConfigManager, Config
-from aider_lint_fixer.lint_runner import LintError
+from aider_lint_fixer.lint_runner import LintError, ErrorSeverity
 
 
 class TestAiderIntegration(unittest.TestCase):
@@ -230,16 +230,16 @@ class TestAiderIntegration(unittest.TestCase):
             file_path='test_file.py',
             line=1,
             column=1,
-            code='E302',
+            rule_id='E302',
             message='expected 2 blank lines, found 1',
+            severity=ErrorSeverity.ERROR,
             linter='flake8'
         )
         
-        result = integration._run_aider_fix('test_file.py', [lint_error])
+        result = integration._run_aider_fix('test_file.py', 'test prompt', 'test-session-id')
         
-        self.assertTrue(result.success)
-        self.assertEqual(result.file_path, 'test_file.py')
-        self.assertIn('Successfully fixed', result.output)
+        self.assertTrue(result["success"])
+        self.assertIn('Successfully fixed', result["output"])
     
     @patch('aider_lint_fixer.aider_integration.AiderIntegration._find_aider_executable')
     @patch('subprocess.run')
@@ -269,15 +269,16 @@ class TestAiderIntegration(unittest.TestCase):
             file_path='test_file.py',
             line=1,
             column=1,
-            code='E302',
+            rule_id='E302',
             message='expected 2 blank lines, found 1',
+            severity=ErrorSeverity.ERROR,
             linter='flake8'
         )
         
-        result = integration._run_aider_fix('test_file.py', [lint_error])
+        result = integration._run_aider_fix('test_file.py', 'test prompt', 'test-session-id')
         
-        self.assertFalse(result.success)
-        self.assertIn('Authentication error', result.error_message)
+        self.assertFalse(result["success"])
+        self.assertIn('Authentication error', result["error"])
 
 
 class TestConfigManagerIntegration(unittest.TestCase):

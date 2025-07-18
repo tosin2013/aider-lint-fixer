@@ -665,12 +665,13 @@ class AiderIntegration:
 
         return "Fixes applied"
 
-    def verify_fixes(self, session: FixSession, lint_runner) -> Dict[str, Any]:
+    def verify_fixes(self, session: FixSession, lint_runner, error_analyzer=None) -> Dict[str, Any]:
         """Verify that fixes were successful by re-running linters.
 
         Args:
             session: Fix session to verify
             lint_runner: LintRunner instance to re-run linters
+            error_analyzer: Optional ErrorAnalyzer for learning from results
 
         Returns:
             Verification results
@@ -710,6 +711,16 @@ class AiderIntegration:
                 still_present.append(original_error)
             else:
                 fixed_errors.append(original_error)
+
+        # Learn from fix results if error_analyzer is provided
+        if error_analyzer:
+            for error in fixed_errors:
+                error_analyzer.learn_from_fix_result(error, fix_successful=True)
+
+            for error in still_present:
+                error_analyzer.learn_from_fix_result(error, fix_successful=False)
+
+            logger.debug(f"Learned from {len(fixed_errors)} successful and {len(still_present)} failed fixes")
 
         verification_summary = {
             "total_original_errors": len(original_errors),

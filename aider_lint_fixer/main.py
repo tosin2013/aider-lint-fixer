@@ -29,6 +29,20 @@ init()
 logger = logging.getLogger(__name__)
 
 
+# Global color helper functions
+def get_color(color_attr, no_color=False):
+    """Get color code safely, respecting no_color setting."""
+    if no_color or os.environ.get("NO_COLOR"):
+        return ""
+    return getattr(Fore, color_attr, "") if hasattr(Fore, color_attr) else ""
+
+def get_style(style_attr, no_color=False):
+    """Get style code safely, respecting no_color setting."""
+    if no_color or os.environ.get("NO_COLOR"):
+        return ""
+    return getattr(Style, style_attr, "") if hasattr(Style, style_attr) else ""
+
+
 def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
     """Set up logging configuration.
 
@@ -91,11 +105,13 @@ def print_project_info(project_info):
     print(f"   Source Files: {len(project_info.source_files)}")
 
 
-def print_lint_summary(results):
+def print_lint_summary(results, baseline_results=None, baseline_total=None):
     """Print lint results summary.
 
     Args:
-        results: Dictionary of lint results
+        results: Dictionary of lint results (processing scan)
+        baseline_results: Dictionary of baseline lint results (optional)
+        baseline_total: Total baseline error count (optional)
     """
     print(f"\n{Fore.YELLOW}🔍 Lint Results Summary:{Style.RESET_ALL}")
 
@@ -109,9 +125,25 @@ def print_lint_summary(results):
         total_warnings += warning_count
 
         status = "✅" if result.success else "❌"
-        print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
 
-    print(f"\n   Total: {total_errors} errors, {total_warnings} warnings")
+        # Show baseline vs processing counts if available
+        if baseline_results and linter_name in baseline_results:
+            baseline_result = baseline_results[linter_name]
+            baseline_error_count = len(baseline_result.errors)
+            baseline_warning_count = len(baseline_result.warnings)
+
+            if baseline_error_count != error_count or baseline_warning_count != warning_count:
+                print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings (baseline: {baseline_error_count} errors, {baseline_warning_count} warnings)")
+            else:
+                print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
+        else:
+            print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
+
+    if baseline_total and baseline_total != total_errors:
+        print(f"\n   Processing Total: {total_errors} errors, {total_warnings} warnings")
+        print(f"   Baseline Total: {baseline_total} errors (showing {total_errors/baseline_total*100:.1f}% of all errors)")
+    else:
+        print(f"\n   Total: {total_errors} errors, {total_warnings} warnings")
 
 
 def print_fix_summary(sessions):
@@ -310,6 +342,7 @@ def print_verification_summary(verification_results):
     help="Comma-separated list of file extensions to process (e.g., py,js,yml)",
 )
 @click.option("--target-dir", help="Target directory to lint (e.g., roles/)")
+@click.option("--stats", is_flag=True, help="Show learning statistics and exit")
 def main(
     project_path: str,
     version: bool,
@@ -335,11 +368,19 @@ def main(
     exclude: tuple,
     extensions: Optional[str],
     target_dir: Optional[str],
+    stats: bool,
 ):
     """Aider Lint Fixer - Automated lint error detection and fixing.
 
     PROJECT_PATH: Path to the project directory (default: current directory)
     """
+    # Set up color helpers for this function
+    def c(color_attr):
+        return get_color(color_attr, no_color)
+
+    def s(style_attr):
+        return get_style(style_attr, no_color)
+
     # Handle version flag
     if version:
         from . import __version__
@@ -380,6 +421,42 @@ def main(
             print("Use --linters <name1,name2> to specify which linters to run")
         return
 
+    # Handle stats flag
+    if stats:
+        from .pattern_matcher import SmartErrorClassifier
+
+        cache_dir = Path(project_path) / ".aider-lint-cache"
+        classifier = SmartErrorClassifier(cache_dir)
+        stats_data = classifier.get_statistics()
+
+        if output_format == "json":
+            import json
+            print(json.dumps(stats_data, indent=2))
+        else:
+            print(f"\n{c('CYAN')}📊 Pattern Cache Statistics{s('RESET_ALL')}")
+            print(f"   Cache directory: {stats_data['cache']['cache_dir']}")
+
+            cache_sizes = stats_data['cache']['cache_sizes']
+            print(f"   Training files: {cache_sizes['training_files']:,} bytes")
+            print(f"   Model files: {cache_sizes['model_files']:,} bytes")
+            print(f"   Total size: {cache_sizes['total_files']:,} bytes")
+
+            print(f"\n{c('CYAN')}🧠 Pattern Matching{s('RESET_ALL')}")
+            print(f"   Languages: {', '.join(stats_data['pattern_matcher']['languages'])}")
+            print(f"   Total patterns: {stats_data['pattern_matcher']['total_patterns']}")
+            print(f"   Aho-Corasick available: {stats_data['pattern_matcher']['ahocorasick_available']}")
+
+            print(f"\n{c('CYAN')}🤖 Machine Learning{s('RESET_ALL')}")
+            print(f"   scikit-learn available: {stats_data['ml_classifier']['sklearn_available']}")
+            print(f"   Trained languages: {', '.join(stats_data['ml_classifier']['trained_languages'])}")
+
+            # Show training data counts
+            for key, value in stats_data['ml_classifier'].items():
+                if key.endswith('_training_examples'):
+                    language = key.replace('_training_examples', '')
+                    print(f"   {language}: {value} training examples")
+        return
+
     # Handle quiet mode
     if quiet:
         import logging
@@ -395,15 +472,7 @@ def main(
         if no_color:
             # Disable colorama colors
             import os
-
             os.environ["NO_COLOR"] = "1"
-            # Reset colorama colors to empty strings
-            for attr in dir(Fore):
-                if not attr.startswith("_"):
-                    setattr(Fore, attr, "")
-            for attr in dir(Style):
-                if not attr.startswith("_"):
-                    setattr(Style, attr, "")
 
         # Print banner
         if not no_banner and not quiet:
@@ -427,13 +496,13 @@ def main(
         # Handle target directory
         if target_dir:
             actual_project_path = str(Path(project_path) / target_dir)
-            print(f"{Fore.GREEN}🚀 Starting Aider Lint Fixer{Style.RESET_ALL}")
+            print(f"{c('GREEN')}🚀 Starting Aider Lint Fixer{s('RESET_ALL')}")
             print(f"   Project: {Path(project_path).resolve()}")
             print(f"   Target Directory: {target_dir}")
             print(f"   Actual Path: {Path(actual_project_path).resolve()}")
         else:
             actual_project_path = project_path
-            print(f"{Fore.GREEN}🚀 Starting Aider Lint Fixer{Style.RESET_ALL}")
+            print(f"{c('GREEN')}🚀 Starting Aider Lint Fixer{s('RESET_ALL')}")
             print(f"   Project: {Path(project_path).resolve()}")
 
         print(f"   LLM Provider: {project_config.llm.provider}")
@@ -478,6 +547,18 @@ def main(
         if extensions:
             linter_options["extensions"] = [ext.strip() for ext in extensions.split(",")]
 
+        # Step 2a: Run baseline scan to get true error count
+        print(f"   📊 Running baseline scan to establish error count...")
+        baseline_options = linter_options.copy()
+        # Remove any limits for baseline scan
+        baseline_options.pop("max_errors", None)
+        baseline_options.pop("max_files", None)
+
+        baseline_results = lint_runner.run_all_available_linters(enabled_linters, **baseline_options)
+        baseline_total_errors = sum(len(result.errors) + len(result.warnings) for result in baseline_results.values())
+
+        # Step 2b: Run processing scan (may be limited)
+        print(f"   🔍 Running processing scan...")
         results = lint_runner.run_all_available_linters(enabled_linters, **linter_options)
 
         # Handle output format
@@ -498,7 +579,7 @@ def main(
                 }
             print(json.dumps(json_results, indent=2))
         else:
-            print_lint_summary(results)
+            print_lint_summary(results, baseline_results=baseline_results, baseline_total=baseline_total_errors)
 
         # Check if there are any errors to fix
         total_errors = sum(len(result.errors) + len(result.warnings) for result in results.values())
@@ -528,7 +609,11 @@ def main(
         prioritized_errors = analyzer.get_prioritized_errors(file_analyses, max_errors)
 
         print(f"   Analyzed {len(file_analyses)} files")
-        print(f"   Found {len(prioritized_errors)} fixable errors")
+        if baseline_total_errors > 0:
+            fixable_rate = len(prioritized_errors) / baseline_total_errors * 100
+            print(f"   Found {len(prioritized_errors)} fixable errors ({fixable_rate:.1f}% of {baseline_total_errors} total baseline errors)")
+        else:
+            print(f"   Found {len(prioritized_errors)} fixable errors")
 
         if not prioritized_errors:
             print(f"\n{Fore.YELLOW}⚠️  No automatically fixable errors found.{Style.RESET_ALL}")
@@ -593,7 +678,7 @@ def main(
         verification_results = {}
 
         for session in sessions:
-            verification = aider_integration.verify_fixes(session, lint_runner)
+            verification = aider_integration.verify_fixes(session, lint_runner, analyzer)
             verification_results[session.session_id] = verification
             total_fixed += verification["errors_fixed"]
             total_attempted += verification["total_original_errors"]
@@ -622,11 +707,11 @@ def main(
         return 0
 
     except KeyboardInterrupt:
-        print(f"\n{Fore.YELLOW}⚠️  Interrupted by user{Style.RESET_ALL}")
+        print(f"\n{c('YELLOW')}⚠️  Interrupted by user{s('RESET_ALL')}")
         return 1
     except Exception as e:
         logger.exception("Unexpected error occurred")
-        print(f"\n{Fore.RED}❌ Error: {e}{Style.RESET_ALL}")
+        print(f"\n{c('RED')}❌ Error: {e}{s('RESET_ALL')}")
         return 1
 
 
