@@ -360,8 +360,9 @@ class ErrorAnalyzer:
         # Special handling for Jinja2 template errors
         if error.linter == "ansible-lint" and "jinja[invalid]" in rule_id:
             # Simple quote syntax errors are easily fixable
-            if ("expected token ','" in message and
-                ("got 'n'" in message or "got 'not'" in message or "got 'qubinode'" in message)):
+            if "expected token ','" in message and (
+                "got 'n'" in message or "got 'not'" in message or "got 'qubinode'" in message
+            ):
                 return FixComplexity.SIMPLE
             # Other template errors might be more complex
             elif "template error" in message:
@@ -426,13 +427,16 @@ class ErrorAnalyzer:
             return False
 
         # Special handling for Jinja2 template syntax errors
-        if (error.linter == "ansible-lint" and
-            category == ErrorCategory.SYNTAX and
-            "jinja[invalid]" in error.rule_id.lower()):
+        if (
+            error.linter == "ansible-lint"
+            and category == ErrorCategory.SYNTAX
+            and "jinja[invalid]" in error.rule_id.lower()
+        ):
             # Simple quote syntax errors are fixable
             message = error.message.lower()
-            if ("expected token ','" in message and
-                ("got 'n'" in message or "got 'not'" in message or "got 'qubinode'" in message)):
+            if "expected token ','" in message and (
+                "got 'n'" in message or "got 'not'" in message or "got 'qubinode'" in message
+            ):
                 return True
             # YAML key duplicates are also fixable
             elif "yaml[key-duplicates]" in error.rule_id.lower():

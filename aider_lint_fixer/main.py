@@ -16,6 +16,7 @@ from typing import List, Optional
 import click
 from colorama import Fore, Style, init
 
+from . import __version__
 from .aider_integration import AiderIntegration
 from .config_manager import ConfigManager
 from .error_analyzer import ErrorAnalyzer
@@ -62,7 +63,7 @@ def print_banner():
     """Print the application banner."""
     banner = f"""
 {Fore.CYAN}╔══════════════════════════════════════════════════════════════╗
-║                    Aider Lint Fixer v1.0.0                  ║
+║                    Aider Lint Fixer v{__version__}                  ║
 ║              Automated Lint Error Detection & Fixing         ║
 ║                   Powered by aider.chat                      ║
 ╚══════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
