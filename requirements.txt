@@ -2,7 +2,7 @@ aider-chat==0.85.2
 colorama==0.4.6
 ConfigArgParse==1.7.1
 GitPython==3.1.44
-importlib_metadata==7.2.1
+importlib_metadata==8.7.0
 importlib_resources==6.5.2
 Jinja2==3.1.6
 MarkupSafe==3.0.2
