@@ -25,7 +25,6 @@ except FileNotFoundError:
 
 setup(
     name="aider-lint-fixer",
-    version="1.0.0",
     author="Tosin Akinosho",
     author_email="tosin@decisioncrafters.com",
     description="Automated lint error detection and fixing powered by aider.chat and AI",
