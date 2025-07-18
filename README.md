@@ -8,11 +8,20 @@
 
 Aider Lint Fixer is an intelligent tool that automatically detects lint errors in your codebase and fixes them using AI-powered code generation through [aider.chat](https://aider.chat).
 
-**🎉 v1.7.0 Release**: Enhanced learning system with 46.1% fixability rate and TypeScript project support!
+**🎉 v1.8.0 Release**: Enhanced Interactive Mode & Progress Tracking for Large Projects!
 
-## ✨ Features (v1.7.0)
+## ✨ Features (v1.8.0)
 
-### 🚀 **New in v1.7.0: Revolutionary Learning System**
+### 🚀 **New in v1.8.0: Enhanced Interactive Mode & Progress Tracking**
+- 🎯 **Enhanced Interactive Mode**: Per-error review with override capabilities for "unfixable" errors
+- 📊 **Progress Tracking**: Visual progress bars and real-time metrics for 100+ error projects
+- ⚡ **Session Recovery**: Resume interrupted sessions with `--resume-session`
+- 🔧 **Force Mode**: Override all classifications with safety confirmations
+- 🌍 **Community Learning**: User choices improve future error classifications
+- 📈 **Performance Metrics**: Files/min, errors/min, success rates, and ETA calculations
+- 💾 **Progress Persistence**: Automatic saving and recovery for long-running operations
+
+### 🧠 **Learning System (v1.7.0)**
 - 🧠 **Enhanced Learning**: 46.1% fixability rate (up from 0.0% in previous versions)
 - ⚡ **High-Performance**: Aho-Corasick pattern matching for sub-millisecond classification
 - 🎯 **TypeScript Projects**: Smart ESLint integration with project-specific configurations
@@ -26,9 +35,11 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 - 📋 **Ansible Support**: ansible-lint with production-ready profiles
 - 🤖 **AI-Powered Fixing**: Uses aider.chat with multiple LLM providers
 - 🎯 **Smart Error Analysis**: Categorizes and prioritizes errors for optimal fixing
-- � **Enterprise Scalability**: Handles 200+ lint issues with intelligent batching
+- 🏢 **Enterprise Scalability**: Handles 200+ lint issues with intelligent batching
 - ⚙️ **Profile System**: Basic (development) vs Strict (production) configurations
-- 📊 **Progress Tracking**: Real-time progress with detailed reporting
+- 📊 **Enhanced Progress Tracking**: Visual progress bars for large projects (100+ errors)
+- 🎮 **Interactive Modes**: Standard and enhanced interactive error review
+- 💾 **Session Management**: Save, resume, and recover interrupted operations
 
 ## 📋 **Supported Linter Versions**
 
@@ -85,10 +96,13 @@ pip install "aider-lint-fixer[learning]"
 # Install from PyPI (recommended)
 pip install aider-lint-fixer
 
-# 🚀 NEW v1.7.0: Install with learning features (recommended for 46.1% fixability rate)
+# 🚀 NEW v1.8.0: Install with enhanced interactive and progress tracking
+pip install aider-lint-fixer[progress]
+
+# 🧠 v1.7.0: Install with learning features (recommended for 46.1% fixability rate)
 pip install aider-lint-fixer[learning]
 
-# Install with all optional features
+# Install with all optional features (includes progress tracking + learning)
 pip install aider-lint-fixer[all]
 
 # Verify installation
@@ -289,6 +303,62 @@ python -m aider_lint_fixer /path/to/your/project --max-files 5 --max-errors 10
 
 # Verbose output for debugging
 python -m aider_lint_fixer /path/to/your/project --verbose
+```
+
+### 🎯 Enhanced Interactive Mode (v1.8.0)
+
+Perfect for reviewing and overriding error classifications:
+
+```bash
+# Enhanced interactive mode - review each error individually
+python -m aider_lint_fixer --enhanced-interactive --linters ansible-lint
+
+# Force mode - attempt to fix ALL errors (use with caution)
+python -m aider_lint_fixer --force --linters flake8
+
+# Standard interactive mode - confirm before starting
+python -m aider_lint_fixer --interactive --linters pylint
+```
+
+**Enhanced Interactive Features:**
+- 🎯 **Per-error decisions**: Fix, skip, or abort for each error
+- ⚠️ **Override "unfixable" errors**: With proper warnings and confirmations
+- 🌍 **Community learning**: Your choices improve future classifications
+- 📊 **Confidence scoring**: Rate your confidence to help the learning system
+
+### 📊 Progress Tracking for Large Projects (v1.8.0)
+
+Automatic enhanced tracking for projects with 100+ lint errors:
+
+```bash
+# Large projects automatically get enhanced progress tracking
+python -m aider_lint_fixer --linters ansible-lint  # 100+ errors detected
+
+# Install with progress tracking support
+pip install aider-lint-fixer[progress]
+
+# Session management
+python -m aider_lint_fixer --list-sessions
+python -m aider_lint_fixer --resume-session progress_1234567890
+```
+
+**Progress Tracking Features:**
+- 📊 **Visual progress bars**: Real-time file and error progress
+- ⚡ **Performance metrics**: Files/min, errors/min, success rates
+- 🕐 **Time estimation**: ETA calculations for completion
+- 💾 **Session persistence**: Automatic saving and recovery
+- 🔄 **Resume capability**: Continue interrupted operations
+
+**Example Output for Large Projects:**
+```
+🚀 Large Project Detected (250 errors)
+📁 Files: ████████████████████████████████████████ 8/10 [80%]
+🔧 Errors: ████████████████████████████████████████ 200/250 [80%]
+
+⚡ Real-time Status:
+   Processing rate: 2.5 files/min, 62.5 errors/min
+   Success rate: 85.2% (213/250)
+   ETA: 14:32:15
 ```
 
 ## 📋 Supported Linters
@@ -493,6 +563,25 @@ python -m aider_lint_fixer --linters ansible-lint
 
 # Dry run to see Ansible issues
 python -m aider_lint_fixer --linters ansible-lint --dry-run
+
+# Enhanced interactive mode for Ansible (v1.8.0)
+python -m aider_lint_fixer --enhanced-interactive --linters ansible-lint
+```
+
+### Large Project Examples (v1.8.0)
+```bash
+# Large project with automatic progress tracking
+python -m aider_lint_fixer --linters flake8,pylint  # 100+ errors
+
+# Force mode for aggressive fixing (use with caution)
+python -m aider_lint_fixer --force --max-errors 50 --linters eslint
+
+# Resume interrupted session
+python -m aider_lint_fixer --list-sessions
+python -m aider_lint_fixer --resume-session progress_1234567890
+
+# Enhanced interactive with progress tracking
+python -m aider_lint_fixer --enhanced-interactive --linters ansible-lint
 ```
 
 ## 🔧 How It Works

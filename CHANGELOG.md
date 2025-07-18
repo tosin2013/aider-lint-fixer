@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2025-07-18
+
+### 🎯 **Enhanced Interactive Mode & Progress Tracking for Large Projects**
+
+This release introduces comprehensive interactive capabilities and advanced progress tracking specifically designed for large projects with 100+ lint errors.
+
+### ✨ **Added**
+- **Enhanced Interactive Mode**: Per-error review with override capabilities for "unfixable" errors
+- **Progress Tracking System**: Visual progress bars and real-time metrics for large projects (100+ errors)
+- **Session Management**: Save, resume, and recover interrupted operations with `--resume-session`
+- **Force Mode**: Override all error classifications with safety confirmations (`--force`)
+- **Community Learning Integration**: User choices improve future error classifications
+- **Performance Metrics**: Real-time files/min, errors/min, success rates, and ETA calculations
+- **Progress Persistence**: Automatic saving to `.aider-lint-cache/` for recovery
+- **New CLI Options**: `--enhanced-interactive`, `--force`, `--list-sessions`, `--resume-session`
+- **Optional Dependencies**: `pip install aider-lint-fixer[progress]` for enhanced tracking
+
+### 🔧 **Enhanced**
+- **Large Project Detection**: Automatic enhanced tracking for 100+ error projects
+- **Visual Progress Bars**: Real-time dual progress bars (files + errors) with tqdm integration
+- **Interactive Error Review**: Override "unfixable" classifications with proper warnings
+- **Session Recovery**: Resume interrupted operations from exactly where they left off
+- **Performance Monitoring**: Track processing rates and identify bottlenecks
+- **User Experience**: Clear feedback for long-running operations with time estimates
+
+### 🚀 **Impact**
+- **Large Project Support**: Transforms experience of fixing 100+ lint errors from black box to transparent process
+- **User Confidence**: Clear visibility into long-running operations with progress indicators
+- **Reliability**: Session recovery prevents lost work from interruptions
+- **Community Learning**: User override choices improve system accuracy over time
+- **Professional UX**: Enterprise-grade progress tracking for production environments
+
+### 📦 **Installation Options**
+```bash
+# Enhanced interactive and progress tracking
+pip install aider-lint-fixer[progress]
+
+# All features (includes progress + learning)
+pip install aider-lint-fixer[all]
+```
+
+### 🎯 **Usage Examples**
+```bash
+# Enhanced interactive mode
+aider-lint-fixer --enhanced-interactive --linters ansible-lint
+
+# Large projects get automatic progress tracking
+aider-lint-fixer --linters flake8,pylint  # 100+ errors
+
+# Session management
+aider-lint-fixer --list-sessions
+aider-lint-fixer --resume-session progress_1234567890
+```
+
 ## [1.7.0] - 2025-01-18
 
 ### 🎯 **Strategic Pre-Flight Check System**
