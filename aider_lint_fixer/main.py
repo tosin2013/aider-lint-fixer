@@ -524,10 +524,15 @@ def main(
             print(f"\n{Fore.CYAN}📋 Recoverable Progress Sessions:{Style.RESET_ALL}")
             for session in sessions:
                 from datetime import datetime
-                start_time = datetime.fromisoformat(session['start_time']).strftime('%Y-%m-%d %H:%M:%S')
+
+                start_time = datetime.fromisoformat(session["start_time"]).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
                 progress = f"{session['processed_errors']}/{session['total_errors']}"
-                size_indicator = "🔥 Large" if session['is_large_project'] else "📁 Small"
-                print(f"   {session['session_id']}: {start_time} - {progress} errors ({size_indicator})")
+                size_indicator = "🔥 Large" if session["is_large_project"] else "📁 Small"
+                print(
+                    f"   {session['session_id']}: {start_time} - {progress} errors ({size_indicator})"
+                )
             print(f"\n💡 Resume with: --resume-session <session_id>")
         return 0
 
@@ -878,9 +883,7 @@ def main(
         # Create enhanced progress tracker for long-running operations
         total_error_count = len(prioritized_errors)
         progress_tracker = EnhancedProgressTracker(
-            project_path=project_path,
-            total_errors=total_error_count,
-            verbose=verbose
+            project_path=project_path, total_errors=total_error_count, verbose=verbose
         )
 
         # Set total files for progress tracking
@@ -888,6 +891,7 @@ def main(
 
         # Import ProgressStage for stage updates
         from .progress_tracker import ProgressStage
+
         progress_tracker.update_stage(ProgressStage.PROCESSING_FILES)
 
         # Create enhanced progress callback
