@@ -50,6 +50,21 @@ linters = [
     "pylint>=3.3.0",
     "ansible-lint>=25.6.0",
 ]
+learning = [
+    "scikit-learn>=1.0.0",
+    "requests>=2.25.0",
+    "beautifulsoup4>=4.9.0",
+    "pyahocorasick>=1.4.0",
+]
+all = [
+    "flake8>=7.3.0",
+    "pylint>=3.3.0",
+    "ansible-lint>=25.6.0",
+    "scikit-learn>=1.0.0",
+    "requests>=2.25.0",
+    "beautifulsoup4>=4.9.0",
+    "pyahocorasick>=1.4.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/tosin2013/aider-lint-fixer"

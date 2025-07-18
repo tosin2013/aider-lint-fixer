@@ -643,8 +643,37 @@ class RuleKnowledgeBase:
                 logger.info(f"Loaded {rules_added} scraped rules from {scraped_file}")
             else:
                 logger.debug("No scraped rules file found")
+                # Try to create scraped rules automatically if dependencies are available
+                self._auto_create_scraped_rules()
         except Exception as e:
             logger.debug(f"Could not load scraped rules: {e}")
+
+    def _auto_create_scraped_rules(self):
+        """Automatically create scraped rules if dependencies are available."""
+        try:
+            # Check if web scraping dependencies are available
+            import requests
+            import bs4
+
+            logger.info("Creating scraped rules automatically...")
+
+            # Import and run rule scraper
+            from .rule_scraper import scrape_and_update_knowledge_base
+
+            # Create scraped rules in background
+            scraped_rules = scrape_and_update_knowledge_base()
+
+            if scraped_rules:
+                # Reload the rules we just created
+                scraped_file = self.cache_dir / "scraped_rules.json"
+                if scraped_file.exists():
+                    self._load_scraped_rules()
+                    logger.info(f"Successfully created and loaded {len(scraped_rules)} scraped rules")
+
+        except ImportError:
+            logger.debug("Web scraping dependencies not available, skipping auto-creation")
+        except Exception as e:
+            logger.debug(f"Could not auto-create scraped rules: {e}")
 
 
 class SmartErrorClassifier:
@@ -671,7 +700,10 @@ class SmartErrorClassifier:
             # Perform periodic cleanup
             self._periodic_cleanup()
         else:
-            logger.warning("scikit-learn not available, ML learning disabled")
+            logger.warning(
+                "scikit-learn not available, ML learning disabled. "
+                "Install with: pip install aider-lint-fixer[learning]"
+            )
 
     def extract_features(
         self, error_message: str, language: str, linter: str, rule_id: str = ""
@@ -1037,8 +1069,10 @@ class SmartErrorClassifier:
             },
             "ml_classifier": {
                 "sklearn_available": SKLEARN_AVAILABLE,
+                "learning_enabled": SKLEARN_AVAILABLE,
                 "trained_languages": list(self.classifiers.keys()) if SKLEARN_AVAILABLE else [],
                 "cache_dir": str(self.cache_dir),
+                "setup_command": "pip install aider-lint-fixer[learning]" if not SKLEARN_AVAILABLE else None,
             },
         }
 

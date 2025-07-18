@@ -121,7 +121,20 @@ This release represents a **major leap forward** in intelligent lint fixing capa
 
 #### **📦 Installation**
 ```bash
+# Basic installation
 pip install aider-lint-fixer==1.5.0
+
+# With learning features (recommended)
+pip install aider-lint-fixer[learning]==1.5.0
+```
+
+#### **🧠 Learning Features Setup**
+```bash
+# Check if learning is enabled
+aider-lint-fixer --stats
+
+# If learning is disabled, install dependencies
+pip install scikit-learn>=1.0.0 requests>=2.25.0 beautifulsoup4>=4.9.0
 ```
 
 #### **🔍 View Learning Statistics**
