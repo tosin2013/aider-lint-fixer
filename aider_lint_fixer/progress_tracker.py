@@ -438,19 +438,19 @@ def create_enhanced_progress_callback(tracker: EnhancedProgressTracker, verbose:
 
             tracker.update_file_progress(current_file_path, file_errors)
 
-            if not tracker.is_large_project or verbose:
-                current = progress_info.get("current_file", 0)
-                total = progress_info.get("total_files", 0)
-                print(
-                    f"\n{Fore.CYAN}📁 Processing file {current}/{total}: {Path(current_file_path).name} ({file_errors} errors){Style.RESET_ALL}"
-                )
+            # Always show file progress - users find it helpful regardless of project size
+            current = progress_info.get("current_file", 0)
+            total = progress_info.get("total_files", 0)
+            print(
+                f"\n{Fore.CYAN}📁 Processing file {current}/{total}: {Path(current_file_path).name} ({file_errors} errors){Style.RESET_ALL}"
+            )
 
         elif stage == "fixing_error_group":
             complexity = progress_info.get("complexity", "unknown")
             group_errors = progress_info.get("group_errors", 0)
 
-            if not tracker.is_large_project or verbose:
-                print(f"   🔧 Fixing {group_errors} {complexity} errors...")
+            # Always show error group progress - helpful for all project sizes
+            print(f"   🔧 Fixing {group_errors} {complexity} errors...")
 
         elif stage == "file_completed":
             session_results = progress_info.get("session_results", 0)
@@ -463,19 +463,19 @@ def create_enhanced_progress_callback(tracker: EnhancedProgressTracker, verbose:
             # Print real-time status for large projects
             tracker.print_real_time_status()
 
-            if not tracker.is_large_project:
-                completed = progress_info.get("completed_files", 0)
-                total = progress_info.get("total_files", 0)
-                processed_errors = progress_info.get("processed_errors", 0)
-                total_errors = progress_info.get("total_errors", 0)
+            # Always show completion progress - helpful for all project sizes
+            completed = progress_info.get("completed_files", 0)
+            total = progress_info.get("total_files", 0)
+            processed_errors = progress_info.get("processed_errors", 0)
+            total_errors = progress_info.get("total_errors", 0)
 
-                print(f"   ✅ File completed: {session_results} successful fixes")
+            print(f"   ✅ File completed: {session_results} successful fixes")
 
-                file_progress = (completed / total * 100) if total > 0 else 0
-                error_progress = (processed_errors / total_errors * 100) if total_errors > 0 else 0
+            file_progress = (completed / total * 100) if total > 0 else 0
+            error_progress = (processed_errors / total_errors * 100) if total_errors > 0 else 0
 
-                print(
-                    f"   📊 Progress: {completed}/{total} files ({file_progress:.1f}%), {processed_errors}/{total_errors} errors ({error_progress:.1f}%)"
-                )
+            print(
+                f"   📊 Progress: {completed}/{total} files ({file_progress:.1f}%), {processed_errors}/{total_errors} errors ({error_progress:.1f}%)"
+            )
 
     return enhanced_progress_callback

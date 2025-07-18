@@ -49,6 +49,7 @@ class ManualFixAttempt:
     fix_description: Optional[str] = None
     time_to_fix_minutes: Optional[int] = None
     user_confidence: int = 5
+    override_classification: bool = False  # Whether user overrode the original classification
 
 
 def enhanced_interactive_mode(
@@ -235,6 +236,7 @@ def create_manual_fix_attempt(choice: InteractiveChoice) -> ManualFixAttempt:
         original_classification=choice.error_analysis.fixable,
         user_attempted=choice.choice == UserChoice.FIX,
         user_confidence=choice.user_confidence,
+        override_classification=choice.override_classification,
     )
 
 

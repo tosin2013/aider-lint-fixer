@@ -18,6 +18,7 @@ from colorama import Fore, Style, init
 
 from . import __version__
 from .aider_integration import AiderIntegration
+from .community_issue_reporter import integrate_community_issue_reporting
 from .config_manager import ConfigManager
 from .enhanced_interactive import (
     CommunityLearningIntegration,
@@ -746,7 +747,7 @@ def main(
             # Get ALL errors (fixable and unfixable) for enhanced interactive mode
             all_error_analyses = []
             for file_path, analysis in file_analyses.items():
-                all_error_analyses.extend(analysis.errors)
+                all_error_analyses.extend(analysis.error_analyses)
 
             if not all_error_analyses:
                 print(f"\n{Fore.GREEN}✅ No errors found!{Style.RESET_ALL}")
@@ -781,9 +782,9 @@ def main(
                 file_path = error_analysis.error.file_path
                 if file_path not in selected_file_analyses:
                     selected_file_analyses[file_path] = type(
-                        "FileAnalysis", (), {"errors": [], "file_path": file_path}
+                        "FileAnalysis", (), {"error_analyses": [], "file_path": file_path}
                     )()
-                selected_file_analyses[file_path].errors.append(error_analysis)
+                selected_file_analyses[file_path].error_analyses.append(error_analysis)
 
             file_analyses = selected_file_analyses
             prioritized_errors = errors_to_fix
@@ -801,7 +802,7 @@ def main(
             # Get ALL errors for force mode
             all_error_analyses = []
             for file_path, analysis in file_analyses.items():
-                all_error_analyses.extend(analysis.errors)
+                all_error_analyses.extend(analysis.error_analyses)
 
             if not all_error_analyses:
                 print(f"\n{Fore.GREEN}✅ No errors found!{Style.RESET_ALL}")
@@ -817,9 +818,9 @@ def main(
                 file_path = error_analysis.error.file_path
                 if file_path not in force_file_analyses:
                     force_file_analyses[file_path] = type(
-                        "FileAnalysis", (), {"errors": [], "file_path": file_path}
+                        "FileAnalysis", (), {"error_analyses": [], "file_path": file_path}
                     )()
-                force_file_analyses[file_path].errors.append(error_analysis)
+                force_file_analyses[file_path].error_analyses.append(error_analysis)
 
             file_analyses = force_file_analyses
             prioritized_errors = all_error_analyses
@@ -882,8 +883,12 @@ def main(
 
         # Create enhanced progress tracker for long-running operations
         total_error_count = len(prioritized_errors)
+
+        # Force verbose progress for enhanced interactive mode
+        effective_verbose = verbose or enhanced_interactive
+
         progress_tracker = EnhancedProgressTracker(
-            project_path=project_path, total_errors=total_error_count, verbose=verbose
+            project_path=project_path, total_errors=total_error_count, verbose=effective_verbose
         )
 
         # Set total files for progress tracking
@@ -950,6 +955,9 @@ def main(
                 print(
                     f"   Classification improvements identified: {len(feedback['classification_improvements'])}"
                 )
+
+            # Integrate community issue reporting
+            integrate_community_issue_reporting(community_learning, community_learning.manual_attempts)
 
         # Final summary
         overall_success_rate = (total_fixed / total_attempted * 100) if total_attempted > 0 else 0
