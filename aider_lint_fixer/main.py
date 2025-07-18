@@ -20,6 +20,7 @@ from . import __version__
 from .aider_integration import AiderIntegration
 from .config_manager import ConfigManager
 from .error_analyzer import ErrorAnalyzer
+from .enhanced_interactive import enhanced_interactive_mode, CommunityLearningIntegration, integrate_with_error_analyzer
 from .lint_runner import LintRunner
 from .project_detector import ProjectDetector
 
@@ -307,6 +308,8 @@ def print_verification_summary(verification_results):
 @click.option("--max-errors", type=int, help="Maximum number of errors to fix per file")
 @click.option("--dry-run", is_flag=True, help="Show what would be fixed without making changes")
 @click.option("--interactive", is_flag=True, help="Confirm each fix before applying")
+@click.option("--enhanced-interactive", is_flag=True, help="Enhanced per-error interactive mode with override capabilities")
+@click.option("--force", is_flag=True, help="Force fix all errors, including those classified as unfixable (use with caution)")
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 @click.option("--quiet", "-q", is_flag=True, help="Suppress non-error output")
 @click.option("--no-color", is_flag=True, help="Disable colored output")
@@ -374,6 +377,8 @@ def main(
     max_errors: Optional[int],
     dry_run: bool,
     interactive: bool,
+    enhanced_interactive: bool,
+    force: bool,
     verbose: bool,
     quiet: bool,
     no_color: bool,
@@ -690,8 +695,98 @@ def main(
         else:
             print(f"   Found {len(prioritized_errors)} fixable errors")
 
-        if not prioritized_errors:
+        # Enhanced interactive mode - allow user to override classifications
+        community_learning = None
+        if enhanced_interactive:
+            # Get ALL errors (fixable and unfixable) for enhanced interactive mode
+            all_error_analyses = []
+            for file_path, analysis in file_analyses.items():
+                all_error_analyses.extend(analysis.errors)
+
+            if not all_error_analyses:
+                print(f"\n{Fore.GREEN}✅ No errors found!{Style.RESET_ALL}")
+                return 0
+
+            # Run enhanced interactive mode
+            interactive_choices = enhanced_interactive_mode(
+                all_error_analyses,
+                max_errors=max_errors,
+                enable_community_learning=True
+            )
+
+            # Initialize community learning integration
+            community_learning = CommunityLearningIntegration(project_path)
+            community_learning.record_interactive_choices(interactive_choices)
+
+            # Integrate choices with error analyzer learning
+            integrate_with_error_analyzer(interactive_choices, analyzer)
+
+            # Filter errors based on user choices
+            errors_to_fix = [choice.error_analysis for choice in interactive_choices
+                           if choice.choice.value == 'fix']
+
+            if not errors_to_fix:
+                print(f"\n{Fore.YELLOW}No errors selected for fixing.{Style.RESET_ALL}")
+                return 0
+
+            # Rebuild file_analyses with only selected errors
+            selected_file_analyses = {}
+            for error_analysis in errors_to_fix:
+                file_path = error_analysis.error.file_path
+                if file_path not in selected_file_analyses:
+                    selected_file_analyses[file_path] = type('FileAnalysis', (), {
+                        'errors': [], 'file_path': file_path
+                    })()
+                selected_file_analyses[file_path].errors.append(error_analysis)
+
+            file_analyses = selected_file_analyses
+            prioritized_errors = errors_to_fix
+
+            print(f"\n{Fore.CYAN}📋 Enhanced Interactive Summary:{Style.RESET_ALL}")
+            print(f"   Selected {len(prioritized_errors)} errors for fixing")
+
+        elif force:
+            # Force mode - include ALL errors (fixable and unfixable)
+            print(f"\n{Fore.RED}⚠️  FORCE MODE ENABLED{Style.RESET_ALL}")
+            print(f"   {Fore.YELLOW}WARNING: Attempting to fix ALL errors, including those classified as unfixable{Style.RESET_ALL}")
+
+            # Get ALL errors for force mode
+            all_error_analyses = []
+            for file_path, analysis in file_analyses.items():
+                all_error_analyses.extend(analysis.errors)
+
+            if not all_error_analyses:
+                print(f"\n{Fore.GREEN}✅ No errors found!{Style.RESET_ALL}")
+                return 0
+
+            # Apply max_errors limit if specified
+            if max_errors:
+                all_error_analyses = all_error_analyses[:max_errors]
+
+            # Rebuild file_analyses with all errors
+            force_file_analyses = {}
+            for error_analysis in all_error_analyses:
+                file_path = error_analysis.error.file_path
+                if file_path not in force_file_analyses:
+                    force_file_analyses[file_path] = type('FileAnalysis', (), {
+                        'errors': [], 'file_path': file_path
+                    })()
+                force_file_analyses[file_path].errors.append(error_analysis)
+
+            file_analyses = force_file_analyses
+            prioritized_errors = all_error_analyses
+
+            print(f"   Forcing fixes for {len(prioritized_errors)} errors")
+
+            # Confirmation for force mode
+            if not click.confirm(f"\n{Fore.RED}Are you sure you want to force-fix {len(prioritized_errors)} errors? This may cause issues.{Style.RESET_ALL}"):
+                print("Aborted by user.")
+                return 0
+
+        elif not prioritized_errors:
             print(f"\n{Fore.YELLOW}⚠️  No automatically fixable errors found.{Style.RESET_ALL}")
+            print(f"   💡 Try --enhanced-interactive to review and override classifications")
+            print(f"   💡 Or use --force to attempt fixing all errors (risky)")
             return 0
 
         # Show what would be fixed in dry-run mode
@@ -760,6 +855,30 @@ def main(
 
         # Print detailed verification results
         print_verification_summary(verification_results)
+
+        # Update community learning with actual fix results
+        if community_learning:
+            # Create fix results mapping for community learning
+            fix_results = {}
+            for session in sessions:
+                verification = verification_results[session.session_id]
+                for result in session.results:
+                    error_key = f"{result.error.file_path}:{result.error.line}:{result.error.rule_id}"
+                    fix_results[error_key] = result.success
+
+            # Update community learning with actual results
+            community_learning.update_fix_results(fix_results)
+
+            # Generate and save community feedback
+            feedback = community_learning.generate_learning_feedback()
+            community_learning.save_community_data()
+
+            print(f"\n{Fore.CYAN}🌍 Community Learning Summary:{Style.RESET_ALL}")
+            print(f"   Total attempts: {feedback['total_attempts']}")
+            print(f"   Successful overrides: {feedback['successful_overrides']}")
+            print(f"   Failed overrides: {feedback['failed_overrides']}")
+            if feedback['classification_improvements']:
+                print(f"   Classification improvements identified: {len(feedback['classification_improvements'])}")
 
         # Final summary
         overall_success_rate = (total_fixed / total_attempted * 100) if total_attempted > 0 else 0
