@@ -746,7 +746,18 @@ class SmartErrorClassifier:
         features.mentions_formatting = any(word in message_lower for word in formatting_keywords)
 
         # Complexity analysis
-        manual_keywords = ["name", "logic", "business", "design", "architecture"]
+        manual_keywords = ["logic", "business", "design", "architecture"]
+        # For Ansible, "name" in naming rules is not domain knowledge - it's style
+        if linter == "ansible-lint":
+            # Don't treat Ansible naming rules as requiring domain knowledge
+            if not ("should be named" in message_lower or "tasks should be named" in message_lower):
+                manual_keywords.append("name")
+            # Module parameter errors require domain knowledge
+            if "unsupported parameters" in message_lower or "args[module]" in message_lower:
+                features.needs_domain_knowledge = True
+                return features
+        else:
+            manual_keywords.append("name")
         features.needs_domain_knowledge = any(word in message_lower for word in manual_keywords)
 
         syntax_keywords = ["syntax", "parse", "invalid", "unexpected", "missing"]
@@ -763,12 +774,37 @@ class SmartErrorClassifier:
             "trailing",
             "whitespace",
         ]
+
+        # Add Ansible-specific auto-fixable patterns
+        if linter == "ansible-lint":
+            auto_fixable_hints.extend([
+                "should be named",
+                "tasks should be named",
+                "plays should be named",
+                "use command module",
+                "use structured parameters",
+                "start task names",
+                "indentation",
+                "wrong indentation",
+                "use true/false",
+                "instead of yes/no",
+                "boolean values",
+                "trailing spaces",  # Real ansible-lint message
+                "trailing whitespace",
+                "forbidden document start",  # Real ansible-lint message
+                "duplication of key",  # Real ansible-lint message
+                "duplicate key"
+            ])
+
         features.auto_fixable_keywords = [
             hint for hint in auto_fixable_hints if hint in message_lower
         ]
 
-        # Manual-only hints
-        manual_hints = ["should be named", "missing name", "add description"]
+        # Manual-only hints (but exclude common Ansible naming rules)
+        manual_hints = ["add description", "complex logic", "business rule"]
+        # Don't treat Ansible naming rules as manual-only
+        if linter != "ansible-lint":
+            manual_hints.extend(["should be named", "missing name"])
         features.manual_only_keywords = [hint for hint in manual_hints if hint in message_lower]
 
         return features
@@ -848,6 +884,28 @@ class SmartErrorClassifier:
         error_lower = error_message.lower()
         if any(keyword in error_lower for keyword in syntax_keywords):
             return False
+
+        # Ansible-lint specific patterns
+        if linter == "ansible-lint":
+            ansible_fixable = [
+                "should be named",
+                "all tasks should be named",
+                "all plays should be named",
+                "use command module instead",
+                "use structured parameters",
+                "start task names with",
+                "line too long",
+                "trailing whitespace",
+                "trailing spaces",  # Real ansible-lint message
+                "wrong indentation",
+                "use true/false instead",
+                "missing document start",
+                "forbidden document start",  # Real ansible-lint message
+                "duplication of key",  # Real ansible-lint message
+                "duplicate key",
+            ]
+            if any(pattern in error_lower for pattern in ansible_fixable):
+                return True
 
         # Style issues are often fixable
         style_keywords = ["should", "missing", "unused", "line too long", "comment"]

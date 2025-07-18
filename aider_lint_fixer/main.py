@@ -348,6 +348,21 @@ def print_verification_summary(verification_results):
 )
 @click.option("--target-dir", help="Target directory to lint (e.g., roles/)")
 @click.option("--stats", is_flag=True, help="Show learning statistics and exit")
+@click.option(
+    "--skip-strategic-check",
+    is_flag=True,
+    help="Skip strategic pre-flight analysis for messy codebases",
+)
+@click.option(
+    "--force-strategic-recheck",
+    is_flag=True,
+    help="Force re-run of strategic analysis (ignores cache)",
+)
+@click.option(
+    "--bypass-strategic-check",
+    is_flag=True,
+    help="Bypass strategic check warnings and proceed anyway (not recommended)",
+)
 def main(
     project_path: str,
     version: bool,
@@ -374,6 +389,9 @@ def main(
     extensions: Optional[str],
     target_dir: Optional[str],
     stats: bool,
+    skip_strategic_check: bool,
+    force_strategic_recheck: bool,
+    bypass_strategic_check: bool,
 ):
     """Aider Lint Fixer - Automated lint error detection and fixing.
 
@@ -522,6 +540,33 @@ def main(
 
         if exclude:
             print(f"   Exclude Patterns: {list(exclude)}")
+
+        # Strategic Pre-Flight Check for messy codebases
+        if not skip_strategic_check:
+            print(f"\n{Fore.YELLOW}🔍 Strategic Pre-Flight Check...{Style.RESET_ALL}")
+
+            try:
+                from .strategic_preflight_check import StrategicPreFlightChecker
+
+                checker = StrategicPreFlightChecker(str(actual_project_path), config_manager)
+                preflight_result = checker.run_preflight_check(
+                    force_recheck=force_strategic_recheck
+                )
+
+                if not preflight_result.should_proceed:
+                    if bypass_strategic_check:
+                        print(f"\n{Fore.YELLOW}⚠️  BYPASSING strategic check - proceeding anyway{Style.RESET_ALL}")
+                        print(f"{Fore.RED}   This is not recommended for chaotic codebases!{Style.RESET_ALL}")
+                    else:
+                        print(f"\n{Fore.RED}🛑 Strategic issues detected - automated fixing blocked{Style.RESET_ALL}")
+                        print(f"{Fore.CYAN}💡 Address the issues above or use --bypass-strategic-check{Style.RESET_ALL}")
+                        print(f"{Fore.CYAN}🔄 Re-run with --force-strategic-recheck after making changes{Style.RESET_ALL}")
+                        return 1
+
+            except ImportError:
+                print(f"{Fore.YELLOW}⚠️  Strategic pre-flight check not available{Style.RESET_ALL}")
+            except Exception as e:
+                print(f"{Fore.YELLOW}⚠️  Strategic pre-flight check failed: {e}{Style.RESET_ALL}")
 
         # Step 1: Detect project structure
         print(f"\n{Fore.CYAN}Step 1: Detecting project structure...{Style.RESET_ALL}")

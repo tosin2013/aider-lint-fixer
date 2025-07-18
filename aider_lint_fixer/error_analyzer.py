@@ -373,11 +373,30 @@ class ErrorAnalyzer:
             elif "template error" in message:
                 return FixComplexity.MODERATE
 
+        # Ansible-lint specific complexity adjustments
+        if error.linter == "ansible-lint":
+            # YAML formatting issues are trivial to fix
+            if any(pattern in message for pattern in [
+                "trailing spaces", "trailing whitespace",
+                "forbidden document start", "found forbidden document start",
+                "duplication of key", "duplicate key"
+            ]):
+                return FixComplexity.TRIVIAL
+
+            # YAML structure issues are simple to fix
+            if any(pattern in rule_id for pattern in [
+                "yaml[trailing-spaces]", "yaml[document-start]",
+                "yaml[key-duplicates]", "yaml[indentation]"
+            ]):
+                return FixComplexity.TRIVIAL
+
         if "missing" in message and "docstring" in message:
             return FixComplexity.SIMPLE
         elif "line too long" in message:
             return FixComplexity.TRIVIAL
         elif "trailing whitespace" in message:
+            return FixComplexity.TRIVIAL
+        elif "trailing spaces" in message:
             return FixComplexity.TRIVIAL
         elif "undefined name" in message:
             return FixComplexity.COMPLEX
@@ -455,7 +474,11 @@ class ErrorAnalyzer:
                 return smart_fixable
 
             # If they disagree, be conservative for syntax errors
+            # Exception: trivial YAML formatting errors are safe to fix
             if category == ErrorCategory.SYNTAX:
+                if complexity == FixComplexity.TRIVIAL and error.linter == "ansible-lint":
+                    # Trust smart classifier for trivial YAML formatting issues
+                    return smart_fixable
                 return False
 
             # For other categories, trust the smart classifier if it says fixable
