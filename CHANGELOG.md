@@ -61,13 +61,13 @@ This release dramatically improves error detection accuracy by resolving missing
 ### 📦 **Installation**
 ```bash
 # Basic installation
-pip install aider-lint-fixer==1.6.0
+pip install aider-lint-fixer==1.7.0
 
 # With learning features (recommended)
-pip install aider-lint-fixer[learning]==1.6.0
+pip install aider-lint-fixer[learning]==1.7.0
 
 # All features
-pip install aider-lint-fixer[all]==1.6.0
+pip install aider-lint-fixer[all]==1.7.0
 ```
 
 ### 🧠 **Learning System Improvements**

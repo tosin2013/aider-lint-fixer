@@ -8,11 +8,11 @@
 
 Aider Lint Fixer is an intelligent tool that automatically detects lint errors in your codebase and fixes them using AI-powered code generation through [aider.chat](https://aider.chat).
 
-**🎉 v1.6.0 Release**: Enhanced learning system with 46.1% fixability rate and TypeScript project support!
+**🎉 v1.7.0 Release**: Enhanced learning system with 46.1% fixability rate and TypeScript project support!
 
-## ✨ Features (v1.6.0)
+## ✨ Features (v1.7.0)
 
-### 🚀 **New in v1.6.0: Revolutionary Learning System**
+### 🚀 **New in v1.7.0: Revolutionary Learning System**
 - 🧠 **Enhanced Learning**: 46.1% fixability rate (up from 0.0% in previous versions)
 - ⚡ **High-Performance**: Aho-Corasick pattern matching for sub-millisecond classification
 - 🎯 **TypeScript Projects**: Smart ESLint integration with project-specific configurations
@@ -66,8 +66,8 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 ### Installation
 
 ```bash
-# Install aider-lint-fixer v1.6.0 with enhanced learning features
-pip install aider-lint-fixer[learning]
+# Install aider-lint-fixer with enhanced learning features (quote for zsh compatibility)
+pip install "aider-lint-fixer[learning]"
 ```
 
 ### 🚀 **Installation**
@@ -85,7 +85,7 @@ pip install aider-lint-fixer[learning]
 # Install from PyPI (recommended)
 pip install aider-lint-fixer
 
-# 🚀 NEW v1.6.0: Install with learning features (recommended for 46.1% fixability rate)
+# 🚀 NEW v1.7.0: Install with learning features (recommended for 46.1% fixability rate)
 pip install aider-lint-fixer[learning]
 
 # Install with all optional features
@@ -455,16 +455,16 @@ aider-lint-fixer --stats
 - **Missing Aho-Corasick**: Causes "using fallback pattern matching" warning
 - **No scraped rules**: Tool will auto-create them if web dependencies are available
 
-**Expected vs Actual (v1.6.0):**
+**Expected vs Actual (v1.7.0):**
 ```bash
-# ❌ Without learning dependencies (v1.5.0 and earlier)
+# ❌ Without learning dependencies (v1.6.0 and earlier)
 Found 0 fixable errors (0.0% of 58 total baseline errors)
 
-# ✅ With learning dependencies (v1.6.0+)
+# ✅ With learning dependencies (v1.7.0+)
 Found 27 fixable errors (46.1% of 58 total baseline errors)
 ```
 
-**🎯 v1.6.0 Performance**: This release resolves the critical 0.0% fixability issue!
+**🎯 v1.7.0 Performance**: This release resolves the critical 0.0% fixability issue!
 
 ## 📖 Examples
 
