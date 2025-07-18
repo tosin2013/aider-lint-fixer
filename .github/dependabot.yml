@@ -49,6 +49,13 @@ updates:
           - "click*"
           - "colorama*"
           - "pyyaml*"
+      aider-ecosystem:
+        patterns:
+          - "aider-chat*"
+          - "grpcio*"
+          - "protobuf*"
+          - "aiohttp*"
+          - "gitpython*"
     # Allow both direct and indirect updates
     allow:
       - dependency-type: "direct"
@@ -59,6 +66,18 @@ updates:
       - dependency-name: "click"
         update-types: ["version-update:semver-major"]
       - dependency-name: "colorama"
+        update-types: ["version-update:semver-major"]
+      # Ignore aider-chat sub-dependencies to avoid conflicts
+      - dependency-name: "grpcio"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+      - dependency-name: "grpcio-status"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+      - dependency-name: "protobuf"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+      # Let aider-chat manage its own dependency versions
+      - dependency-name: "aiohttp"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "gitpython"
         update-types: ["version-update:semver-major"]
 
   # Node.js dependencies (npm)

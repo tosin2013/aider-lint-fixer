@@ -64,6 +64,12 @@ jobs:
           UPDATE_TYPE="github-actions"
           echo "⚙️ GitHub Actions update - will auto-merge after tests"
         
+        # Aider-chat sub-dependencies - require manual review
+        elif [[ "$PR_TITLE" =~ "grpcio" ]] || [[ "$PR_TITLE" =~ "protobuf" ]] || [[ "$PR_TITLE" =~ "aiohttp" ]]; then
+          AUTO_MERGE="false"
+          UPDATE_TYPE="aider-dependency"
+          echo "🎯 Aider-chat sub-dependency - requires manual review to avoid conflicts"
+
         # Major updates or core dependencies - require manual review
         else
           AUTO_MERGE="false"
@@ -76,13 +82,14 @@ jobs:
         
     - name: 📋 Add labels
       uses: actions/github-script@v7
+      continue-on-error: true
       with:
         script: |
           const updateType = '${{ steps.check.outputs.update-type }}';
           const autoMerge = '${{ steps.check.outputs.auto-merge }}';
-          
+
           const labels = ['dependabot'];
-          
+
           // Add update type label
           if (updateType === 'security') {
             labels.push('security', 'auto-merge');
@@ -97,14 +104,20 @@ jobs:
           } else {
             labels.push('manual-review');
           }
-          
-          // Add labels to PR
-          await github.rest.issues.addLabels({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            labels: labels
-          });
+
+          // Try to add labels to PR (may fail due to permissions)
+          try {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: labels
+            });
+            console.log('✅ Labels added successfully');
+          } catch (error) {
+            console.log('⚠️ Could not add labels (insufficient permissions):', error.message);
+            console.log('Labels that would be added:', labels.join(', '));
+          }
 
   # Run tests on Dependabot PRs
   dependabot-test:
@@ -166,28 +179,45 @@ jobs:
     steps:
     - name: 🤖 Enable auto-merge
       uses: actions/github-script@v7
+      continue-on-error: true
       with:
         script: |
           const updateType = '${{ needs.dependabot-validate.outputs.update-type }}';
-          
-          // Add approval comment
-          await github.rest.pulls.createReview({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number,
-            event: 'APPROVE',
-            body: `🤖 **Auto-approving ${updateType} update**\n\n✅ All tests passed\n✅ Safe for automatic merge\n\nThis PR will be automatically merged.`
-          });
-          
-          // Enable auto-merge
-          await github.rest.pulls.merge({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number,
-            commit_title: `Auto-merge: ${context.payload.pull_request.title}`,
-            commit_message: `Automatically merged ${updateType} update from Dependabot.\n\nAll tests passed and update is considered safe.`,
-            merge_method: 'squash'
-          });
+
+          try {
+            // Add approval comment
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'APPROVE',
+              body: `🤖 **Auto-approving ${updateType} update**\n\n✅ All tests passed\n✅ Safe for automatic merge\n\nThis PR will be automatically merged.`
+            });
+            console.log('✅ Approval review added');
+
+            // Enable auto-merge
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              commit_title: `Auto-merge: ${context.payload.pull_request.title}`,
+              commit_message: `Automatically merged ${updateType} update from Dependabot.\n\nAll tests passed and update is considered safe.`,
+              merge_method: 'squash'
+            });
+            console.log('✅ Auto-merge completed');
+
+          } catch (error) {
+            console.log('⚠️ Auto-merge failed (insufficient permissions):', error.message);
+            console.log('💡 Manual merge required - PR is ready and approved');
+
+            // Add comment explaining the situation
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `🤖 **Auto-merge attempted but requires manual action**\n\n✅ All tests passed\n✅ Update is safe for merge\n⚠️ Insufficient permissions for automatic merge\n\n**Action required:** Please manually merge this PR.`
+            });
+          }
           
     - name: 📊 Update summary
       run: |
@@ -214,16 +244,22 @@ jobs:
     steps:
     - name: 👀 Add manual review comment
       uses: actions/github-script@v7
+      continue-on-error: true
       with:
         script: |
           const updateType = '${{ needs.dependabot-validate.outputs.update-type }}';
-          
-          await github.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            body: `👀 **Manual review required for ${updateType} update**\n\n⚠️ This update requires manual review because:\n- It may be a major version update\n- It affects core dependencies\n- It requires careful testing\n\nPlease review the changes and merge manually if appropriate.`
-          });
+
+          try {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `👀 **Manual review required for ${updateType} update**\n\n⚠️ This update requires manual review because:\n- It may be a major version update\n- It affects core dependencies\n- It requires careful testing\n\nPlease review the changes and merge manually if appropriate.`
+            });
+            console.log('✅ Manual review comment added');
+          } catch (error) {
+            console.log('⚠️ Could not add comment (insufficient permissions):', error.message);
+          }
           
     - name: 📊 Update summary
       run: |

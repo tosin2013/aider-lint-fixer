@@ -1,0 +1,182 @@
+name: 🔍 Dependency Conflict Check
+
+on:
+  pull_request:
+    paths:
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - 'setup.py'
+  workflow_dispatch:
+
+jobs:
+  check-conflicts:
+    name: 🔍 Check Dependency Conflicts
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: 📦 Install pip-tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install pip-tools pipdeptree
+        
+    - name: 🔍 Check for dependency conflicts
+      run: |
+        echo "## 🔍 Dependency Conflict Analysis" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Try to install dependencies and check for conflicts
+        echo "### 📦 Installing Dependencies" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if pip install -r requirements.txt; then
+          echo "✅ **Initial installation:** Success" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Initial installation:** Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          pip install -r requirements.txt 2>&1 | tail -20 >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Check for dependency conflicts
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔍 Dependency Tree Analysis" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if pip check; then
+          echo "✅ **Dependency check:** No conflicts found" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ **Dependency check:** Conflicts detected" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          pip check >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Show dependency tree for aider-chat
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🌳 Aider-Chat Dependency Tree" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "```" >> $GITHUB_STEP_SUMMARY
+        pipdeptree --packages aider-chat >> $GITHUB_STEP_SUMMARY
+        echo "```" >> $GITHUB_STEP_SUMMARY
+        
+    - name: 🔍 Analyze specific conflicts
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🎯 Conflict Analysis" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Check for common conflict patterns
+        CONFLICTS_FOUND=false
+        
+        # Check grpcio versions
+        GRPCIO_VERSIONS=$(pip list | grep grpcio | wc -l)
+        if [ "$GRPCIO_VERSIONS" -gt 1 ]; then
+          echo "⚠️ **Multiple grpcio versions detected**" >> $GITHUB_STEP_SUMMARY
+          pip list | grep grpcio >> $GITHUB_STEP_SUMMARY
+          CONFLICTS_FOUND=true
+        fi
+        
+        # Check for version conflicts in requirements
+        if grep -q "grpcio" requirements.txt; then
+          REQUIRED_GRPCIO=$(grep "grpcio" requirements.txt)
+          echo "📋 **Requirements.txt grpcio:** $REQUIRED_GRPCIO" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Get aider-chat's grpcio requirement
+        AIDER_GRPCIO=$(pip show aider-chat | grep "Requires:" | grep -o "grpcio[^,]*" || echo "Not found")
+        echo "🎯 **Aider-chat requires:** $AIDER_GRPCIO" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "$CONFLICTS_FOUND" = true ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 💡 Recommended Actions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. **Remove conflicting dependencies** from requirements.txt" >> $GITHUB_STEP_SUMMARY
+          echo "2. **Let aider-chat manage** its own sub-dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "3. **Update Dependabot config** to ignore aider-chat sub-dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "4. **Pin aider-chat version** and let it manage grpcio/protobuf versions" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **No conflicts detected** - Dependencies are compatible" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  suggest-resolution:
+    name: 💡 Suggest Conflict Resolution
+    runs-on: ubuntu-latest
+    needs: check-conflicts
+    if: failure()
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 💡 Create resolution suggestions
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const suggestions = `
+          ## 🔧 Dependency Conflict Resolution Suggestions
+          
+          ### 🎯 **Root Cause**
+          This conflict typically occurs when:
+          - Dependabot tries to update aider-chat's sub-dependencies
+          - Direct dependencies conflict with aider-chat's pinned versions
+          - Multiple packages require different versions of the same dependency
+          
+          ### 💡 **Recommended Solutions**
+          
+          #### **Option 1: Let aider-chat manage its dependencies (Recommended)**
+          \`\`\`bash
+          # Remove conflicting dependencies from requirements.txt
+          # Keep only direct dependencies, let aider-chat manage:
+          # - grpcio
+          # - grpcio-status  
+          # - protobuf
+          # - aiohttp (if not directly needed)
+          \`\`\`
+          
+          #### **Option 2: Update Dependabot configuration**
+          \`\`\`yaml
+          # In .github/dependabot.yml, ignore aider-chat sub-dependencies:
+          ignore:
+            - dependency-name: "grpcio"
+            - dependency-name: "grpcio-status"
+            - dependency-name: "protobuf"
+          \`\`\`
+          
+          #### **Option 3: Pin compatible versions**
+          \`\`\`bash
+          # Check aider-chat's requirements:
+          pip show aider-chat
+          
+          # Pin to compatible versions in requirements.txt
+          \`\`\`
+          
+          ### 🔄 **Next Steps**
+          1. Choose one of the resolution strategies above
+          2. Test the changes locally: \`pip install -r requirements.txt\`
+          3. Verify no conflicts: \`pip check\`
+          4. Update this PR with the fix
+          
+          ### 🛡️ **Prevention**
+          - Configure Dependabot to ignore aider-chat sub-dependencies
+          - Group aider-ecosystem updates together
+          - Regularly update aider-chat itself rather than its sub-dependencies
+          `;
+          
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: suggestions
+          });

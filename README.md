@@ -61,6 +61,7 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 - **Git**
 - **pip3** (usually included with Python)
 - **Node.js/npm** (for Node.js linters)
+- **Supported platforms**: Linux, macOS (Windows has limited support)
 
 #### **📦 Recommended Installation (Git + Virtual Environment)**
 
@@ -73,11 +74,8 @@ cd aider-lint-fixer
 # Create virtual environment
 python3 -m venv venv
 
-# Activate virtual environment
-# On Linux/macOS:
+# Activate virtual environment (Linux/macOS)
 source venv/bin/activate
-# On Windows:
-# venv\Scripts\activate
 
 # Upgrade pip
 pip3 install --upgrade pip
