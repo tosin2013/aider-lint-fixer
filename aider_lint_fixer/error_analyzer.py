@@ -376,18 +376,29 @@ class ErrorAnalyzer:
         # Ansible-lint specific complexity adjustments
         if error.linter == "ansible-lint":
             # YAML formatting issues are trivial to fix
-            if any(pattern in message for pattern in [
-                "trailing spaces", "trailing whitespace",
-                "forbidden document start", "found forbidden document start",
-                "duplication of key", "duplicate key"
-            ]):
+            if any(
+                pattern in message
+                for pattern in [
+                    "trailing spaces",
+                    "trailing whitespace",
+                    "forbidden document start",
+                    "found forbidden document start",
+                    "duplication of key",
+                    "duplicate key",
+                ]
+            ):
                 return FixComplexity.TRIVIAL
 
             # YAML structure issues are simple to fix
-            if any(pattern in rule_id for pattern in [
-                "yaml[trailing-spaces]", "yaml[document-start]",
-                "yaml[key-duplicates]", "yaml[indentation]"
-            ]):
+            if any(
+                pattern in rule_id
+                for pattern in [
+                    "yaml[trailing-spaces]",
+                    "yaml[document-start]",
+                    "yaml[key-duplicates]",
+                    "yaml[indentation]",
+                ]
+            ):
                 return FixComplexity.TRIVIAL
 
         if "missing" in message and "docstring" in message:

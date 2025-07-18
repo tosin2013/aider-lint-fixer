@@ -555,12 +555,22 @@ def main(
 
                 if not preflight_result.should_proceed:
                     if bypass_strategic_check:
-                        print(f"\n{Fore.YELLOW}⚠️  BYPASSING strategic check - proceeding anyway{Style.RESET_ALL}")
-                        print(f"{Fore.RED}   This is not recommended for chaotic codebases!{Style.RESET_ALL}")
+                        print(
+                            f"\n{Fore.YELLOW}⚠️  BYPASSING strategic check - proceeding anyway{Style.RESET_ALL}"
+                        )
+                        print(
+                            f"{Fore.RED}   This is not recommended for chaotic codebases!{Style.RESET_ALL}"
+                        )
                     else:
-                        print(f"\n{Fore.RED}🛑 Strategic issues detected - automated fixing blocked{Style.RESET_ALL}")
-                        print(f"{Fore.CYAN}💡 Address the issues above or use --bypass-strategic-check{Style.RESET_ALL}")
-                        print(f"{Fore.CYAN}🔄 Re-run with --force-strategic-recheck after making changes{Style.RESET_ALL}")
+                        print(
+                            f"\n{Fore.RED}🛑 Strategic issues detected - automated fixing blocked{Style.RESET_ALL}"
+                        )
+                        print(
+                            f"{Fore.CYAN}💡 Address the issues above or use --bypass-strategic-check{Style.RESET_ALL}"
+                        )
+                        print(
+                            f"{Fore.CYAN}🔄 Re-run with --force-strategic-recheck after making changes{Style.RESET_ALL}"
+                        )
                         return 1
 
             except ImportError:

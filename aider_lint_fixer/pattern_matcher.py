@@ -777,24 +777,26 @@ class SmartErrorClassifier:
 
         # Add Ansible-specific auto-fixable patterns
         if linter == "ansible-lint":
-            auto_fixable_hints.extend([
-                "should be named",
-                "tasks should be named",
-                "plays should be named",
-                "use command module",
-                "use structured parameters",
-                "start task names",
-                "indentation",
-                "wrong indentation",
-                "use true/false",
-                "instead of yes/no",
-                "boolean values",
-                "trailing spaces",  # Real ansible-lint message
-                "trailing whitespace",
-                "forbidden document start",  # Real ansible-lint message
-                "duplication of key",  # Real ansible-lint message
-                "duplicate key"
-            ])
+            auto_fixable_hints.extend(
+                [
+                    "should be named",
+                    "tasks should be named",
+                    "plays should be named",
+                    "use command module",
+                    "use structured parameters",
+                    "start task names",
+                    "indentation",
+                    "wrong indentation",
+                    "use true/false",
+                    "instead of yes/no",
+                    "boolean values",
+                    "trailing spaces",  # Real ansible-lint message
+                    "trailing whitespace",
+                    "forbidden document start",  # Real ansible-lint message
+                    "duplication of key",  # Real ansible-lint message
+                    "duplicate key",
+                ]
+            )
 
         features.auto_fixable_keywords = [
             hint for hint in auto_fixable_hints if hint in message_lower
