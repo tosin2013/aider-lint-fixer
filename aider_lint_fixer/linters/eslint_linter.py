@@ -123,13 +123,14 @@ class ESLintLinter(BaseLinter):
 
         try:
             import json
-            with open(package_json, 'r') as f:
+
+            with open(package_json, "r") as f:
                 data = json.load(f)
 
-            scripts = data.get('scripts', {})
+            scripts = data.get("scripts", {})
             # Check if there's a lint script that uses ESLint
-            lint_script = scripts.get('lint', '')
-            return 'eslint' in lint_script.lower()
+            lint_script = scripts.get("lint", "")
+            return "eslint" in lint_script.lower()
         except Exception:
             return False
 
@@ -164,9 +165,10 @@ class ESLintLinter(BaseLinter):
         if package_json.exists():
             try:
                 import json
-                with open(package_json, 'r') as f:
+
+                with open(package_json, "r") as f:
                     data = json.load(f)
-                if 'eslintConfig' in data:
+                if "eslintConfig" in data:
                     return str(package_json)
             except Exception:
                 pass
@@ -184,21 +186,22 @@ class ESLintLinter(BaseLinter):
         if package_json.exists():
             try:
                 import json
-                with open(package_json, 'r') as f:
+
+                with open(package_json, "r") as f:
                     data = json.load(f)
 
                 # Check dependencies and devDependencies
                 all_deps = {}
-                all_deps.update(data.get('dependencies', {}))
-                all_deps.update(data.get('devDependencies', {}))
+                all_deps.update(data.get("dependencies", {}))
+                all_deps.update(data.get("devDependencies", {}))
 
                 # Look for TypeScript-related packages
                 ts_packages = [
-                    'typescript',
-                    '@typescript-eslint/parser',
-                    '@typescript-eslint/eslint-plugin',
-                    'ts-node',
-                    'ts-loader'
+                    "typescript",
+                    "@typescript-eslint/parser",
+                    "@typescript-eslint/eslint-plugin",
+                    "ts-node",
+                    "ts-loader",
                 ]
 
                 return any(pkg in all_deps for pkg in ts_packages)
@@ -206,7 +209,7 @@ class ESLintLinter(BaseLinter):
                 pass
 
         # Check for .ts or .tsx files in the project
-        for ext in ['.ts', '.tsx']:
+        for ext in [".ts", ".tsx"]:
             if any(self.project_root.rglob(f"*{ext}")):
                 return True
 
@@ -214,12 +217,12 @@ class ESLintLinter(BaseLinter):
 
     def _extract_json_from_output(self, output: str) -> str:
         """Extract JSON from npm script output which may contain extra text."""
-        lines = output.strip().split('\n')
+        lines = output.strip().split("\n")
 
         # Look for JSON array start
         json_start = -1
         for i, line in enumerate(lines):
-            if line.strip().startswith('['):
+            if line.strip().startswith("["):
                 json_start = i
                 break
 
@@ -228,7 +231,7 @@ class ESLintLinter(BaseLinter):
 
         # Extract from JSON start to end
         json_lines = lines[json_start:]
-        return '\n'.join(json_lines)
+        return "\n".join(json_lines)
 
     def parse_output(
         self, stdout: str, stderr: str, return_code: int

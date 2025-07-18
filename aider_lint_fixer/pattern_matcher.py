@@ -652,8 +652,8 @@ class RuleKnowledgeBase:
         """Automatically create scraped rules if dependencies are available."""
         try:
             # Check if web scraping dependencies are available
-            import requests
             import bs4
+            import requests
 
             logger.info("Creating scraped rules automatically...")
 
@@ -668,7 +668,9 @@ class RuleKnowledgeBase:
                 scraped_file = self.cache_dir / "scraped_rules.json"
                 if scraped_file.exists():
                     self._load_scraped_rules()
-                    logger.info(f"Successfully created and loaded {len(scraped_rules)} scraped rules")
+                    logger.info(
+                        f"Successfully created and loaded {len(scraped_rules)} scraped rules"
+                    )
 
         except ImportError:
             logger.debug("Web scraping dependencies not available, skipping auto-creation")
@@ -1072,7 +1074,9 @@ class SmartErrorClassifier:
                 "learning_enabled": SKLEARN_AVAILABLE,
                 "trained_languages": list(self.classifiers.keys()) if SKLEARN_AVAILABLE else [],
                 "cache_dir": str(self.cache_dir),
-                "setup_command": "pip install aider-lint-fixer[learning]" if not SKLEARN_AVAILABLE else None,
+                "setup_command": (
+                    "pip install aider-lint-fixer[learning]" if not SKLEARN_AVAILABLE else None
+                ),
             },
         }
 
