@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2025-07-18
+
+### 🌍 **Community Issue Reporting & Collaborative Improvement**
+
+This release introduces a revolutionary community-driven improvement system that transforms successful user overrides into GitHub issues, creating a feedback loop that continuously improves the system for everyone.
+
+### ✨ **Added**
+- **Community Issue Reporter**: Automatically generates GitHub issues from successful override patterns
+- **GitHub Integration**: Pre-filled issue forms with detailed analysis and evidence
+- **Pattern Analysis**: Groups similar successful fixes to identify classification improvements
+- **One-Click Contribution**: Browser integration for easy community contribution
+- **Success Rate Tracking**: Analyzes override success rates to identify improvement opportunities
+- **Detailed Issue Templates**: Comprehensive GitHub issues with user confidence, success rates, and sample data
+- **Community Learning Loop**: User overrides → Pattern analysis → GitHub issues → System improvements
+- **Optional Installation**: `pip install aider-lint-fixer[community]` for community features
+
+### 🔧 **Enhanced**
+- **Enhanced Interactive Mode**: Now prompts for community contribution after successful overrides
+- **Manual Fix Tracking**: Records override classification status for community analysis
+- **Learning Feedback**: Improved feedback generation with classification improvement suggestions
+- **Progress Visibility**: Maintains always-visible progress from v1.8.0
+- **Code Quality**: All files formatted with black for consistent code style
+
+### 🚀 **Impact**
+- **Continuous Improvement**: User successes automatically improve the system for everyone
+- **Community-Driven**: Harnesses collective knowledge to enhance error classification
+- **Higher Fix Rates**: Successful override patterns lead to better automatic classification
+- **Shared Knowledge**: Individual discoveries benefit the entire user community
+- **Transparent Process**: Clear visibility into how user feedback improves the system
+
+### 📦 **Installation Options**
+```bash
+# Community issue reporting features
+pip install aider-lint-fixer[community]
+
+# All features (includes community + progress + learning)
+pip install aider-lint-fixer[all]
+```
+
+### 🎯 **Usage Examples**
+```bash
+# Enhanced interactive with community reporting
+aider-lint-fixer --enhanced-interactive --linters ansible-lint
+
+# After successful overrides, system prompts:
+# "Would you like to help improve the system by creating community issues?"
+# Browser opens with pre-filled GitHub issue for community benefit
+```
+
+### 🌟 **Community Workflow**
+1. User overrides "unfixable" error classification
+2. System records successful fix pattern
+3. Pattern analysis identifies improvement opportunity
+4. GitHub issue generated with detailed evidence
+5. Community reviews and implements improvement
+6. Future users benefit from higher automatic fix rates
+
 ## [1.8.0] - 2025-07-18
 
 ### 🎯 **Enhanced Interactive Mode & Progress Tracking for Large Projects**

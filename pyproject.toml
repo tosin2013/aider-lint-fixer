@@ -59,6 +59,10 @@ learning = [
 progress = [
     "tqdm>=4.64.0",
 ]
+community = [
+    # Community issue reporting uses built-in webbrowser and urllib
+    # No additional dependencies required
+]
 all = [
     "flake8>=7.3.0",
     "pylint>=3.3.0",

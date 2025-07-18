@@ -96,13 +96,16 @@ pip install "aider-lint-fixer[learning]"
 # Install from PyPI (recommended)
 pip install aider-lint-fixer
 
-# 🚀 NEW v1.8.0: Install with enhanced interactive and progress tracking
+# 🚀 NEW v1.9.0: Install with community issue reporting and enhanced workflows
+pip install aider-lint-fixer[community]
+
+# 📊 v1.8.0: Install with enhanced interactive and progress tracking
 pip install aider-lint-fixer[progress]
 
 # 🧠 v1.7.0: Install with learning features (recommended for 46.1% fixability rate)
 pip install aider-lint-fixer[learning]
 
-# Install with all optional features (includes progress tracking + learning)
+# Install with all optional features (includes community + progress + learning)
 pip install aider-lint-fixer[all]
 
 # Verify installation
@@ -304,6 +307,26 @@ python -m aider_lint_fixer /path/to/your/project --max-files 5 --max-errors 10
 # Verbose output for debugging
 python -m aider_lint_fixer /path/to/your/project --verbose
 ```
+
+### 🌍 Community Issue Reporting (v1.9.0)
+
+Transform your successful fixes into community improvements:
+
+```bash
+# Enhanced interactive mode with community reporting
+aider-lint-fixer --enhanced-interactive --linters ansible-lint
+
+# After successful overrides, system prompts:
+# "Would you like to help improve the system by creating community issues?"
+# Browser opens with pre-filled GitHub issue for community benefit
+```
+
+**Community Features:**
+- 🎯 **Automatic issue generation**: Successful override patterns become GitHub issues
+- 🌍 **Community learning**: Your fixes help improve classification for everyone
+- 📊 **Pattern analysis**: System identifies errors that should be reclassified
+- 🚀 **One-click contribution**: Pre-filled GitHub issues with detailed analysis
+- 📈 **Continuous improvement**: Higher automatic fix rates through shared knowledge
 
 ### 🎯 Enhanced Interactive Mode (v1.8.0)
 
@@ -584,6 +607,24 @@ python -m aider_lint_fixer --resume-session progress_1234567890
 python -m aider_lint_fixer --enhanced-interactive --linters ansible-lint
 ```
 
+### Community Contribution Examples (v1.9.0)
+```bash
+# Override "unfixable" errors and contribute to community
+python -m aider_lint_fixer --enhanced-interactive --linters ansible-lint
+# → Override yaml[trailing-spaces] classification
+# → System records successful fix pattern
+# → Prompts to create GitHub issue for community benefit
+
+# Example community workflow:
+# 1. User overrides "unfixable" error → Success
+# 2. System analyzes pattern → Identifies improvement opportunity
+# 3. GitHub issue generated → "Enhancement: Improve ansible-lint yaml[trailing-spaces] classification"
+# 4. Community benefits → Higher automatic fix rates for everyone
+
+# Install with community features
+pip install aider-lint-fixer[community]
+```
+
 ## 🔧 How It Works
 
 1. **Project Detection**: Automatically scans your project to identify languages, package managers, and lint configurations
@@ -591,6 +632,7 @@ python -m aider_lint_fixer --enhanced-interactive --linters ansible-lint
 3. **Error Analysis**: Categorizes errors by type and complexity, prioritizes them for fixing
 4. **AI-Powered Fixing**: Uses aider.chat with your chosen LLM to generate and apply fixes
 5. **Verification**: Re-runs linters to verify fixes and reports success rates
+6. **Community Learning** (v1.9.0): Records successful overrides and generates GitHub issues to improve the system for everyone
 
 ## 🛠️ Development
 
