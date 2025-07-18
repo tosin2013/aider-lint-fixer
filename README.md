@@ -50,9 +50,16 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.11+
 - [aider.chat](https://aider.chat) installed (`pip install aider-chat`)
 - DeepSeek API key from [platform.deepseek.com](https://platform.deepseek.com/)
+
+### Installation
+
+```bash
+# Install aider-lint-fixer from PyPI
+pip install aider-lint-fixer
+```
 
 ### 🚀 **Installation**
 
@@ -63,7 +70,17 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 - **Node.js/npm** (for Node.js linters)
 - **Supported platforms**: Linux, macOS (Windows has limited support)
 
-#### **📦 Recommended Installation (Git + Virtual Environment)**
+#### **📦 Quick Installation (PyPI)**
+
+```bash
+# Install from PyPI (recommended)
+pip install aider-lint-fixer
+
+# Verify installation
+aider-lint-fixer --version
+```
+
+#### **🔧 Development Installation (Git + Virtual Environment)**
 
 ##### **1. Clone and Set Up Virtual Environment**
 ```bash
@@ -113,13 +130,13 @@ python3 -m aider_lint_fixer --version
 
 #### **🐳 Alternative Installation Methods**
 
-##### **One-Line Installation**
+##### **Install from Git (Latest Development)**
 ```bash
-# Install directly from Git
-pip3 install git+https://github.com/tosin2013/aider-lint-fixer.git
+# Install directly from Git (latest development version)
+pip install git+https://github.com/tosin2013/aider-lint-fixer.git
 
-# With virtual environment
-python3 -m venv aider-env && source aider-env/bin/activate && pip3 install git+https://github.com/tosin2013/aider-lint-fixer.git
+# With virtual environment (recommended for development)
+python3 -m venv aider-env && source aider-env/bin/activate && pip install git+https://github.com/tosin2013/aider-lint-fixer.git
 ```
 
 ##### **Install from Source (Development)**
