@@ -19,9 +19,14 @@ from colorama import Fore, Style, init
 from . import __version__
 from .aider_integration import AiderIntegration
 from .config_manager import ConfigManager
+from .enhanced_interactive import (
+    CommunityLearningIntegration,
+    enhanced_interactive_mode,
+    integrate_with_error_analyzer,
+)
 from .error_analyzer import ErrorAnalyzer
-from .enhanced_interactive import enhanced_interactive_mode, CommunityLearningIntegration, integrate_with_error_analyzer
 from .lint_runner import LintRunner
+from .progress_tracker import EnhancedProgressTracker, create_enhanced_progress_callback
 from .project_detector import ProjectDetector
 
 # Initialize colorama for cross-platform colored output
@@ -308,8 +313,16 @@ def print_verification_summary(verification_results):
 @click.option("--max-errors", type=int, help="Maximum number of errors to fix per file")
 @click.option("--dry-run", is_flag=True, help="Show what would be fixed without making changes")
 @click.option("--interactive", is_flag=True, help="Confirm each fix before applying")
-@click.option("--enhanced-interactive", is_flag=True, help="Enhanced per-error interactive mode with override capabilities")
-@click.option("--force", is_flag=True, help="Force fix all errors, including those classified as unfixable (use with caution)")
+@click.option(
+    "--enhanced-interactive",
+    is_flag=True,
+    help="Enhanced per-error interactive mode with override capabilities",
+)
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Force fix all errors, including those classified as unfixable (use with caution)",
+)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 @click.option("--quiet", "-q", is_flag=True, help="Suppress non-error output")
 @click.option("--no-color", is_flag=True, help="Disable colored output")
@@ -366,6 +379,15 @@ def print_verification_summary(verification_results):
     is_flag=True,
     help="Bypass strategic check warnings and proceed anyway (not recommended)",
 )
+@click.option(
+    "--resume-session",
+    help="Resume a previous progress session by session ID",
+)
+@click.option(
+    "--list-sessions",
+    is_flag=True,
+    help="List recoverable progress sessions and exit",
+)
 def main(
     project_path: str,
     version: bool,
@@ -397,6 +419,8 @@ def main(
     skip_strategic_check: bool,
     force_strategic_recheck: bool,
     bypass_strategic_check: bool,
+    resume_session: Optional[str],
+    list_sessions: bool,
 ):
     """Aider Lint Fixer - Automated lint error detection and fixing.
 
@@ -490,6 +514,22 @@ def main(
                     language = key.replace("_training_examples", "")
                     print(f"   {language}: {value} training examples")
         return
+
+    # Handle progress session management
+    if list_sessions:
+        sessions = EnhancedProgressTracker.list_recoverable_sessions(project_path)
+        if not sessions:
+            print(f"{Fore.YELLOW}No recoverable progress sessions found.{Style.RESET_ALL}")
+        else:
+            print(f"\n{Fore.CYAN}📋 Recoverable Progress Sessions:{Style.RESET_ALL}")
+            for session in sessions:
+                from datetime import datetime
+                start_time = datetime.fromisoformat(session['start_time']).strftime('%Y-%m-%d %H:%M:%S')
+                progress = f"{session['processed_errors']}/{session['total_errors']}"
+                size_indicator = "🔥 Large" if session['is_large_project'] else "📁 Small"
+                print(f"   {session['session_id']}: {start_time} - {progress} errors ({size_indicator})")
+            print(f"\n💡 Resume with: --resume-session <session_id>")
+        return 0
 
     # Handle quiet mode
     if quiet:
@@ -709,9 +749,7 @@ def main(
 
             # Run enhanced interactive mode
             interactive_choices = enhanced_interactive_mode(
-                all_error_analyses,
-                max_errors=max_errors,
-                enable_community_learning=True
+                all_error_analyses, max_errors=max_errors, enable_community_learning=True
             )
 
             # Initialize community learning integration
@@ -722,8 +760,11 @@ def main(
             integrate_with_error_analyzer(interactive_choices, analyzer)
 
             # Filter errors based on user choices
-            errors_to_fix = [choice.error_analysis for choice in interactive_choices
-                           if choice.choice.value == 'fix']
+            errors_to_fix = [
+                choice.error_analysis
+                for choice in interactive_choices
+                if choice.choice.value == "fix"
+            ]
 
             if not errors_to_fix:
                 print(f"\n{Fore.YELLOW}No errors selected for fixing.{Style.RESET_ALL}")
@@ -734,9 +775,9 @@ def main(
             for error_analysis in errors_to_fix:
                 file_path = error_analysis.error.file_path
                 if file_path not in selected_file_analyses:
-                    selected_file_analyses[file_path] = type('FileAnalysis', (), {
-                        'errors': [], 'file_path': file_path
-                    })()
+                    selected_file_analyses[file_path] = type(
+                        "FileAnalysis", (), {"errors": [], "file_path": file_path}
+                    )()
                 selected_file_analyses[file_path].errors.append(error_analysis)
 
             file_analyses = selected_file_analyses
@@ -748,7 +789,9 @@ def main(
         elif force:
             # Force mode - include ALL errors (fixable and unfixable)
             print(f"\n{Fore.RED}⚠️  FORCE MODE ENABLED{Style.RESET_ALL}")
-            print(f"   {Fore.YELLOW}WARNING: Attempting to fix ALL errors, including those classified as unfixable{Style.RESET_ALL}")
+            print(
+                f"   {Fore.YELLOW}WARNING: Attempting to fix ALL errors, including those classified as unfixable{Style.RESET_ALL}"
+            )
 
             # Get ALL errors for force mode
             all_error_analyses = []
@@ -768,9 +811,9 @@ def main(
             for error_analysis in all_error_analyses:
                 file_path = error_analysis.error.file_path
                 if file_path not in force_file_analyses:
-                    force_file_analyses[file_path] = type('FileAnalysis', (), {
-                        'errors': [], 'file_path': file_path
-                    })()
+                    force_file_analyses[file_path] = type(
+                        "FileAnalysis", (), {"errors": [], "file_path": file_path}
+                    )()
                 force_file_analyses[file_path].errors.append(error_analysis)
 
             file_analyses = force_file_analyses
@@ -779,7 +822,9 @@ def main(
             print(f"   Forcing fixes for {len(prioritized_errors)} errors")
 
             # Confirmation for force mode
-            if not click.confirm(f"\n{Fore.RED}Are you sure you want to force-fix {len(prioritized_errors)} errors? This may cause issues.{Style.RESET_ALL}"):
+            if not click.confirm(
+                f"\n{Fore.RED}Are you sure you want to force-fix {len(prioritized_errors)} errors? This may cause issues.{Style.RESET_ALL}"
+            ):
                 print("Aborted by user.")
                 return 0
 
@@ -830,13 +875,31 @@ def main(
                 print("Aborted by user.")
                 return 0
 
-        # Create progress callback for long-running operations
-        progress_callback = create_progress_callback(verbose)
+        # Create enhanced progress tracker for long-running operations
+        total_error_count = len(prioritized_errors)
+        progress_tracker = EnhancedProgressTracker(
+            project_path=project_path,
+            total_errors=total_error_count,
+            verbose=verbose
+        )
 
-        # Fix errors with progress tracking
+        # Set total files for progress tracking
+        progress_tracker.set_total_files(len(file_analyses))
+
+        # Import ProgressStage for stage updates
+        from .progress_tracker import ProgressStage
+        progress_tracker.update_stage(ProgressStage.PROCESSING_FILES)
+
+        # Create enhanced progress callback
+        progress_callback = create_enhanced_progress_callback(progress_tracker, verbose)
+
+        # Fix errors with enhanced progress tracking
         sessions = aider_integration.fix_multiple_files(
             file_analyses, max_files, max_errors, progress_callback
         )
+
+        # Close progress tracker
+        progress_tracker.close()
 
         print_fix_summary(sessions)
 
@@ -863,7 +926,9 @@ def main(
             for session in sessions:
                 verification = verification_results[session.session_id]
                 for result in session.results:
-                    error_key = f"{result.error.file_path}:{result.error.line}:{result.error.rule_id}"
+                    error_key = (
+                        f"{result.error.file_path}:{result.error.line}:{result.error.rule_id}"
+                    )
                     fix_results[error_key] = result.success
 
             # Update community learning with actual results
@@ -877,8 +942,10 @@ def main(
             print(f"   Total attempts: {feedback['total_attempts']}")
             print(f"   Successful overrides: {feedback['successful_overrides']}")
             print(f"   Failed overrides: {feedback['failed_overrides']}")
-            if feedback['classification_improvements']:
-                print(f"   Classification improvements identified: {len(feedback['classification_improvements'])}")
+            if feedback["classification_improvements"]:
+                print(
+                    f"   Classification improvements identified: {len(feedback['classification_improvements'])}"
+                )
 
         # Final summary
         overall_success_rate = (total_fixed / total_attempted * 100) if total_attempted > 0 else 0

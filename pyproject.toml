@@ -56,6 +56,9 @@ learning = [
     "beautifulsoup4>=4.9.0",
     "pyahocorasick>=1.4.0",
 ]
+progress = [
+    "tqdm>=4.64.0",
+]
 all = [
     "flake8>=7.3.0",
     "pylint>=3.3.0",
@@ -64,6 +67,7 @@ all = [
     "requests>=2.25.0",
     "beautifulsoup4>=4.9.0",
     "pyahocorasick>=1.4.0",
+    "tqdm>=4.64.0",
 ]
 
 [project.urls]
