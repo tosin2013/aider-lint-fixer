@@ -20,9 +20,9 @@ def test_enhanced_interactive_help():
 
     # Test help output
     print("\n1. Testing CLI flag exposure...")
-    result = subprocess.run([
-        sys.executable, "-m", "aider_lint_fixer", "--help"
-    ], capture_output=True, text=True)
+    result = subprocess.run(
+        [sys.executable, "-m", "aider_lint_fixer", "--help"], capture_output=True, text=True
+    )
 
     assert result.returncode == 0, f"Help command failed: {result.stderr}"
 
@@ -33,7 +33,7 @@ def test_enhanced_interactive_help():
         "--enhanced-interactive",
         "--force",
         "Enhanced per-error interactive mode",
-        "Force fix all errors"
+        "Force fix all errors",
     ]
 
     missing_flags = []
@@ -57,8 +57,9 @@ def test_enhanced_interactive_import():
         enhanced_interactive_mode,
         CommunityLearningIntegration,
         UserChoice,
-        InteractiveChoice
+        InteractiveChoice,
     )
+
     print("   ✅ Enhanced interactive module imports successfully")
 
     # Test enum values
@@ -66,7 +67,9 @@ def test_enhanced_interactive_import():
     print(f"   ✅ UserChoice enum has {len(choices)} options: {[c.value for c in choices]}")
 
     assert len(choices) == 3, "UserChoice enum should have 3 options"
-    assert all(hasattr(UserChoice, choice.name) for choice in choices), "All choices should be valid enum members"
+    assert all(
+        hasattr(UserChoice, choice.name) for choice in choices
+    ), "All choices should be valid enum members"
 
 
 def test_community_learning_integration():
@@ -81,16 +84,27 @@ def test_community_learning_integration():
 
     # Test feedback generation
     feedback = integration.generate_learning_feedback()
-    expected_keys = ["total_attempts", "successful_overrides", "failed_overrides", "classification_improvements"]
+    expected_keys = [
+        "total_attempts",
+        "successful_overrides",
+        "failed_overrides",
+        "classification_improvements",
+    ]
 
     print("   ✅ Learning feedback structure is correct")
     print(f"      Keys: {list(feedback.keys())}")
 
-    assert all(key in feedback for key in expected_keys), f"Missing feedback keys: {set(expected_keys) - set(feedback.keys())}"
+    assert all(
+        key in feedback for key in expected_keys
+    ), f"Missing feedback keys: {set(expected_keys) - set(feedback.keys())}"
     assert isinstance(feedback["total_attempts"], int), "total_attempts should be an integer"
-    assert isinstance(feedback["successful_overrides"], int), "successful_overrides should be an integer"
+    assert isinstance(
+        feedback["successful_overrides"], int
+    ), "successful_overrides should be an integer"
     assert isinstance(feedback["failed_overrides"], int), "failed_overrides should be an integer"
-    assert isinstance(feedback["classification_improvements"], list), "classification_improvements should be a list"
+    assert isinstance(
+        feedback["classification_improvements"], list
+    ), "classification_improvements should be a list"
 
 
 def demonstrate_usage():
@@ -121,7 +135,7 @@ def main():
     tests = [
         test_enhanced_interactive_help,
         test_enhanced_interactive_import,
-        test_community_learning_integration
+        test_community_learning_integration,
     ]
 
     passed = 0

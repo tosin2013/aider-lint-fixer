@@ -957,7 +957,9 @@ def main(
                 )
 
             # Integrate community issue reporting
-            integrate_community_issue_reporting(community_learning, community_learning.manual_attempts)
+            integrate_community_issue_reporting(
+                community_learning, community_learning.manual_attempts
+            )
 
         # Final summary
         overall_success_rate = (total_fixed / total_attempted * 100) if total_attempted > 0 else 0
