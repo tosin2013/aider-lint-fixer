@@ -7,13 +7,13 @@ pre-flight check. Stops execution and provides strategic guidance for
 chaotic codebases before attempting automated fixes.
 """
 
-import sys
 import json
-from pathlib import Path
-from typing import Dict, List, Optional
-from dataclasses import dataclass, asdict
+import sys
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Optional
 
 
 class ChaosLevel(Enum):

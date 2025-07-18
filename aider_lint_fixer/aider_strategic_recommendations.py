@@ -6,12 +6,9 @@ Uses aider.chat to generate specific, actionable recommendations for cleaning up
 chaotic codebases before proceeding with automated lint fixing.
 """
 
-import subprocess
-import tempfile
-import json
-from pathlib import Path
-from typing import List, Dict, Optional
 from dataclasses import dataclass
+from pathlib import Path
+from typing import List, Optional
 
 from .strategic_preflight_check import ChaosIndicator, ChaosLevel
 
