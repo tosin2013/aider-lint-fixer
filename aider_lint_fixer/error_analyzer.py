@@ -246,16 +246,34 @@ class ErrorAnalyzer:
             file_analysis.file_content = ""
             file_analysis.file_exists = False
 
-        # Analyze each error
-        for error in errors:
-            error_analysis = self._analyze_error(error, file_analysis.file_content)
-            file_analysis.error_analyses.append(error_analysis)
+        try:
+            # Analyze each error
+            for error in errors:
+                try:
+                    error_analysis = self._analyze_error(error, file_analysis.file_content)
+                    file_analysis.error_analyses.append(error_analysis)
+                except Exception as e:
+                    logger.warning(f"Failed to analyze error in {file_path}: {e}")
+                    # Continue with other errors
 
-        # Find related errors
-        self._find_related_errors(file_analysis.error_analyses)
+            # Find related errors
+            try:
+                self._find_related_errors(file_analysis.error_analyses)
+            except Exception as e:
+                logger.warning(f"Failed to find related errors in {file_path}: {e}")
 
-        # Calculate complexity score
-        file_analysis.complexity_score = self._calculate_file_complexity(file_analysis)
+            # Calculate complexity score - ensure this always gets set
+            try:
+                file_analysis.complexity_score = self._calculate_file_complexity(file_analysis)
+            except Exception as e:
+                logger.warning(f"Failed to calculate complexity score for {file_path}: {e}")
+                file_analysis.complexity_score = 0.0  # Default fallback value
+
+        except Exception as e:
+            logger.error(f"Unexpected error during file analysis for {file_path}: {e}")
+            # Ensure complexity_score is always set, even if analysis fails
+            if not hasattr(file_analysis, 'complexity_score') or file_analysis.complexity_score is None:
+                file_analysis.complexity_score = 0.0
 
         return file_analysis
 
@@ -311,8 +329,8 @@ class ErrorAnalyzer:
             ErrorCategory enum value
         """
         linter = error.linter
-        rule_id = error.rule_id.lower()
-        message = error.message.lower()
+        rule_id = (error.rule_id or "").lower()
+        message = (error.message or "").lower()
 
         # Check rule-based categorization
         if linter in self.RULE_CATEGORIES:
@@ -359,8 +377,8 @@ class ErrorAnalyzer:
         base_complexity = self.COMPLEXITY_MAPPING.get(category, FixComplexity.MODERATE)
 
         # Adjust based on specific rules or messages
-        message = error.message.lower()
-        rule_id = error.rule_id.lower()
+        message = (error.message or "").lower()
+        rule_id = (error.rule_id or "").lower()
 
         # Special handling for Jinja2 template errors
         if error.linter == "ansible-lint" and "jinja[invalid]" in rule_id:
@@ -506,10 +524,10 @@ class ErrorAnalyzer:
         if (
             error.linter == "ansible-lint"
             and category == ErrorCategory.SYNTAX
-            and "jinja[invalid]" in error.rule_id.lower()
+            and "jinja[invalid]" in (error.rule_id or "").lower()
         ):
             # Simple quote syntax errors are fixable
-            message = error.message.lower()
+            message = (error.message or "").lower()
             if "expected token ','" in message and (
                 "got 'n'" in message or "got 'not'" in message or "got 'qubinode'" in message
             ):
@@ -532,18 +550,22 @@ class ErrorAnalyzer:
             error: The lint error that was attempted to be fixed
             fix_successful: Whether the fix was successful
         """
-        language = detect_language_from_file_path(error.file_path)
+        try:
+            language = detect_language_from_file_path(error.file_path)
 
-        # Special case: if linter is ansible-lint, treat as ansible regardless of file extension
-        if error.linter == "ansible-lint":
-            language = "ansible"
+            # Special case: if linter is ansible-lint, treat as ansible regardless of file extension
+            if error.linter == "ansible-lint":
+                language = "ansible"
 
-        self.smart_classifier.learn_from_fix(error.message, language, error.linter, fix_successful)
+            self.smart_classifier.learn_from_fix(error.message, language, error.linter, fix_successful)
 
-        logger.debug(
-            f"Learned from fix: {error.linter} -> {fix_successful} "
-            f"(language: {language}) for: {error.message[:50]}..."
-        )
+            logger.info(
+                f"✅ Learned from fix: {error.linter} -> {fix_successful} "
+                f"(language: {language}) for: {error.message[:50]}..."
+            )
+        except Exception as e:
+            logger.error(f"Failed to record learning data: {e}")
+            # Continue execution even if learning fails
 
     def get_pattern_statistics(self) -> Dict:
         """Get statistics about the pattern matching system."""
@@ -649,7 +671,7 @@ class ErrorAnalyzer:
             return True
 
         # Import-related errors
-        if "import" in error1.message.lower() and "import" in error2.message.lower():
+        if "import" in (error1.message or "").lower() and "import" in (error2.message or "").lower():
             return True
 
         return False

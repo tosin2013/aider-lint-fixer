@@ -472,12 +472,16 @@ class AiderIntegration:
                 "description": "",
             }
 
-    def _build_aider_command(self, file_path: str, message: str = None) -> List[str]:
+    def _build_aider_command(self, file_path: str, message: str = None, architect_mode: bool = False,
+                           architect_model: str = None, editor_model: str = None) -> List[str]:
         """Build the aider command with appropriate options.
 
         Args:
             file_path: Path to the file to fix
             message: Optional message to pass to aider
+            architect_mode: Whether to use architect mode
+            architect_model: Model to use for architect reasoning
+            editor_model: Model to use for file editing (when in architect mode)
 
         Returns:
             List of command arguments
@@ -490,16 +494,38 @@ class AiderIntegration:
         # Set up environment variables for aider subprocess
         self._setup_aider_environment(llm_config)
 
-        if llm_config.provider == "deepseek":
-            command.extend(["--model", llm_config.model])
-        elif llm_config.provider == "openrouter":
-            command.extend(["--model", llm_config.model])
-        elif llm_config.provider == "ollama":
-            # Extract model name from full model string
-            model_name = (
-                llm_config.model.split("/")[-1] if "/" in llm_config.model else llm_config.model
-            )
-            command.extend(["--model", f"ollama_chat/{model_name}"])
+        # Configure models based on mode
+        if architect_mode:
+            # Use architect mode with separate models
+            command.append("--architect")
+
+            # Set architect model (main reasoning model)
+            architect_model_name = architect_model or llm_config.model
+            command.extend(["--model", architect_model_name])
+
+            # Set editor model (for file editing)
+            if editor_model:
+                command.extend(["--editor-model", editor_model])
+            else:
+                # Default editor models based on architect model
+                default_editor = self._get_default_editor_model(architect_model_name)
+                if default_editor:
+                    command.extend(["--editor-model", default_editor])
+
+            # Use recommended edit format for architect mode
+            command.extend(["--editor-edit-format", "editor-diff"])
+        else:
+            # Standard mode - single model
+            if llm_config.provider == "deepseek":
+                command.extend(["--model", llm_config.model])
+            elif llm_config.provider == "openrouter":
+                command.extend(["--model", llm_config.model])
+            elif llm_config.provider == "ollama":
+                # Extract model name from full model string
+                model_name = (
+                    llm_config.model.split("/")[-1] if "/" in llm_config.model else llm_config.model
+                )
+                command.extend(["--model", f"ollama_chat/{model_name}"])
 
         # Add scripting-friendly options
         command.extend(
@@ -529,6 +555,447 @@ class AiderIntegration:
         command.append(clean_file_path)
 
         return command
+
+    def _get_default_editor_model(self, architect_model: str) -> Optional[str]:
+        """Get the recommended editor model for a given architect model.
+
+        Args:
+            architect_model: The architect model being used
+
+        Returns:
+            Recommended editor model name or None
+        """
+        # Recommended pairings based on aider documentation
+        editor_model_map = {
+            # OpenAI o1 models work best with GPT-4o editor
+            "o1-mini": "gpt-4o",
+            "o1-preview": "gpt-4o",
+            "openai/o1-mini": "gpt-4o",
+            "openai/o1-preview": "gpt-4o",
+
+            # Claude models can use GPT-4o or same model
+            "claude-3-5-sonnet-20241022": "gpt-4o",
+            "anthropic/claude-3-5-sonnet-20241022": "gpt-4o",
+
+            # DeepSeek models can use GPT-4o for editing
+            "deepseek/deepseek-chat": "gpt-4o",
+            "deepseek/deepseek-coder": "gpt-4o",
+
+            # For other models, let aider choose default
+        }
+
+        return editor_model_map.get(architect_model)
+
+    def _create_architect_prompt_file(self, prompt_data: Dict) -> str:
+        """Create temporary file with architect prompt for complex instructions.
+
+        Args:
+            prompt_data: Dictionary containing architect prompt information
+
+        Returns:
+            Path to the created temporary prompt file
+        """
+        try:
+            # Create temporary file with .md extension for better formatting
+            prompt_file = tempfile.NamedTemporaryFile(
+                mode='w',
+                suffix='.md',
+                prefix='architect_prompt_',
+                delete=False,
+                dir=self.project_root
+            )
+
+            # Write the architect prompt content
+            architect_prompt = prompt_data.get("architect_prompt", "")
+            if not architect_prompt:
+                # Fallback to basic prompt if no specific architect prompt
+                file_name = prompt_data.get("file", "unknown").split('/')[-1]
+                undefined_vars = prompt_data.get("undefined_variables", [])
+                architect_prompt = f"""# Fix undefined variables in {file_name}
+
+Please analyze and fix the undefined variable issues in this file.
+
+Undefined variables detected: {', '.join(undefined_vars)}
+
+Instructions:
+1. Examine each undefined variable in context
+2. Determine the correct solution (import, global, typo, scope)
+3. Apply fixes while preserving functionality
+4. Ensure no runtime errors are introduced
+"""
+
+            prompt_file.write(architect_prompt)
+            prompt_file.close()
+
+            logger.debug(f"Created architect prompt file: {prompt_file.name}")
+            return prompt_file.name
+
+        except Exception as e:
+            logger.error(f"Failed to create architect prompt file: {e}")
+            raise
+
+    def _cleanup_prompt_file(self, prompt_file_path: str) -> None:
+        """Clean up temporary prompt file.
+
+        Args:
+            prompt_file_path: Path to the prompt file to clean up
+        """
+        try:
+            if os.path.exists(prompt_file_path):
+                os.unlink(prompt_file_path)
+                logger.debug(f"Cleaned up prompt file: {prompt_file_path}")
+        except Exception as e:
+            logger.warning(f"Failed to cleanup prompt file {prompt_file_path}: {e}")
+
+    def _run_architect_mode(self, file_path: str, prompt_data: Dict,
+                          architect_model: str = None, editor_model: str = None) -> Dict:
+        """Execute aider in architect mode with structured prompt.
+
+        Args:
+            file_path: Path to the file to fix
+            prompt_data: Dictionary containing architect prompt and metadata
+            architect_model: Model to use for architect reasoning
+            editor_model: Model to use for file editing
+
+        Returns:
+            Dictionary with execution results
+        """
+        prompt_file_path = None
+
+        try:
+            # Create temporary prompt file
+            prompt_file_path = self._create_architect_prompt_file(prompt_data)
+
+            # Build architect mode command
+            # Use @filename syntax to load prompt from file
+            message = f"@{prompt_file_path}"
+            command = self._build_aider_command(
+                file_path,
+                message,
+                architect_mode=True,
+                architect_model=architect_model,
+                editor_model=editor_model
+            )
+
+            logger.info(f"Running architect mode for {file_path}")
+            logger.debug(f"Architect command: {' '.join(command)}")
+
+            # Execute the command
+            process = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=self.AIDER_TIMEOUT,
+                cwd=self.project_root,
+            )
+
+            stdout = process.stdout
+            stderr = process.stderr
+
+            # Analyze results
+            success = process.returncode == 0
+            changes_made = self._detect_changes_made(stdout)
+
+            if success:
+                logger.info(f"Architect mode completed successfully for {file_path}")
+                description = f"Fixed undefined variables using architect mode"
+            else:
+                logger.error(f"Architect mode failed for {file_path}: {stderr}")
+                description = f"Architect mode failed: {stderr[:100]}..."
+
+            return {
+                "success": success,
+                "changes_made": changes_made,
+                "output": stdout,
+                "error": stderr if not success else "",
+                "description": description,
+                "mode": "architect"
+            }
+
+        except subprocess.TimeoutExpired:
+            logger.error(f"Architect mode timed out for {file_path}")
+            return {
+                "success": False,
+                "changes_made": False,
+                "output": "",
+                "error": "Architect mode execution timed out",
+                "description": "Timed out during architect mode execution",
+                "mode": "architect"
+            }
+        except Exception as e:
+            logger.error(f"Error running architect mode for {file_path}: {e}")
+            return {
+                "success": False,
+                "changes_made": False,
+                "output": "",
+                "error": str(e),
+                "description": f"Architect mode error: {str(e)}",
+                "mode": "architect"
+            }
+        finally:
+            # Always cleanup the temporary prompt file
+            if prompt_file_path:
+                self._cleanup_prompt_file(prompt_file_path)
+
+    def execute_architect_guidance(self, guidance: Dict, architect_model: str = None,
+                                 editor_model: str = None) -> List[FixResult]:
+        """Execute architect mode for all dangerous files identified in guidance.
+
+        Args:
+            guidance: Architect guidance from Pre-Lint Risk Assessment
+            architect_model: Model to use for architect reasoning
+            editor_model: Model to use for file editing
+
+        Returns:
+            List of FixResult objects for each file processed
+        """
+        results = []
+
+        if not guidance.get("has_dangerous_errors"):
+            logger.info("No dangerous errors found - skipping architect mode")
+            return results
+
+        architect_prompts = guidance.get("architect_prompts", [])
+        if not architect_prompts:
+            logger.warning("No architect prompts found in guidance")
+            return results
+
+        logger.info(f"🏗️  Executing architect mode for {len(architect_prompts)} files")
+
+        for i, prompt_data in enumerate(architect_prompts, 1):
+            file_path = prompt_data.get("file", "")
+            if not file_path:
+                logger.warning(f"Skipping prompt {i}: no file path specified")
+                continue
+
+            file_name = file_path.split('/')[-1]
+            undefined_vars = prompt_data.get("undefined_variables", [])
+
+            print(f"\n🏗️  [{i}/{len(architect_prompts)}] Architect mode: {file_name}")
+            print(f"   📁 File: {file_path}")
+            print(f"   🔍 Undefined variables: {', '.join(undefined_vars)}")
+
+            try:
+                # Execute architect mode for this file
+                result = self._run_architect_mode(
+                    file_path,
+                    prompt_data,
+                    architect_model=architect_model,
+                    editor_model=editor_model
+                )
+
+                # Create FixResult from architect mode result
+                # Note: We don't have ErrorAnalysis objects for architect mode,
+                # so we'll create a simplified result
+                fix_result = FixResult(
+                    error_analysis=None,  # Architect mode doesn't use ErrorAnalysis
+                    success=result["success"],
+                    changes_made=result["changes_made"],
+                    fix_description=result["description"],
+                    aider_output=result["output"],
+                    error_message=result.get("error", "")
+                )
+
+                results.append(fix_result)
+
+                if result["success"]:
+                    print(f"   ✅ Architect mode completed successfully")
+                    if result["changes_made"]:
+                        print(f"   📝 Changes were made to the file")
+                    else:
+                        print(f"   ℹ️  No changes needed")
+                else:
+                    print(f"   ❌ Architect mode failed: {result.get('error', 'Unknown error')}")
+
+            except Exception as e:
+                logger.error(f"Error executing architect mode for {file_path}: {e}")
+
+                # Create failed result
+                fix_result = FixResult(
+                    error_analysis=None,
+                    success=False,
+                    changes_made=False,
+                    fix_description=f"Architect mode error: {str(e)}",
+                    aider_output="",
+                    error_message=str(e)
+                )
+                results.append(fix_result)
+
+                print(f"   ❌ Error: {str(e)}")
+
+        # Summary
+        successful = sum(1 for r in results if r.success)
+        with_changes = sum(1 for r in results if r.changes_made)
+
+        print(f"\n🏗️  Architect Mode Summary:")
+        print(f"   📊 Files processed: {len(results)}")
+        print(f"   ✅ Successful: {successful}")
+        print(f"   📝 Files changed: {with_changes}")
+
+        return results
+
+    def execute_safe_automation(self, guidance: Dict, enabled_linters: List[str],
+                              max_errors: int = None) -> List[FixResult]:
+        """Execute safe automation for non-dangerous error types.
+
+        Args:
+            guidance: Architect guidance from Pre-Lint Risk Assessment
+            enabled_linters: List of enabled linters
+            max_errors: Maximum errors to fix per file
+
+        Returns:
+            List of FixResult objects for safe automation
+        """
+        results = []
+
+        safe_plan = guidance.get("safe_automation_plan", {})
+        if not safe_plan:
+            logger.info("No safe automation plan found")
+            return results
+
+        safe_errors_count = safe_plan.get("safe_errors_count", 0)
+        if safe_errors_count == 0:
+            logger.info("No safe errors to automate")
+            return results
+
+        print(f"\n🤖 Safe Automation Phase:")
+        print(f"   📊 Safe errors to fix: {safe_errors_count}")
+        print(f"   🔧 Linters: {', '.join(enabled_linters)}")
+
+        # Use the existing fix_errors method but with exclusions for dangerous rules
+        dangerous_rules = ["no-undef", "no-global-assign", "no-implicit-globals", "no-redeclare"]
+
+        # This would integrate with the existing lint runner and error fixing logic
+        # For now, we'll return a placeholder that indicates safe automation was attempted
+        logger.info(f"Safe automation would exclude rules: {', '.join(dangerous_rules)}")
+        logger.info(f"Safe automation would fix up to {max_errors or 'unlimited'} errors per file")
+
+        # TODO: Integrate with existing LintRunner and error fixing workflow
+        # This requires coordination with the main lint fixing pipeline
+
+        return results
+
+    def create_enhanced_prompt_for_dangerous_errors(self, error_analyses: List,
+                                                   undefined_vars_context: Dict = None) -> str:
+        """Create enhanced prompt for dangerous errors with undefined variable context.
+
+        Args:
+            error_analyses: List of ErrorAnalysis objects
+            undefined_vars_context: Context about undefined variables from risk assessment
+
+        Returns:
+            Enhanced prompt string with context about dangerous errors
+        """
+        prompt_parts = ["# Enhanced Fix for Dangerous Errors", ""]
+
+        # Group errors by file
+        files_with_errors = {}
+        for error_analysis in error_analyses:
+            file_path = error_analysis.error.file_path
+            if file_path not in files_with_errors:
+                files_with_errors[file_path] = []
+            files_with_errors[file_path].append(error_analysis)
+
+        for file_path, file_errors in files_with_errors.items():
+            file_name = file_path.split('/')[-1]
+            prompt_parts.append(f"## File: {file_name}")
+            prompt_parts.append(f"Path: {file_path}")
+            prompt_parts.append("")
+
+            # Check for undefined variables in this file
+            undefined_vars = []
+            no_undef_errors = []
+
+            for error_analysis in file_errors:
+                error = error_analysis.error
+                if error.rule_id == "no-undef":
+                    no_undef_errors.append(error)
+                    # Extract variable name from error message
+                    import re
+                    match = re.search(r"'([^']+)' is not defined", error.message)
+                    if match:
+                        undefined_vars.append(match.group(1))
+
+            if undefined_vars:
+                prompt_parts.append("### ⚠️ CRITICAL: Undefined Variables Detected")
+                prompt_parts.append("These variables are undefined and may break functionality:")
+                prompt_parts.append("")
+
+                for var in undefined_vars:
+                    prompt_parts.append(f"- `{var}` - undefined variable")
+
+                    # Add context if available
+                    if undefined_vars_context and file_path in undefined_vars_context:
+                        file_context = undefined_vars_context[file_path]
+                        if var in file_context.get("undefined_vars", set()):
+                            # Find suggestions for this variable
+                            suggestions = self._get_variable_suggestions(var, file_name)
+                            if suggestions:
+                                prompt_parts.append(f"  💡 Suggestion: {suggestions[0]}")
+
+                prompt_parts.append("")
+                prompt_parts.append("### Instructions for Undefined Variables:")
+                prompt_parts.append("1. **DO NOT** create dummy variables or empty objects")
+                prompt_parts.append("2. **ANALYZE CONTEXT** - determine what each variable should be:")
+                prompt_parts.append("   - Missing import statements")
+                prompt_parts.append("   - Global variables from HTML/external scripts")
+                prompt_parts.append("   - Typos in variable names")
+                prompt_parts.append("   - Variables that should be function parameters")
+                prompt_parts.append("3. **PRESERVE FUNCTIONALITY** - ensure fixes don't break the code")
+                prompt_parts.append("4. **ADD COMMENTS** explaining your reasoning for each fix")
+                prompt_parts.append("")
+
+            # List other errors
+            other_errors = [e for e in file_errors if e.error.rule_id != "no-undef"]
+            if other_errors:
+                prompt_parts.append("### Other Errors to Fix:")
+                for error_analysis in other_errors:
+                    error = error_analysis.error
+                    prompt_parts.append(f"- Line {error.line}: {error.rule_id} - {error.message}")
+                prompt_parts.append("")
+
+        prompt_parts.extend([
+            "## General Instructions:",
+            "1. Fix all errors while preserving code functionality",
+            "2. Pay special attention to undefined variables - these are dangerous",
+            "3. Add appropriate imports, globals, or parameter declarations",
+            "4. Test your understanding by explaining each undefined variable fix",
+            "5. If unsure about a variable's purpose, add a comment asking for clarification",
+            "",
+            "## Example Fixes:",
+            "```javascript",
+            "// BAD: Creating dummy variables",
+            "const globalConfig = {}; // This breaks functionality!",
+            "",
+            "// GOOD: Adding proper import",
+            "import { globalConfig } from './config.js';",
+            "",
+            "// GOOD: Declaring as global (if from HTML)",
+            "/* global globalConfig */",
+            "",
+            "// GOOD: Adding as parameter (if should be passed in)",
+            "function processData(globalConfig) {",
+            "```"
+        ])
+
+        return "\n".join(prompt_parts)
+
+    def _get_variable_suggestions(self, var_name: str, file_name: str) -> List[str]:
+        """Get suggestions for fixing an undefined variable."""
+        suggestions = []
+
+        if var_name.lower() in ['console', 'window', 'document', 'global', 'process']:
+            suggestions.append(f"'{var_name}' is a global - add /* global {var_name} */ comment")
+        elif var_name.lower().endswith('callback') or 'callback' in var_name.lower():
+            suggestions.append(f"'{var_name}' might be a missing function parameter")
+        elif file_name.endswith('.mjs') or 'module' in file_name:
+            suggestions.append(f"'{var_name}' might need an import statement")
+        elif 'config' in var_name.lower():
+            suggestions.append(f"'{var_name}' might be imported from a config file")
+        else:
+            suggestions.append(f"'{var_name}' needs investigation - could be import, global, or typo")
+
+        return suggestions
 
     def _setup_aider_environment(self, llm_config) -> None:
         """Set up environment variables for aider subprocess.
@@ -762,8 +1229,10 @@ class AiderIntegration:
         sessions = []
 
         # Sort files by complexity (easier files first)
+        # Use getattr with default to handle cases where complexity_score might be missing
         sorted_files = sorted(
-            file_analyses.items(), key=lambda x: (x[1].complexity_score, len(x[1].error_analyses))
+            file_analyses.items(),
+            key=lambda x: (getattr(x[1], 'complexity_score', 0.0), len(x[1].error_analyses))
         )
 
         if max_files:

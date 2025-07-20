@@ -413,7 +413,7 @@ class LanguagePatternMatcher:
         if not error_message:
             return []
 
-        error_lower = error_message.lower()
+        error_lower = (error_message or "").lower()
 
         if AHOCORASICK_AVAILABLE and language in self.matchers:
             # Fast Aho-Corasick matching
@@ -883,7 +883,7 @@ class SmartErrorClassifier:
 
         # Syntax errors are usually not fixable
         syntax_keywords = ["syntax error", "unexpected token", "parse error", "invalid syntax"]
-        error_lower = error_message.lower()
+        error_lower = (error_message or "").lower()
         if any(keyword in error_lower for keyword in syntax_keywords):
             return False
 
@@ -996,13 +996,16 @@ class SmartErrorClassifier:
             logger.error(f"Failed to save training data for {language}: {e}")
             return
 
-        # Retrain if we have enough data
-        if len(training_data) >= 20:  # Minimum for meaningful training
+        # Retrain if we have enough data (lowered threshold for faster learning)
+        if len(training_data) >= 5:  # Minimum for meaningful training (reduced from 20)
             self._retrain_language_model(language, training_data)
 
         # Also try to extract patterns for fast matching
         if fix_successful:
             self._extract_and_add_pattern(error_message, language, linter)
+
+        # Immediate learning: update confidence for similar patterns
+        self._update_pattern_confidence(error_message, language, linter, fix_successful)
 
     def _extract_and_add_pattern(self, error_message: str, language: str, linter: str):
         """Extract key phrases from successful fixes and add as patterns."""
@@ -1039,6 +1042,21 @@ class SmartErrorClassifier:
         error_indicators = ["error", "warning", "should", "expected", "missing", "unused"]
         return any(indicator in phrase for indicator in error_indicators)
 
+    def _update_pattern_confidence(self, error_message: str, language: str, linter: str, fix_successful: bool):
+        """Immediately update confidence for similar patterns."""
+        # Find existing patterns that match this error
+        if language in self.pattern_matcher.patterns_by_language:
+            for pattern in self.pattern_matcher.patterns_by_language[language]:
+                if pattern.linter == linter and pattern.pattern.lower() in error_message.lower():
+                    # Adjust confidence based on fix success
+                    if fix_successful:
+                        pattern.confidence = min(1.0, pattern.confidence + 0.1)
+                    else:
+                        pattern.confidence = max(0.1, pattern.confidence - 0.1)
+
+                    logger.debug(f"Updated pattern confidence: {pattern.pattern} -> {pattern.confidence:.2f}")
+                    break
+
     def _retrain_language_model(self, language: str, training_data: List[Dict]):
         """Retrain the ML model for a specific language."""
         if not SKLEARN_AVAILABLE:
@@ -1071,7 +1089,12 @@ class SmartErrorClassifier:
             # Save models
             self._save_models()
 
-            logger.info(f"Retrained {language} model with {len(training_data)} examples")
+            logger.info(f"🧠 Retrained {language} model with {len(training_data)} examples")
+
+            # Log learning progress
+            fixable_count = sum(1 for item in training_data if item["fixable"])
+            success_rate = fixable_count / len(training_data) * 100
+            logger.info(f"   📊 Success rate: {success_rate:.1f}% ({fixable_count}/{len(training_data)})")
 
         except Exception as e:
             logger.error(f"Failed to retrain {language} model: {e}")
@@ -1149,6 +1172,12 @@ class SmartErrorClassifier:
                         with open(training_file, "r", encoding="utf-8") as f:
                             training_data = json.load(f)
                         stats["ml_classifier"][f"{language}_training_examples"] = len(training_data)
+
+                        # Add learning progress info
+                        if len(training_data) >= 5:
+                            stats["ml_classifier"][f"{language}_model_trained"] = True
+                        else:
+                            stats["ml_classifier"][f"{language}_needs_examples"] = 5 - len(training_data)
                     except Exception:
                         pass
 

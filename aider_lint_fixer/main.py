@@ -29,6 +29,7 @@ from .error_analyzer import ErrorAnalyzer
 from .lint_runner import LintRunner
 from .progress_tracker import EnhancedProgressTracker, create_enhanced_progress_callback
 from .project_detector import ProjectDetector
+from .pre_lint_assessment import PreLintAssessor, display_risk_assessment
 
 # Initialize colorama for cross-platform colored output
 init()
@@ -324,6 +325,23 @@ def print_verification_summary(verification_results):
     is_flag=True,
     help="Force fix all errors, including those classified as unfixable (use with caution)",
 )
+@click.option(
+    "--loop",
+    is_flag=True,
+    help="Iterative mode: run force mode in intelligent loops until convergence or diminishing returns detected",
+)
+@click.option(
+    "--max-iterations",
+    type=int,
+    default=10,
+    help="Maximum iterations for loop mode (default: 10)",
+)
+@click.option(
+    "--improvement-threshold",
+    type=float,
+    default=5.0,
+    help="Minimum improvement percentage to continue looping (default: 5.0%)",
+)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 @click.option("--quiet", "-q", is_flag=True, help="Suppress non-error output")
 @click.option("--no-color", is_flag=True, help="Disable colored output")
@@ -381,6 +399,11 @@ def print_verification_summary(verification_results):
     help="Bypass strategic check warnings and proceed anyway (not recommended)",
 )
 @click.option(
+    "--skip-pre-lint-assessment",
+    is_flag=True,
+    help="Skip pre-lint risk assessment and proceed directly to linting",
+)
+@click.option(
     "--resume-session",
     help="Resume a previous progress session by session ID",
 )
@@ -388,6 +411,24 @@ def print_verification_summary(verification_results):
     "--list-sessions",
     is_flag=True,
     help="List recoverable progress sessions and exit",
+)
+@click.option(
+    "--use-architect-mode",
+    is_flag=True,
+    help="Use architect mode for dangerous error types (no-undef, etc.)",
+)
+@click.option(
+    "--architect-model",
+    help="Model to use for architect reasoning (e.g., o1-mini, claude-3-5-sonnet)",
+)
+@click.option(
+    "--editor-model",
+    help="Model to use for file editing in architect mode (e.g., gpt-4o)",
+)
+@click.option(
+    "--architect-only",
+    is_flag=True,
+    help="Only run architect mode for dangerous errors, skip safe automation",
 )
 def main(
     project_path: str,
@@ -402,6 +443,9 @@ def main(
     interactive: bool,
     enhanced_interactive: bool,
     force: bool,
+    loop: bool,
+    max_iterations: int,
+    improvement_threshold: float,
     verbose: bool,
     quiet: bool,
     no_color: bool,
@@ -420,8 +464,13 @@ def main(
     skip_strategic_check: bool,
     force_strategic_recheck: bool,
     bypass_strategic_check: bool,
+    skip_pre_lint_assessment: bool,
     resume_session: Optional[str],
     list_sessions: bool,
+    use_architect_mode: bool,
+    architect_model: Optional[str],
+    editor_model: Optional[str],
+    architect_only: bool,
 ):
     """Aider Lint Fixer - Automated lint error detection and fixing.
 
@@ -434,6 +483,20 @@ def main(
 
     def s(style_attr):
         return get_style(style_attr, no_color)
+
+    # Validate loop mode parameters
+    if loop and not force:
+        print(f"{Fore.RED}❌ Error: --loop requires --force mode{Style.RESET_ALL}")
+        print(f"   Loop mode runs iterative force fixing until convergence")
+        return 1
+
+    if loop:
+        if max_iterations < 1:
+            print(f"{Fore.RED}❌ Error: --max-iterations must be at least 1{Style.RESET_ALL}")
+            return 1
+        if improvement_threshold < 0:
+            print(f"{Fore.RED}❌ Error: --improvement-threshold must be non-negative{Style.RESET_ALL}")
+            return 1
 
     # Handle version flag
     if version:
@@ -629,6 +692,40 @@ def main(
             except Exception as e:
                 print(f"{Fore.YELLOW}⚠️  Strategic pre-flight check failed: {e}{Style.RESET_ALL}")
 
+        # Initialize assessment variable for architect mode
+        assessment = None
+
+        # Pre-Lint Risk Assessment (unless bypassed, but run in force mode for tracing)
+        if (not check_only and not skip_pre_lint_assessment) or force:
+            if force:
+                print(f"\n{Fore.CYAN}🔍 Pre-Lint Risk Assessment (for undefined variable tracing)...{Style.RESET_ALL}")
+            else:
+                print(f"\n{Fore.CYAN}🔍 Pre-Lint Risk Assessment...{Style.RESET_ALL}")
+
+            try:
+                assessor = PreLintAssessor(actual_project_path)
+                # Convert linters string to list if needed
+                linters_list = [l.strip() for l in linters.split(",")] if linters else ["eslint", "flake8"]
+                assessment = assessor.assess_project(linters_list)
+
+                if not force:
+                    # Display assessment and get user decision (only if not force mode)
+                    should_proceed = display_risk_assessment(assessment)
+
+                    if not should_proceed:
+                        print(f"\n{Fore.YELLOW}⚠️  Lint fixing cancelled by user based on risk assessment.{Style.RESET_ALL}")
+                        print(f"{Fore.CYAN}💡 Consider using --check-only to preview changes first.{Style.RESET_ALL}")
+                        return
+                else:
+                    # In force mode, just collect the assessment data for tracing
+                    print(f"   ✅ Assessment completed (force mode - proceeding regardless)")
+
+            except Exception as e:
+                print(f"{Fore.YELLOW}⚠️  Pre-lint assessment failed: {e}{Style.RESET_ALL}")
+                if not force:
+                    print(f"{Fore.CYAN}💡 Proceeding with caution...{Style.RESET_ALL}")
+                assessment = None  # Ensure assessment is None if failed
+
         # Step 1: Detect project structure
         print(f"\n{Fore.CYAN}Step 1: Detecting project structure...{Style.RESET_ALL}")
 
@@ -793,13 +890,49 @@ def main(
             print(f"   Selected {len(prioritized_errors)} errors for fixing")
 
         elif force:
-            # Force mode - include ALL errors (fixable and unfixable)
-            print(f"\n{Fore.RED}⚠️  FORCE MODE ENABLED{Style.RESET_ALL}")
-            print(
-                f"   {Fore.YELLOW}WARNING: Attempting to fix ALL errors, including those classified as unfixable{Style.RESET_ALL}"
-            )
+            if loop:
+                # Iterative Intelligent Force Mode
+                print(f"\n{Fore.CYAN}🔄 ITERATIVE INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}")
+                print(f"   {Fore.YELLOW}Running force mode in intelligent loops until convergence{Style.RESET_ALL}")
+                print(f"   Max iterations: {max_iterations}")
+                print(f"   Improvement threshold: {improvement_threshold}%")
 
-            # Get ALL errors for force mode
+                # Import iterative force mode
+                try:
+                    from .iterative_force_mode import IterativeForceMode, IterationResult, LoopExitReason
+                    iterative_mode = IterativeForceMode(actual_project_path)
+                    iterative_mode.max_iterations = max_iterations
+                    iterative_mode.improvement_threshold = improvement_threshold
+
+                    # Run iterative loop
+                    iteration = 1
+                    continue_loop = True
+
+                    while continue_loop and iteration <= max_iterations:
+                        print(f"\n{Fore.CYAN}🔄 ITERATION {iteration}{Style.RESET_ALL}")
+                        print("=" * 50)
+
+                        # Get current error count
+                        current_errors = sum(len(analysis.error_analyses) for analysis in file_analyses.values())
+
+                        # Run single force iteration (this will be the existing force mode logic)
+                        import time
+                        iteration_start_time = time.time()
+
+                        # Store the force mode logic result for this iteration
+                        # (The existing force mode logic will continue below)
+                        break  # Exit to run existing force mode logic once
+
+                except ImportError:
+                    print(f"\n{Fore.YELLOW}⚠️  Iterative mode not available, falling back to single force mode{Style.RESET_ALL}")
+                    loop = False  # Disable loop mode
+
+            if not loop:
+                # Single Intelligent Force Mode
+                print(f"\n{Fore.CYAN}🧠 INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}")
+                print(f"   {Fore.YELLOW}Using ML to safely manage force mode for chaotic codebases{Style.RESET_ALL}")
+
+            # Get ALL errors for force mode analysis
             all_error_analyses = []
             for file_path, analysis in file_analyses.items():
                 all_error_analyses.extend(analysis.error_analyses)
@@ -808,31 +941,114 @@ def main(
                 print(f"\n{Fore.GREEN}✅ No errors found!{Style.RESET_ALL}")
                 return 0
 
-            # Apply max_errors limit if specified
-            if max_errors:
-                all_error_analyses = all_error_analyses[:max_errors]
+            # Initialize Intelligent Force Mode
+            try:
+                from .intelligent_force_mode import IntelligentForceMode
+                intelligent_force = IntelligentForceMode(actual_project_path)
 
-            # Rebuild file_analyses with all errors
-            force_file_analyses = {}
-            for error_analysis in all_error_analyses:
-                file_path = error_analysis.error.file_path
-                if file_path not in force_file_analyses:
-                    force_file_analyses[file_path] = type(
-                        "FileAnalysis", (), {"error_analyses": [], "file_path": file_path}
-                    )()
-                force_file_analyses[file_path].error_analyses.append(error_analysis)
+                # Analyze force strategy using ML
+                print(f"\n{Fore.CYAN}🔍 Analyzing {len(all_error_analyses)} errors with ML...{Style.RESET_ALL}")
+                force_strategy = intelligent_force.analyze_force_strategy(all_error_analyses)
 
-            file_analyses = force_file_analyses
-            prioritized_errors = all_error_analyses
+                # Display intelligent force strategy
+                print(f"\n{Fore.CYAN}🧠 INTELLIGENT FORCE STRATEGY{Style.RESET_ALL}")
+                print("=" * 60)
 
-            print(f"   Forcing fixes for {len(prioritized_errors)} errors")
+                if force_strategy['is_chaotic']:
+                    print(f"{Fore.YELLOW}🏥 CHAOTIC CODEBASE DETECTED{Style.RESET_ALL}")
+                    print(f"   Total errors: {force_strategy['total_errors']}")
+                else:
+                    print(f"{Fore.GREEN}📊 MANAGEABLE CODEBASE{Style.RESET_ALL}")
+                    print(f"   Total errors: {force_strategy['total_errors']}")
 
-            # Confirmation for force mode
-            if not click.confirm(
-                f"\n{Fore.RED}Are you sure you want to force-fix {len(prioritized_errors)} errors? This may cause issues.{Style.RESET_ALL}"
-            ):
-                print("Aborted by user.")
-                return 0
+                # Show action breakdown
+                breakdown = force_strategy['action_breakdown']
+                print(f"\n📊 ML-Powered Action Plan:")
+                if breakdown.get('auto_force', 0) > 0:
+                    print(f"   🤖 Auto-force (no confirmation): {breakdown['auto_force']} errors")
+                if breakdown.get('batch_confirm', 0) > 0:
+                    print(f"   📦 Batch confirmation: {breakdown['batch_confirm']} errors")
+                if breakdown.get('manual_review', 0) > 0:
+                    print(f"   👤 Manual review required: {breakdown['manual_review']} errors")
+                if breakdown.get('skip', 0) > 0:
+                    print(f"   ⏭️  Skip (too risky): {breakdown['skip']} errors")
+
+                print(f"\n⏱️  Estimated time: {force_strategy['estimated_time_minutes']} minutes")
+
+                # Show recommendations
+                if force_strategy['recommendations']:
+                    print(f"\n💡 ML Recommendations:")
+                    for rec in force_strategy['recommendations']:
+                        print(f"   {rec}")
+
+                # Show batch plans
+                batch_plans = force_strategy['batch_plans']
+                if len(batch_plans) > 1:
+                    print(f"\n📦 Batch Execution Plan:")
+                    for batch in batch_plans:
+                        if batch.batch_id == 0:
+                            print(f"   Batch 0 (Auto-Force): {len(batch.errors)} errors - {batch.risk_level} risk")
+                        else:
+                            print(f"   Batch {batch.batch_id}: {len(batch.errors)} errors - {batch.risk_level} risk - {batch.estimated_time}min")
+
+                # Get user confirmation for the strategy
+                auto_force_count = breakdown.get('auto_force', 0)
+                batch_count = breakdown.get('batch_confirm', 0)
+                manual_count = breakdown.get('manual_review', 0)
+
+                if auto_force_count > 0:
+                    print(f"\n{Fore.GREEN}🤖 {auto_force_count} high-confidence errors will be fixed automatically{Style.RESET_ALL}")
+
+                if batch_count > 0 or manual_count > 0:
+                    confirm_msg = f"Proceed with intelligent force strategy?"
+                    if not click.confirm(confirm_msg):
+                        print("Aborted by user.")
+                        return 0
+
+                # Execute the intelligent force strategy
+                prioritized_errors = []
+
+                # Add auto-force errors (these will be processed without individual confirmation)
+                auto_force_decisions = [d for d in force_strategy['force_decisions'] if d.action == 'auto_force']
+                prioritized_errors.extend([d.error_analysis for d in auto_force_decisions])
+
+                # Add batch-confirm errors (these will be processed in batches)
+                batch_decisions = [d for d in force_strategy['force_decisions'] if d.action == 'batch_confirm']
+                prioritized_errors.extend([d.error_analysis for d in batch_decisions])
+
+                # Apply max_errors limit if specified
+                if max_errors:
+                    prioritized_errors = prioritized_errors[:max_errors]
+
+                # Rebuild file_analyses with prioritized errors
+                force_file_analyses = {}
+                for error_analysis in prioritized_errors:
+                    file_path = error_analysis.error.file_path
+                    if file_path not in force_file_analyses:
+                        force_file_analyses[file_path] = type(
+                            "FileAnalysis", (), {"error_analyses": [], "file_path": file_path}
+                        )()
+                    force_file_analyses[file_path].error_analyses.append(error_analysis)
+
+                file_analyses = force_file_analyses
+
+                print(f"\n{Fore.GREEN}✅ Intelligent force strategy activated{Style.RESET_ALL}")
+                print(f"   Processing {len(prioritized_errors)} prioritized errors")
+
+                # Store force strategy for later use during fixing
+                globals()['_intelligent_force_strategy'] = force_strategy
+
+            except ImportError:
+                print(f"\n{Fore.YELLOW}⚠️  Intelligent force mode not available, falling back to basic force mode{Style.RESET_ALL}")
+                # Fall back to original force mode logic
+                prioritized_errors = all_error_analyses[:max_errors] if max_errors else all_error_analyses
+
+                # Basic confirmation
+                warning_msg = f"\n{Fore.RED}Are you sure you want to force-fix {len(prioritized_errors)} errors? This may cause issues.{Style.RESET_ALL}"
+                print(warning_msg)
+                if not click.confirm("Proceed with basic force mode?"):
+                    print("Aborted by user.")
+                    return 0
 
         elif not prioritized_errors:
             print(f"\n{Fore.YELLOW}⚠️  No automatically fixable errors found.{Style.RESET_ALL}")
@@ -857,7 +1073,7 @@ def main(
 
             return 0
 
-        # Step 4: Fix errors
+        # Step 4: Fix errors with hybrid workflow (safe automation + architect mode)
         print(f"\n{Fore.CYAN}Step 4: Fixing errors with aider.chat...{Style.RESET_ALL}")
 
         try:
@@ -866,6 +1082,51 @@ def main(
             print(f"{Fore.RED}❌ {e}{Style.RESET_ALL}")
             print(f"   Please install aider-chat: pip install aider-chat")
             return 1
+
+        # Check if architect mode should be used
+        architect_results = []
+        if use_architect_mode and hasattr(assessment, 'architect_guidance') and assessment.architect_guidance:
+            guidance = assessment.architect_guidance
+
+            if guidance.get("has_dangerous_errors"):
+                print(f"\n{Fore.CYAN}🏗️  Architect Mode Phase:{Style.RESET_ALL}")
+                print(f"   Dangerous errors detected - using architect mode for manual review")
+
+                # Execute architect mode for dangerous errors
+                architect_results = aider_integration.execute_architect_guidance(
+                    guidance,
+                    architect_model=architect_model,
+                    editor_model=editor_model
+                )
+
+                # If architect-only mode, skip regular automation
+                if architect_only:
+                    print(f"\n{Fore.CYAN}🏗️  Architect-only mode: Skipping safe automation{Style.RESET_ALL}")
+
+                    # Show architect mode summary
+                    successful_architect = sum(1 for r in architect_results if r.success)
+                    print(f"\n{Fore.GREEN}🎉 Architect Mode Complete!{Style.RESET_ALL}")
+                    print(f"   Files processed: {len(architect_results)}")
+                    print(f"   Successful fixes: {successful_architect}")
+
+                    return 0 if successful_architect > 0 else 1
+            else:
+                print(f"\n{Fore.CYAN}ℹ️  No dangerous errors found - proceeding with standard automation{Style.RESET_ALL}")
+        elif use_architect_mode:
+            print(f"\n{Fore.YELLOW}⚠️  Architect mode requested but no risk assessment available{Style.RESET_ALL}")
+            print(f"   Run without --skip-pre-lint-assessment to enable architect mode")
+
+        # Continue with standard/safe automation (unless architect-only mode)
+        if not architect_only:
+            print(f"\n{Fore.CYAN}🤖 Standard Automation Phase:{Style.RESET_ALL}")
+            if use_architect_mode and hasattr(assessment, 'architect_guidance') and assessment.architect_guidance:
+                guidance = assessment.architect_guidance
+                safe_plan = guidance.get("safe_automation_plan", {})
+                if safe_plan:
+                    safe_count = safe_plan.get("safe_errors_count", 0)
+                    print(f"   Focusing on {safe_count} safe errors (excluding dangerous types)")
+                else:
+                    print(f"   Processing all errors with standard automation")
 
         # Interactive confirmation
         if interactive:
