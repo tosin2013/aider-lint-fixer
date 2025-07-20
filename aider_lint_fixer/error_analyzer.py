@@ -6,14 +6,15 @@ and context extraction for better fixing strategies.
 """
 
 import logging
-import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional
 
+from .control_flow_analyzer import ControlFlowAnalyzer
 from .lint_runner import ErrorSeverity, LintError, LintResult
 from .pattern_matcher import SmartErrorClassifier, detect_language_from_file_path
+from .structural_analyzer import StructuralProblemDetector
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,7 @@ class ErrorAnalysis:
     related_errors: List[LintError] = field(default_factory=list)
     fix_strategy: Optional[str] = None
     estimated_effort: int = 1  # 1-5 scale
+    control_flow_context: Optional[Dict] = None  # Control flow analysis insights
 
 
 @dataclass
@@ -75,6 +77,25 @@ class FileAnalysis:
 
 class ErrorAnalyzer:
     """Analyzes lint errors and provides fixing strategies."""
+
+    def __init__(self, project_path: str = ".", project_root: Optional[str] = None):
+        # Support both parameter names for backward compatibility
+        if project_root is not None:
+            self.project_path = project_root
+            self.project_root = Path(project_root) if project_root else Path.cwd()
+        else:
+            self.project_path = project_path
+            self.project_root = Path(project_path) if project_path else Path.cwd()
+
+        # Initialize enhanced modules
+        self.structural_detector = StructuralProblemDetector(self.project_path)
+        self.control_flow_analyzer = ControlFlowAnalyzer()
+        self._last_structural_analysis = None
+        self._control_flow_cache = {}
+
+        # Initialize smart pattern matching system
+        cache_dir = self.project_root / ".aider-lint-cache"
+        self.smart_classifier = SmartErrorClassifier(cache_dir)
 
     # Rule patterns for categorization
     RULE_CATEGORIES = {
@@ -173,18 +194,6 @@ class ErrorAnalyzer:
         ErrorSeverity.STYLE: 2,
     }
 
-    def __init__(self, project_root: Optional[str] = None):
-        """Initialize the error analyzer.
-
-        Args:
-            project_root: Root directory of the project for resolving relative paths
-        """
-        self.project_root = Path(project_root) if project_root else Path.cwd()
-
-        # Initialize smart pattern matching system
-        cache_dir = self.project_root / ".aider-lint-cache"
-        self.smart_classifier = SmartErrorClassifier(cache_dir)
-
     def analyze_errors(self, results: Dict[str, LintResult]) -> Dict[str, FileAnalysis]:
         """Analyze all lint errors and group by file.
 
@@ -211,7 +220,91 @@ class ErrorAnalyzer:
 
         logger.info(f"Analyzed {len(file_analyses)} files with lint errors")
 
+        # Perform structural analysis if high error count detected
+        total_errors = sum(len(analysis.error_analyses) for analysis in file_analyses.values())
+
+        if total_errors >= 100:  # Research threshold for chaotic codebases
+            logger.info(
+                f"High error count ({total_errors}) detected, performing structural analysis"
+            )
+
+            try:
+                structural_analysis = self.structural_detector.analyze_structural_problems(
+                    file_analyses
+                )
+
+                # Add structural insights to file analyses
+                for file_path, analysis in file_analyses.items():
+                    if file_path in structural_analysis.hotspot_files:
+                        analysis.complexity_score = min(10.0, analysis.complexity_score + 2.0)
+                        logger.debug(f"Marked {file_path} as structural hotspot")
+
+                    if file_path in structural_analysis.refactoring_candidates:
+                        # Add structural problem context to error analyses
+                        for error_analysis in analysis.error_analyses:
+                            if not error_analysis.fix_strategy:
+                                error_analysis.fix_strategy = (
+                                    "Consider refactoring - part of structural problem cluster"
+                                )
+
+                # Log structural analysis results
+                logger.info("Structural analysis completed:")
+                logger.info(
+                    f"- Architectural score: {structural_analysis.architectural_score:.1f}/100"
+                )
+                logger.info(
+                    f"- Structural issues found: {len(structural_analysis.structural_issues)}"
+                )
+                logger.info(f"- Hotspot files: {len(structural_analysis.hotspot_files)}")
+                logger.info(
+                    f"- Refactoring candidates: {len(structural_analysis.refactoring_candidates)}"
+                )
+
+                # Store structural analysis for later use
+                self._last_structural_analysis = structural_analysis
+
+            except Exception as e:
+                logger.warning(f"Structural analysis failed: {e}")
+
         return file_analyses
+
+    def get_structural_analysis(self):
+        """Get the last structural analysis results."""
+        return self._last_structural_analysis
+
+    def has_structural_problems(self) -> bool:
+        """Check if structural problems were detected in the last analysis."""
+        return (
+            self._last_structural_analysis is not None
+            and len(self._last_structural_analysis.structural_issues) > 0
+        )
+
+    def get_structural_recommendations(self) -> List[str]:
+        """Get structural recommendations from the last analysis."""
+        if self._last_structural_analysis:
+            return self._last_structural_analysis.recommendations
+        return []
+
+    def _get_control_flow_analysis(self, file_path: str, error_lines: set):
+        """Get control flow analysis for a file, with caching."""
+
+        if file_path in self._control_flow_cache:
+            return self._control_flow_cache[file_path]
+
+        try:
+            analysis = self.control_flow_analyzer.analyze_file(file_path, error_lines)
+            self._control_flow_cache[file_path] = analysis
+
+            logger.debug(
+                f"Control flow analysis for {file_path}: "
+                f"{len(analysis.control_structures)} structures, "
+                f"{len(analysis.unreachable_code)} unreachable lines"
+            )
+
+            return analysis
+        except Exception as e:
+            logger.warning(f"Control flow analysis failed for {file_path}: {e}")
+            return None
 
     def _analyze_file(self, file_path: str, errors: List[LintError]) -> FileAnalysis:
         """Analyze errors in a single file.
@@ -247,10 +340,18 @@ class ErrorAnalyzer:
             file_analysis.file_exists = False
 
         try:
+            # Perform control flow analysis if file has multiple errors
+            control_flow_analysis = None
+            if len(errors) > 5:  # Threshold for control flow analysis
+                error_lines = {error.line for error in errors}
+                control_flow_analysis = self._get_control_flow_analysis(file_path, error_lines)
+
             # Analyze each error
             for error in errors:
                 try:
-                    error_analysis = self._analyze_error(error, file_analysis.file_content)
+                    error_analysis = self._analyze_error(
+                        error, file_analysis.file_content, control_flow_analysis
+                    )
                     file_analysis.error_analyses.append(error_analysis)
                 except Exception as e:
                     logger.warning(f"Failed to analyze error in {file_path}: {e}")
@@ -272,12 +373,17 @@ class ErrorAnalyzer:
         except Exception as e:
             logger.error(f"Unexpected error during file analysis for {file_path}: {e}")
             # Ensure complexity_score is always set, even if analysis fails
-            if not hasattr(file_analysis, 'complexity_score') or file_analysis.complexity_score is None:
+            if (
+                not hasattr(file_analysis, "complexity_score")
+                or file_analysis.complexity_score is None
+            ):
                 file_analysis.complexity_score = 0.0
 
         return file_analysis
 
-    def _analyze_error(self, error: LintError, file_content: Optional[str]) -> ErrorAnalysis:
+    def _analyze_error(
+        self, error: LintError, file_content: Optional[str], control_flow_analysis=None
+    ) -> ErrorAnalysis:
         """Analyze a single error.
 
         Args:
@@ -308,7 +414,29 @@ class ErrorAnalyzer:
         # Estimate effort
         effort = self._estimate_effort(complexity, category)
 
-        return ErrorAnalysis(
+        # Add control flow insights if available
+        control_flow_insights = {}
+        if control_flow_analysis:
+            control_flow_insights = self.control_flow_analyzer.get_control_flow_insights(error.line)
+
+            # Adjust complexity and priority based on control flow context
+            if control_flow_insights.get("complexity_context") == "high":
+                if complexity == FixComplexity.TRIVIAL:
+                    complexity = FixComplexity.SIMPLE
+                elif complexity == FixComplexity.SIMPLE:
+                    complexity = FixComplexity.MODERATE
+                elif complexity == FixComplexity.MODERATE:
+                    complexity = FixComplexity.COMPLEX
+
+                # Increase priority for errors in complex control structures
+                priority = min(10.0, priority + 1.0)
+
+            # Adjust fixability for unreachable code
+            if not control_flow_insights.get("reachable", True):
+                fixable = False
+                fix_strategy = "Remove unreachable code or fix control flow logic"
+
+        error_analysis = ErrorAnalysis(
             error=error,
             category=category,
             complexity=complexity,
@@ -318,6 +446,12 @@ class ErrorAnalyzer:
             fix_strategy=fix_strategy,
             estimated_effort=effort,
         )
+
+        # Store control flow insights for later use
+        if control_flow_insights:
+            error_analysis.control_flow_context = control_flow_insights
+
+        return error_analysis
 
     def _categorize_error(self, error: LintError) -> ErrorCategory:
         """Categorize an error based on its rule and message.
@@ -557,7 +691,9 @@ class ErrorAnalyzer:
             if error.linter == "ansible-lint":
                 language = "ansible"
 
-            self.smart_classifier.learn_from_fix(error.message, language, error.linter, fix_successful)
+            self.smart_classifier.learn_from_fix(
+                error.message, language, error.linter, fix_successful
+            )
 
             logger.info(
                 f"✅ Learned from fix: {error.linter} -> {fix_successful} "
@@ -671,7 +807,10 @@ class ErrorAnalyzer:
             return True
 
         # Import-related errors
-        if "import" in (error1.message or "").lower() and "import" in (error2.message or "").lower():
+        if (
+            "import" in (error1.message or "").lower()
+            and "import" in (error2.message or "").lower()
+        ):
             return True
 
         return False

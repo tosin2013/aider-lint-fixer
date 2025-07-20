@@ -14,8 +14,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from .project_detector import ProjectInfo
 from .native_lint_detector import NativeLintDetector
+from .project_detector import ProjectInfo
 
 # Import modular linters - delay import to avoid circular dependencies
 MODULAR_LINTERS_AVAILABLE = False
@@ -256,7 +256,9 @@ class LintRunner:
 
         return self.native_commands.get(linter_name)
 
-    def _run_native_command(self, native_command, file_paths: Optional[List[str]] = None) -> LintResult:
+    def _run_native_command(
+        self, native_command, file_paths: Optional[List[str]] = None
+    ) -> LintResult:
         """Run a native lint command and parse its output."""
         logger = logging.getLogger(__name__)
 
@@ -265,9 +267,11 @@ class LintRunner:
             command = native_command.command.copy()
 
             # Add JSON format if supported (but not for make-based commands)
-            use_json = (native_command.supports_json_output and
-                       native_command.json_format_args and
-                       'make' not in ' '.join(native_command.command))
+            use_json = (
+                native_command.supports_json_output
+                and native_command.json_format_args
+                and "make" not in " ".join(native_command.command)
+            )
 
             if use_json:
                 command.extend(native_command.json_format_args)
@@ -285,22 +289,26 @@ class LintRunner:
                 capture_output=True,
                 text=True,
                 timeout=300,  # 5 minute timeout
-                cwd=native_command.working_directory
+                cwd=native_command.working_directory,
             )
 
             # Parse the output based on linter type and format
             if native_command.linter_type == "eslint" and use_json:
-                return self._parse_eslint_json_output(result.stdout, result.stderr, result.returncode)
+                return self._parse_eslint_json_output(
+                    result.stdout, result.stderr, result.returncode
+                )
             elif native_command.linter_type == "eslint":
-                return self._parse_eslint_text_output(result.stdout, result.stderr, result.returncode)
+                return self._parse_eslint_text_output(
+                    result.stdout, result.stderr, result.returncode
+                )
             else:
                 # For other linters, create a basic result
                 errors = []
                 warnings = []
 
                 # Simple error counting for non-JSON output
-                output_lines = (result.stdout + result.stderr).split('\n')
-                error_count = len([line for line in output_lines if 'error' in line.lower()])
+                output_lines = (result.stdout + result.stderr).split("\n")
+                error_count = len([line for line in output_lines if "error" in line.lower()])
 
                 return LintResult(
                     linter=native_command.linter_type,
@@ -308,7 +316,7 @@ class LintRunner:
                     errors=errors,
                     warnings=warnings,
                     raw_output=result.stdout + result.stderr,
-                    execution_time=0.0
+                    execution_time=0.0,
                 )
 
         except Exception as e:
@@ -336,8 +344,12 @@ class LintRunner:
                             column=message.get("column", 0),
                             rule_id=message.get("ruleId", ""),
                             message=message.get("message", ""),
-                            severity=ErrorSeverity.ERROR if message.get("severity", 1) == 2 else ErrorSeverity.WARNING,
-                            linter="eslint"
+                            severity=(
+                                ErrorSeverity.ERROR
+                                if message.get("severity", 1) == 2
+                                else ErrorSeverity.WARNING
+                            ),
+                            linter="eslint",
                         )
 
                         if lint_error.severity == ErrorSeverity.ERROR:
@@ -349,15 +361,17 @@ class LintRunner:
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to parse ESLint JSON output: {e}")
             # Create a fallback error
-            errors.append(LintError(
-                file_path="unknown",
-                line=0,
-                column=0,
-                rule_id="parse-error",
-                message=f"Failed to parse ESLint output: {e}",
-                severity=ErrorSeverity.ERROR,
-                linter="eslint"
-            ))
+            errors.append(
+                LintError(
+                    file_path="unknown",
+                    line=0,
+                    column=0,
+                    rule_id="parse-error",
+                    message=f"Failed to parse ESLint output: {e}",
+                    severity=ErrorSeverity.ERROR,
+                    linter="eslint",
+                )
+            )
 
         return LintResult(
             linter="eslint",
@@ -365,7 +379,7 @@ class LintRunner:
             errors=errors,
             warnings=warnings,
             raw_output=stdout + stderr,
-            execution_time=0.0
+            execution_time=0.0,
         )
 
     def _parse_eslint_text_output(self, stdout: str, stderr: str, return_code: int) -> LintResult:
@@ -379,7 +393,7 @@ class LintRunner:
         #    21:1   error  This line has a length of 128. Maximum allowed is 120                 max-len
         #    47:1   error  This line has a length of 123. Maximum allowed is 120                 max-len
         output = stdout + stderr
-        lines = output.split('\n')
+        lines = output.split("\n")
 
         current_file = "unknown"
         import re
@@ -391,22 +405,25 @@ class LintRunner:
 
             # Check if this line is a file path
             # ESLint file paths typically start with / or ./ and end with js/ts extensions
-            if (line_stripped.startswith('/') or line_stripped.startswith('./')) and \
-               any(line_stripped.endswith(ext) for ext in ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs']):
+            if (line_stripped.startswith("/") or line_stripped.startswith("./")) and any(
+                line_stripped.endswith(ext)
+                for ext in [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"]
+            ):
                 current_file = line_stripped
                 continue
 
             # Check if this line contains an error or warning
-            if not ('error' in line.lower() or 'warning' in line.lower()):
+            if not ("error" in line.lower() or "warning" in line.lower()):
                 continue
 
             # ESLint format: "   21:1   error  This line has a length of 128. Maximum allowed is 120                 max-len"
             # Look for the pattern: spaces + number:number + spaces + error/warning + message + rule
-            if ':' in line and ('error' in line or 'warning' in line):
+            if ":" in line and ("error" in line or "warning" in line):
                 try:
                     # Find line:column pattern
                     import re
-                    match = re.search(r'(\d+):(\d+)\s+(error|warning)\s+(.+)', line)
+
+                    match = re.search(r"(\d+):(\d+)\s+(error|warning)\s+(.+)", line)
                     if match:
                         line_num = int(match.group(1))
                         column = int(match.group(2))
@@ -418,13 +435,13 @@ class LintRunner:
                         message = rest
 
                         # Split by multiple spaces to find rule at the end
-                        parts = re.split(r'\s{2,}', rest)
+                        parts = re.split(r"\s{2,}", rest)
                         if len(parts) >= 2:
                             message = parts[0].strip()
                             rule_id = parts[-1].strip()
 
                         # Determine severity
-                        is_error = level == 'error'
+                        is_error = level == "error"
                         severity = ErrorSeverity.ERROR if is_error else ErrorSeverity.WARNING
 
                         # Use the current file being tracked
@@ -437,7 +454,7 @@ class LintRunner:
                             rule_id=rule_id,
                             message=message,
                             severity=severity,
-                            linter="eslint"
+                            linter="eslint",
                         )
 
                         if severity == ErrorSeverity.ERROR:
@@ -451,7 +468,9 @@ class LintRunner:
 
         # Alternative approach: count errors from the summary line
         # ESLint often shows "✖ 153 problems (153 errors, 0 warnings)"
-        summary_match = re.search(r'✖\s+(\d+)\s+problems?\s+\((\d+)\s+errors?,\s+(\d+)\s+warnings?\)', output)
+        summary_match = re.search(
+            r"✖\s+(\d+)\s+problems?\s+\((\d+)\s+errors?,\s+(\d+)\s+warnings?\)", output
+        )
         if summary_match and not errors:
             # If we couldn't parse individual errors, create summary errors
             total_problems = int(summary_match.group(1))
@@ -460,26 +479,30 @@ class LintRunner:
 
             # Create generic errors for the count
             for i in range(error_count):
-                errors.append(LintError(
-                    file_path="multiple_files",
-                    line=0,
-                    column=0,
-                    rule_id="eslint-error",
-                    message=f"ESLint error {i+1} of {error_count}",
-                    severity=ErrorSeverity.ERROR,
-                    linter="eslint"
-                ))
+                errors.append(
+                    LintError(
+                        file_path="multiple_files",
+                        line=0,
+                        column=0,
+                        rule_id="eslint-error",
+                        message=f"ESLint error {i+1} of {error_count}",
+                        severity=ErrorSeverity.ERROR,
+                        linter="eslint",
+                    )
+                )
 
             for i in range(warning_count):
-                warnings.append(LintError(
-                    file_path="multiple_files",
-                    line=0,
-                    column=0,
-                    rule_id="eslint-warning",
-                    message=f"ESLint warning {i+1} of {warning_count}",
-                    severity=ErrorSeverity.WARNING,
-                    linter="eslint"
-                ))
+                warnings.append(
+                    LintError(
+                        file_path="multiple_files",
+                        line=0,
+                        column=0,
+                        rule_id="eslint-warning",
+                        message=f"ESLint warning {i+1} of {warning_count}",
+                        severity=ErrorSeverity.WARNING,
+                        linter="eslint",
+                    )
+                )
 
         return LintResult(
             linter="eslint",
@@ -487,7 +510,7 @@ class LintRunner:
             errors=errors,
             warnings=warnings,
             raw_output=output,
-            execution_time=0.0
+            execution_time=0.0,
         )
 
     def _detect_available_linters(
@@ -565,7 +588,9 @@ class LintRunner:
             if native_result:
                 return native_result
             else:
-                logger.warning(f"Native {linter_name} command failed, falling back to modular implementation")
+                logger.warning(
+                    f"Native {linter_name} command failed, falling back to modular implementation"
+                )
 
         # Try to use modular linter implementation second
         _import_modular_linters()

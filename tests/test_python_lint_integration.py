@@ -3,7 +3,7 @@
 Integration tests for Python linter support in aider-lint-fixer.
 """
 
-import os
+
 import shutil
 
 # Add the parent directory to the path

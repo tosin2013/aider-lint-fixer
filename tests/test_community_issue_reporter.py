@@ -9,6 +9,7 @@ GitHub issue creation for community contributions.
 import json
 import tempfile
 from pathlib import Path
+import pytest
 
 
 def test_community_issue_reporter_import():
@@ -20,16 +21,16 @@ def test_community_issue_reporter_import():
 
     try:
         from aider_lint_fixer.community_issue_reporter import (
-            CommunityIssueReporter,
             CommunityIssue,
+            CommunityIssueReporter,
             integrate_community_issue_reporting,
         )
 
         print("   ✅ Community issue reporter modules import successfully")
-        return True
+        assert True  # Test passed
     except ImportError as e:
         print(f"   ❌ Import failed: {e}")
-        return False
+        pytest.fail(f"Import failed: {e}")
 
 
 def test_community_issue_creation():
@@ -39,7 +40,7 @@ def test_community_issue_creation():
     try:
         from aider_lint_fixer.community_issue_reporter import CommunityIssueReporter
         from aider_lint_fixer.enhanced_interactive import ManualFixAttempt
-        from aider_lint_fixer.lint_runner import LintError, ErrorSeverity
+        from aider_lint_fixer.lint_runner import ErrorSeverity, LintError
 
         # Create temporary directory for testing
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -96,17 +97,17 @@ def test_community_issue_creation():
                 assert len(loaded_issues) == len(potential_issues), "Issue count mismatch"
                 print(f"   ✅ Successfully loaded {len(loaded_issues)} issues")
 
-                return True
+                assert True  # Test passed
             else:
                 print(f"   ❌ No potential issues created")
-                return False
+                pytest.fail("No potential issues created")
 
     except Exception as e:
         print(f"   ❌ Community issue creation test failed: {e}")
         import traceback
 
         traceback.print_exc()
-        return False
+        pytest.fail(f"Community issue creation test failed: {e}")
 
 
 def test_github_issue_url_generation():
@@ -114,7 +115,7 @@ def test_github_issue_url_generation():
     print("\n3. Testing GitHub issue URL generation...")
 
     try:
-        from aider_lint_fixer.community_issue_reporter import CommunityIssueReporter, CommunityIssue
+        from aider_lint_fixer.community_issue_reporter import CommunityIssue, CommunityIssueReporter
 
         with tempfile.TemporaryDirectory() as temp_dir:
             reporter = CommunityIssueReporter(temp_dir)
@@ -146,11 +147,11 @@ def test_github_issue_url_generation():
             assert "title=" in github_url, "URL should contain encoded title"
 
             print(f"   ✅ GitHub URL generation works correctly")
-            return True
+            assert True  # Test passed
 
     except Exception as e:
         print(f"   ❌ GitHub URL generation test failed: {e}")
-        return False
+        pytest.fail(f"GitHub URL generation test failed: {e}")
 
 
 def test_integration_with_enhanced_interactive():
@@ -163,7 +164,7 @@ def test_integration_with_enhanced_interactive():
             CommunityLearningIntegration,
             ManualFixAttempt,
         )
-        from aider_lint_fixer.lint_runner import LintError, ErrorSeverity
+        from aider_lint_fixer.lint_runner import ErrorSeverity, LintError
 
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create community learning integration
@@ -214,17 +215,17 @@ def test_integration_with_enhanced_interactive():
 
             if potential_issues:
                 print(f"   ✅ Integration would create {len(potential_issues)} community issues")
-                return True
+                assert True  # Test passed
             else:
                 print(f"   ⚠️  No issues would be created (may need more samples)")
-                return True  # This is still a valid test result
+                assert True  # This is still a valid test result
 
     except Exception as e:
         print(f"   ❌ Integration test failed: {e}")
         import traceback
 
         traceback.print_exc()
-        return False
+        pytest.fail(f"Integration test failed: {e}")
 
 
 def demonstrate_community_issue_workflow():

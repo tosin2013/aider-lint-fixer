@@ -40,13 +40,13 @@ function badFunction(x,y,z) {
     }
     var unused_var = "not used";
     var result = x + y + z + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12 + 13 + 14 + 15;
-    
+
     var data = {key: "value", another_key:"another_value"}
-    
+
     if (result == undefined) {
         console.log("result is undefined")
     }
-    
+
     return result
 }
 

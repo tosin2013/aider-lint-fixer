@@ -472,8 +472,14 @@ class AiderIntegration:
                 "description": "",
             }
 
-    def _build_aider_command(self, file_path: str, message: str = None, architect_mode: bool = False,
-                           architect_model: str = None, editor_model: str = None) -> List[str]:
+    def _build_aider_command(
+        self,
+        file_path: str,
+        message: str = None,
+        architect_mode: bool = False,
+        architect_model: str = None,
+        editor_model: str = None,
+    ) -> List[str]:
         """Build the aider command with appropriate options.
 
         Args:
@@ -572,15 +578,12 @@ class AiderIntegration:
             "o1-preview": "gpt-4o",
             "openai/o1-mini": "gpt-4o",
             "openai/o1-preview": "gpt-4o",
-
             # Claude models can use GPT-4o or same model
             "claude-3-5-sonnet-20241022": "gpt-4o",
             "anthropic/claude-3-5-sonnet-20241022": "gpt-4o",
-
             # DeepSeek models can use GPT-4o for editing
             "deepseek/deepseek-chat": "gpt-4o",
             "deepseek/deepseek-coder": "gpt-4o",
-
             # For other models, let aider choose default
         }
 
@@ -598,18 +601,18 @@ class AiderIntegration:
         try:
             # Create temporary file with .md extension for better formatting
             prompt_file = tempfile.NamedTemporaryFile(
-                mode='w',
-                suffix='.md',
-                prefix='architect_prompt_',
+                mode="w",
+                suffix=".md",
+                prefix="architect_prompt_",
                 delete=False,
-                dir=self.project_root
+                dir=self.project_root,
             )
 
             # Write the architect prompt content
             architect_prompt = prompt_data.get("architect_prompt", "")
             if not architect_prompt:
                 # Fallback to basic prompt if no specific architect prompt
-                file_name = prompt_data.get("file", "unknown").split('/')[-1]
+                file_name = prompt_data.get("file", "unknown").split("/")[-1]
                 undefined_vars = prompt_data.get("undefined_variables", [])
                 architect_prompt = f"""# Fix undefined variables in {file_name}
 
@@ -647,8 +650,13 @@ Instructions:
         except Exception as e:
             logger.warning(f"Failed to cleanup prompt file {prompt_file_path}: {e}")
 
-    def _run_architect_mode(self, file_path: str, prompt_data: Dict,
-                          architect_model: str = None, editor_model: str = None) -> Dict:
+    def _run_architect_mode(
+        self,
+        file_path: str,
+        prompt_data: Dict,
+        architect_model: str = None,
+        editor_model: str = None,
+    ) -> Dict:
         """Execute aider in architect mode with structured prompt.
 
         Args:
@@ -674,7 +682,7 @@ Instructions:
                 message,
                 architect_mode=True,
                 architect_model=architect_model,
-                editor_model=editor_model
+                editor_model=editor_model,
             )
 
             logger.info(f"Running architect mode for {file_path}")
@@ -709,7 +717,7 @@ Instructions:
                 "output": stdout,
                 "error": stderr if not success else "",
                 "description": description,
-                "mode": "architect"
+                "mode": "architect",
             }
 
         except subprocess.TimeoutExpired:
@@ -720,7 +728,7 @@ Instructions:
                 "output": "",
                 "error": "Architect mode execution timed out",
                 "description": "Timed out during architect mode execution",
-                "mode": "architect"
+                "mode": "architect",
             }
         except Exception as e:
             logger.error(f"Error running architect mode for {file_path}: {e}")
@@ -730,15 +738,16 @@ Instructions:
                 "output": "",
                 "error": str(e),
                 "description": f"Architect mode error: {str(e)}",
-                "mode": "architect"
+                "mode": "architect",
             }
         finally:
             # Always cleanup the temporary prompt file
             if prompt_file_path:
                 self._cleanup_prompt_file(prompt_file_path)
 
-    def execute_architect_guidance(self, guidance: Dict, architect_model: str = None,
-                                 editor_model: str = None) -> List[FixResult]:
+    def execute_architect_guidance(
+        self, guidance: Dict, architect_model: str = None, editor_model: str = None
+    ) -> List[FixResult]:
         """Execute architect mode for all dangerous files identified in guidance.
 
         Args:
@@ -768,7 +777,7 @@ Instructions:
                 logger.warning(f"Skipping prompt {i}: no file path specified")
                 continue
 
-            file_name = file_path.split('/')[-1]
+            file_name = file_path.split("/")[-1]
             undefined_vars = prompt_data.get("undefined_variables", [])
 
             print(f"\n🏗️  [{i}/{len(architect_prompts)}] Architect mode: {file_name}")
@@ -781,7 +790,7 @@ Instructions:
                     file_path,
                     prompt_data,
                     architect_model=architect_model,
-                    editor_model=editor_model
+                    editor_model=editor_model,
                 )
 
                 # Create FixResult from architect mode result
@@ -793,7 +802,7 @@ Instructions:
                     changes_made=result["changes_made"],
                     fix_description=result["description"],
                     aider_output=result["output"],
-                    error_message=result.get("error", "")
+                    error_message=result.get("error", ""),
                 )
 
                 results.append(fix_result)
@@ -817,7 +826,7 @@ Instructions:
                     changes_made=False,
                     fix_description=f"Architect mode error: {str(e)}",
                     aider_output="",
-                    error_message=str(e)
+                    error_message=str(e),
                 )
                 results.append(fix_result)
 
@@ -834,8 +843,9 @@ Instructions:
 
         return results
 
-    def execute_safe_automation(self, guidance: Dict, enabled_linters: List[str],
-                              max_errors: int = None) -> List[FixResult]:
+    def execute_safe_automation(
+        self, guidance: Dict, enabled_linters: List[str], max_errors: int = None
+    ) -> List[FixResult]:
         """Execute safe automation for non-dangerous error types.
 
         Args:
@@ -875,8 +885,9 @@ Instructions:
 
         return results
 
-    def create_enhanced_prompt_for_dangerous_errors(self, error_analyses: List,
-                                                   undefined_vars_context: Dict = None) -> str:
+    def create_enhanced_prompt_for_dangerous_errors(
+        self, error_analyses: List, undefined_vars_context: Dict = None
+    ) -> str:
         """Create enhanced prompt for dangerous errors with undefined variable context.
 
         Args:
@@ -897,7 +908,7 @@ Instructions:
             files_with_errors[file_path].append(error_analysis)
 
         for file_path, file_errors in files_with_errors.items():
-            file_name = file_path.split('/')[-1]
+            file_name = file_path.split("/")[-1]
             prompt_parts.append(f"## File: {file_name}")
             prompt_parts.append(f"Path: {file_path}")
             prompt_parts.append("")
@@ -912,6 +923,7 @@ Instructions:
                     no_undef_errors.append(error)
                     # Extract variable name from error message
                     import re
+
                     match = re.search(r"'([^']+)' is not defined", error.message)
                     if match:
                         undefined_vars.append(match.group(1))
@@ -936,12 +948,16 @@ Instructions:
                 prompt_parts.append("")
                 prompt_parts.append("### Instructions for Undefined Variables:")
                 prompt_parts.append("1. **DO NOT** create dummy variables or empty objects")
-                prompt_parts.append("2. **ANALYZE CONTEXT** - determine what each variable should be:")
+                prompt_parts.append(
+                    "2. **ANALYZE CONTEXT** - determine what each variable should be:"
+                )
                 prompt_parts.append("   - Missing import statements")
                 prompt_parts.append("   - Global variables from HTML/external scripts")
                 prompt_parts.append("   - Typos in variable names")
                 prompt_parts.append("   - Variables that should be function parameters")
-                prompt_parts.append("3. **PRESERVE FUNCTIONALITY** - ensure fixes don't break the code")
+                prompt_parts.append(
+                    "3. **PRESERVE FUNCTIONALITY** - ensure fixes don't break the code"
+                )
                 prompt_parts.append("4. **ADD COMMENTS** explaining your reasoning for each fix")
                 prompt_parts.append("")
 
@@ -954,29 +970,31 @@ Instructions:
                     prompt_parts.append(f"- Line {error.line}: {error.rule_id} - {error.message}")
                 prompt_parts.append("")
 
-        prompt_parts.extend([
-            "## General Instructions:",
-            "1. Fix all errors while preserving code functionality",
-            "2. Pay special attention to undefined variables - these are dangerous",
-            "3. Add appropriate imports, globals, or parameter declarations",
-            "4. Test your understanding by explaining each undefined variable fix",
-            "5. If unsure about a variable's purpose, add a comment asking for clarification",
-            "",
-            "## Example Fixes:",
-            "```javascript",
-            "// BAD: Creating dummy variables",
-            "const globalConfig = {}; // This breaks functionality!",
-            "",
-            "// GOOD: Adding proper import",
-            "import { globalConfig } from './config.js';",
-            "",
-            "// GOOD: Declaring as global (if from HTML)",
-            "/* global globalConfig */",
-            "",
-            "// GOOD: Adding as parameter (if should be passed in)",
-            "function processData(globalConfig) {",
-            "```"
-        ])
+        prompt_parts.extend(
+            [
+                "## General Instructions:",
+                "1. Fix all errors while preserving code functionality",
+                "2. Pay special attention to undefined variables - these are dangerous",
+                "3. Add appropriate imports, globals, or parameter declarations",
+                "4. Test your understanding by explaining each undefined variable fix",
+                "5. If unsure about a variable's purpose, add a comment asking for clarification",
+                "",
+                "## Example Fixes:",
+                "```javascript",
+                "// BAD: Creating dummy variables",
+                "const globalConfig = {}; // This breaks functionality!",
+                "",
+                "// GOOD: Adding proper import",
+                "import { globalConfig } from './config.js';",
+                "",
+                "// GOOD: Declaring as global (if from HTML)",
+                "/* global globalConfig */",
+                "",
+                "// GOOD: Adding as parameter (if should be passed in)",
+                "function processData(globalConfig) {",
+                "```",
+            ]
+        )
 
         return "\n".join(prompt_parts)
 
@@ -984,16 +1002,18 @@ Instructions:
         """Get suggestions for fixing an undefined variable."""
         suggestions = []
 
-        if var_name.lower() in ['console', 'window', 'document', 'global', 'process']:
+        if var_name.lower() in ["console", "window", "document", "global", "process"]:
             suggestions.append(f"'{var_name}' is a global - add /* global {var_name} */ comment")
-        elif var_name.lower().endswith('callback') or 'callback' in var_name.lower():
+        elif var_name.lower().endswith("callback") or "callback" in var_name.lower():
             suggestions.append(f"'{var_name}' might be a missing function parameter")
-        elif file_name.endswith('.mjs') or 'module' in file_name:
+        elif file_name.endswith(".mjs") or "module" in file_name:
             suggestions.append(f"'{var_name}' might need an import statement")
-        elif 'config' in var_name.lower():
+        elif "config" in var_name.lower():
             suggestions.append(f"'{var_name}' might be imported from a config file")
         else:
-            suggestions.append(f"'{var_name}' needs investigation - could be import, global, or typo")
+            suggestions.append(
+                f"'{var_name}' needs investigation - could be import, global, or typo"
+            )
 
         return suggestions
 
@@ -1232,7 +1252,7 @@ Instructions:
         # Use getattr with default to handle cases where complexity_score might be missing
         sorted_files = sorted(
             file_analyses.items(),
-            key=lambda x: (getattr(x[1], 'complexity_score', 0.0), len(x[1].error_analyses))
+            key=lambda x: (getattr(x[1], "complexity_score", 0.0), len(x[1].error_analyses)),
         )
 
         if max_files:

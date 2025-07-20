@@ -54,10 +54,10 @@ def test_enhanced_interactive_import():
     print("\n2. Testing module imports...")
 
     from aider_lint_fixer.enhanced_interactive import (
-        enhanced_interactive_mode,
         CommunityLearningIntegration,
-        UserChoice,
         InteractiveChoice,
+        UserChoice,
+        enhanced_interactive_mode,
     )
 
     print("   ✅ Enhanced interactive module imports successfully")

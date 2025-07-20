@@ -5,9 +5,10 @@ Test script for enhanced progress tracking functionality.
 This script demonstrates the new progress tracking features for long-running lint fixes.
 """
 
-import time
 import tempfile
+import time
 from pathlib import Path
+import pytest
 
 
 def test_progress_tracker_import():
@@ -20,16 +21,16 @@ def test_progress_tracker_import():
     try:
         from aider_lint_fixer.progress_tracker import (
             EnhancedProgressTracker,
-            ProgressStage,
             ProgressMetrics,
+            ProgressStage,
             create_enhanced_progress_callback,
         )
 
         print("   ✅ Progress tracker modules import successfully")
-        return True
+        assert True  # Test passed
     except ImportError as e:
         print(f"   ❌ Import failed: {e}")
-        return False
+        pytest.fail(f"Import failed: {e}")
 
 
 def test_progress_tracker_basic_functionality():
@@ -72,11 +73,11 @@ def test_progress_tracker_basic_functionality():
         large_tracker.close()
         small_tracker.close()
 
-        return True
+        assert True  # Test passed
 
     except Exception as e:
         print(f"   ❌ Basic functionality test failed: {e}")
-        return False
+        pytest.fail(f"Basic functionality test failed: {e}")
 
 
 def test_progress_callback_integration():
@@ -119,11 +120,11 @@ def test_progress_callback_integration():
         print("   ✅ Progress callback integration works")
 
         tracker.close()
-        return True
+        assert True  # Test passed
 
     except Exception as e:
         print(f"   ❌ Progress callback test failed: {e}")
-        return False
+        pytest.fail(f"Progress callback test failed: {e}")
 
 
 def test_progress_summary():
@@ -170,11 +171,11 @@ def test_progress_summary():
         print("   ✅ Progress summary works correctly")
 
         tracker.close()
-        return True
+        assert True  # Test passed
 
     except Exception as e:
         print(f"   ❌ Progress summary test failed: {e}")
-        return False
+        pytest.fail(f"Progress summary test failed: {e}")
 
 
 def demonstrate_progress_features():

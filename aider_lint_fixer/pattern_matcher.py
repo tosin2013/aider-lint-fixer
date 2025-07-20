@@ -12,7 +12,7 @@ import pickle
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 try:
     import ahocorasick
@@ -652,8 +652,8 @@ class RuleKnowledgeBase:
         """Automatically create scraped rules if dependencies are available."""
         try:
             # Check if web scraping dependencies are available
-            import bs4
-            import requests
+            import bs4  # noqa: F401
+            import requests  # noqa: F401
 
             logger.info("Creating scraped rules automatically...")
 
@@ -1042,7 +1042,9 @@ class SmartErrorClassifier:
         error_indicators = ["error", "warning", "should", "expected", "missing", "unused"]
         return any(indicator in phrase for indicator in error_indicators)
 
-    def _update_pattern_confidence(self, error_message: str, language: str, linter: str, fix_successful: bool):
+    def _update_pattern_confidence(
+        self, error_message: str, language: str, linter: str, fix_successful: bool
+    ):
         """Immediately update confidence for similar patterns."""
         # Find existing patterns that match this error
         if language in self.pattern_matcher.patterns_by_language:
@@ -1054,7 +1056,9 @@ class SmartErrorClassifier:
                     else:
                         pattern.confidence = max(0.1, pattern.confidence - 0.1)
 
-                    logger.debug(f"Updated pattern confidence: {pattern.pattern} -> {pattern.confidence:.2f}")
+                    logger.debug(
+                        f"Updated pattern confidence: {pattern.pattern} -> {pattern.confidence:.2f}"
+                    )
                     break
 
     def _retrain_language_model(self, language: str, training_data: List[Dict]):
@@ -1094,7 +1098,9 @@ class SmartErrorClassifier:
             # Log learning progress
             fixable_count = sum(1 for item in training_data if item["fixable"])
             success_rate = fixable_count / len(training_data) * 100
-            logger.info(f"   📊 Success rate: {success_rate:.1f}% ({fixable_count}/{len(training_data)})")
+            logger.info(
+                f"   📊 Success rate: {success_rate:.1f}% ({fixable_count}/{len(training_data)})"
+            )
 
         except Exception as e:
             logger.error(f"Failed to retrain {language} model: {e}")
@@ -1177,7 +1183,9 @@ class SmartErrorClassifier:
                         if len(training_data) >= 5:
                             stats["ml_classifier"][f"{language}_model_trained"] = True
                         else:
-                            stats["ml_classifier"][f"{language}_needs_examples"] = 5 - len(training_data)
+                            stats["ml_classifier"][f"{language}_needs_examples"] = 5 - len(
+                                training_data
+                            )
                     except Exception:
                         pass
 

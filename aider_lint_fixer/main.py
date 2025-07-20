@@ -5,13 +5,11 @@ This module provides the command-line interface and orchestrates the entire
 lint detection and fixing workflow.
 """
 
-import argparse
 import logging
 import os
 import sys
-import time
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import click
 from colorama import Fore, Style, init
@@ -20,6 +18,8 @@ from . import __version__
 from .aider_integration import AiderIntegration
 from .community_issue_reporter import integrate_community_issue_reporting
 from .config_manager import ConfigManager
+from .context_manager import ContextManager
+from .cost_monitor import BudgetLimits, CostModel, CostMonitor
 from .enhanced_interactive import (
     CommunityLearningIntegration,
     enhanced_interactive_mode,
@@ -27,9 +27,9 @@ from .enhanced_interactive import (
 )
 from .error_analyzer import ErrorAnalyzer
 from .lint_runner import LintRunner
+from .pre_lint_assessment import PreLintAssessor, display_risk_assessment
 from .progress_tracker import EnhancedProgressTracker, create_enhanced_progress_callback
 from .project_detector import ProjectDetector
-from .pre_lint_assessment import PreLintAssessor, display_risk_assessment
 
 # Initialize colorama for cross-platform colored output
 init()
@@ -186,7 +186,7 @@ def print_fix_summary(sessions):
 
         # Show what errors were attempted to be fixed
         if session.errors_to_fix:
-            print(f"      🎯 Errors Attempted:")
+            print("      🎯 Errors Attempted:")
             for i, error_analysis in enumerate(
                 session.errors_to_fix[:5]
             ):  # Show first 5 attempted errors
@@ -430,6 +430,38 @@ def print_verification_summary(verification_results):
     is_flag=True,
     help="Only run architect mode for dangerous errors, skip safe automation",
 )
+@click.option(
+    "--max-cost",
+    type=float,
+    default=100.0,
+    help="Maximum total cost budget for AI operations (default: $100.00)",
+)
+@click.option(
+    "--max-iteration-cost",
+    type=float,
+    default=20.0,
+    help="Maximum cost per iteration in loop mode (default: $20.00)",
+)
+@click.option(
+    "--ai-model",
+    type=click.Choice(
+        [
+            "gpt-4",
+            "gpt-4-turbo",
+            "gpt-3.5-turbo",
+            "claude-3-opus",
+            "claude-3-sonnet",
+            "claude-3-haiku",
+        ]
+    ),
+    default="gpt-4-turbo",
+    help="AI model to use for cost calculations (default: gpt-4-turbo)",
+)
+@click.option(
+    "--show-cost-prediction",
+    is_flag=True,
+    help="Show cost predictions before starting operations",
+)
 def main(
     project_path: str,
     version: bool,
@@ -471,6 +503,10 @@ def main(
     architect_model: Optional[str],
     editor_model: Optional[str],
     architect_only: bool,
+    max_cost: float,
+    max_iteration_cost: float,
+    ai_model: str,
+    show_cost_prediction: bool,
 ):
     """Aider Lint Fixer - Automated lint error detection and fixing.
 
@@ -495,7 +531,9 @@ def main(
             print(f"{Fore.RED}❌ Error: --max-iterations must be at least 1{Style.RESET_ALL}")
             return 1
         if improvement_threshold < 0:
-            print(f"{Fore.RED}❌ Error: --improvement-threshold must be non-negative{Style.RESET_ALL}")
+            print(
+                f"{Fore.RED}❌ Error: --improvement-threshold must be non-negative{Style.RESET_ALL}"
+            )
             return 1
 
     # Handle version flag
@@ -698,14 +736,18 @@ def main(
         # Pre-Lint Risk Assessment (unless bypassed, but run in force mode for tracing)
         if (not check_only and not skip_pre_lint_assessment) or force:
             if force:
-                print(f"\n{Fore.CYAN}🔍 Pre-Lint Risk Assessment (for undefined variable tracing)...{Style.RESET_ALL}")
+                print(
+                    f"\n{Fore.CYAN}🔍 Pre-Lint Risk Assessment (for undefined variable tracing)...{Style.RESET_ALL}"
+                )
             else:
                 print(f"\n{Fore.CYAN}🔍 Pre-Lint Risk Assessment...{Style.RESET_ALL}")
 
             try:
                 assessor = PreLintAssessor(actual_project_path)
                 # Convert linters string to list if needed
-                linters_list = [l.strip() for l in linters.split(",")] if linters else ["eslint", "flake8"]
+                linters_list = (
+                    [l.strip() for l in linters.split(",")] if linters else ["eslint", "flake8"]
+                )
                 assessment = assessor.assess_project(linters_list)
 
                 if not force:
@@ -713,8 +755,12 @@ def main(
                     should_proceed = display_risk_assessment(assessment)
 
                     if not should_proceed:
-                        print(f"\n{Fore.YELLOW}⚠️  Lint fixing cancelled by user based on risk assessment.{Style.RESET_ALL}")
-                        print(f"{Fore.CYAN}💡 Consider using --check-only to preview changes first.{Style.RESET_ALL}")
+                        print(
+                            f"\n{Fore.YELLOW}⚠️  Lint fixing cancelled by user based on risk assessment.{Style.RESET_ALL}"
+                        )
+                        print(
+                            f"{Fore.CYAN}💡 Consider using --check-only to preview changes first.{Style.RESET_ALL}"
+                        )
                         return
                 else:
                     # In force mode, just collect the assessment data for tracing
@@ -823,8 +869,27 @@ def main(
         # Step 3: Analyze errors
         print(f"\n{Fore.CYAN}Step 3: Analyzing errors...{Style.RESET_ALL}")
 
-        analyzer = ErrorAnalyzer(project_root=str(project_info.root_path))
+        analyzer = ErrorAnalyzer(project_path=str(project_info.root_path))
         file_analyses = analyzer.analyze_errors(results)
+
+        # Check for structural problems and display insights
+        if analyzer.has_structural_problems():
+            structural_analysis = analyzer.get_structural_analysis()
+            print(f"\n{Fore.YELLOW}🏗️  STRUCTURAL ANALYSIS RESULTS{Style.RESET_ALL}")
+            print(f"   Architectural Score: {structural_analysis.architectural_score:.1f}/100")
+            print(f"   Structural Issues: {len(structural_analysis.structural_issues)}")
+            print(f"   Hotspot Files: {len(structural_analysis.hotspot_files)}")
+            print(f"   Refactoring Candidates: {len(structural_analysis.refactoring_candidates)}")
+
+            # Display key recommendations
+            recommendations = analyzer.get_structural_recommendations()
+            if recommendations:
+                print(f"\n{Fore.CYAN}📋 Structural Recommendations:{Style.RESET_ALL}")
+                for rec in recommendations[:5]:  # Show top 5 recommendations
+                    print(f"   • {rec}")
+
+                if len(recommendations) > 5:
+                    print(f"   ... and {len(recommendations) - 5} more recommendations")
 
         # Get prioritized errors
         prioritized_errors = analyzer.get_prioritized_errors(file_analyses, max_errors)
@@ -893,14 +958,66 @@ def main(
             if loop:
                 # Iterative Intelligent Force Mode
                 print(f"\n{Fore.CYAN}🔄 ITERATIVE INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}")
-                print(f"   {Fore.YELLOW}Running force mode in intelligent loops until convergence{Style.RESET_ALL}")
+                print(
+                    f"   {Fore.YELLOW}Running force mode in intelligent loops until convergence{Style.RESET_ALL}"
+                )
                 print(f"   Max iterations: {max_iterations}")
                 print(f"   Improvement threshold: {improvement_threshold}%")
 
+                # Initialize cost monitoring and context management
+                budget_limits = BudgetLimits(
+                    max_total_cost=max_cost, max_iteration_cost=max_iteration_cost
+                )
+                cost_monitor = CostMonitor(actual_project_path, budget_limits)
+                context_manager = ContextManager(max_tokens=8000, target_tokens=6000)
+
+                # Set AI model for cost calculations
+                model_mapping = {
+                    "gpt-4": CostModel.GPT_4,
+                    "gpt-4-turbo": CostModel.GPT_4_TURBO,
+                    "gpt-3.5-turbo": CostModel.GPT_3_5_TURBO,
+                    "claude-3-opus": CostModel.CLAUDE_3_OPUS,
+                    "claude-3-sonnet": CostModel.CLAUDE_3_SONNET,
+                    "claude-3-haiku": CostModel.CLAUDE_3_HAIKU,
+                }
+                cost_monitor.set_model(model_mapping.get(ai_model, CostModel.GPT_4_TURBO))
+
+                # Show cost prediction if requested
+                if show_cost_prediction:
+                    total_errors = sum(
+                        len(analysis.error_analyses) for analysis in file_analyses.values()
+                    )
+                    estimated_tokens_per_error = 500  # Conservative estimate
+                    estimated_total_tokens = (
+                        total_errors * estimated_tokens_per_error * max_iterations
+                    )
+
+                    # Rough cost estimation
+                    pricing = cost_monitor.MODEL_PRICING[cost_monitor.current_model]
+                    estimated_cost = (
+                        (estimated_total_tokens / 1000) * (pricing["input"] + pricing["output"]) / 2
+                    )
+
+                    print(f"\n{Fore.CYAN}💰 COST PREDICTION{Style.RESET_ALL}")
+                    print(f"   Model: {ai_model}")
+                    print(f"   Estimated total cost: ${estimated_cost:.2f}")
+                    print(f"   Budget limit: ${max_cost:.2f}")
+                    print(f"   Per-iteration limit: ${max_iteration_cost:.2f}")
+
+                    if estimated_cost > max_cost:
+                        print(f"   {Fore.YELLOW}⚠️  Estimated cost exceeds budget!{Style.RESET_ALL}")
+
                 # Import iterative force mode
                 try:
-                    from .iterative_force_mode import IterativeForceMode, IterationResult, LoopExitReason
-                    iterative_mode = IterativeForceMode(actual_project_path)
+                    from .iterative_force_mode import (
+                        IterationResult,
+                        IterativeForceMode,
+                        LoopExitReason,
+                    )
+
+                    iterative_mode = IterativeForceMode(
+                        actual_project_path, cost_monitor, context_manager
+                    )
                     iterative_mode.max_iterations = max_iterations
                     iterative_mode.improvement_threshold = improvement_threshold
 
@@ -913,10 +1030,13 @@ def main(
                         print("=" * 50)
 
                         # Get current error count
-                        current_errors = sum(len(analysis.error_analyses) for analysis in file_analyses.values())
+                        current_errors = sum(
+                            len(analysis.error_analyses) for analysis in file_analyses.values()
+                        )
 
                         # Run single force iteration (this will be the existing force mode logic)
                         import time
+
                         iteration_start_time = time.time()
 
                         # Store the force mode logic result for this iteration
@@ -924,13 +1044,17 @@ def main(
                         break  # Exit to run existing force mode logic once
 
                 except ImportError:
-                    print(f"\n{Fore.YELLOW}⚠️  Iterative mode not available, falling back to single force mode{Style.RESET_ALL}")
+                    print(
+                        f"\n{Fore.YELLOW}⚠️  Iterative mode not available, falling back to single force mode{Style.RESET_ALL}"
+                    )
                     loop = False  # Disable loop mode
 
             if not loop:
                 # Single Intelligent Force Mode
                 print(f"\n{Fore.CYAN}🧠 INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}")
-                print(f"   {Fore.YELLOW}Using ML to safely manage force mode for chaotic codebases{Style.RESET_ALL}")
+                print(
+                    f"   {Fore.YELLOW}Using ML to safely manage force mode for chaotic codebases{Style.RESET_ALL}"
+                )
 
             # Get ALL errors for force mode analysis
             all_error_analyses = []
@@ -944,17 +1068,20 @@ def main(
             # Initialize Intelligent Force Mode
             try:
                 from .intelligent_force_mode import IntelligentForceMode
+
                 intelligent_force = IntelligentForceMode(actual_project_path)
 
                 # Analyze force strategy using ML
-                print(f"\n{Fore.CYAN}🔍 Analyzing {len(all_error_analyses)} errors with ML...{Style.RESET_ALL}")
+                print(
+                    f"\n{Fore.CYAN}🔍 Analyzing {len(all_error_analyses)} errors with ML...{Style.RESET_ALL}"
+                )
                 force_strategy = intelligent_force.analyze_force_strategy(all_error_analyses)
 
                 # Display intelligent force strategy
                 print(f"\n{Fore.CYAN}🧠 INTELLIGENT FORCE STRATEGY{Style.RESET_ALL}")
                 print("=" * 60)
 
-                if force_strategy['is_chaotic']:
+                if force_strategy["is_chaotic"]:
                     print(f"{Fore.YELLOW}🏥 CHAOTIC CODEBASE DETECTED{Style.RESET_ALL}")
                     print(f"   Total errors: {force_strategy['total_errors']}")
                 else:
@@ -962,42 +1089,48 @@ def main(
                     print(f"   Total errors: {force_strategy['total_errors']}")
 
                 # Show action breakdown
-                breakdown = force_strategy['action_breakdown']
+                breakdown = force_strategy["action_breakdown"]
                 print(f"\n📊 ML-Powered Action Plan:")
-                if breakdown.get('auto_force', 0) > 0:
+                if breakdown.get("auto_force", 0) > 0:
                     print(f"   🤖 Auto-force (no confirmation): {breakdown['auto_force']} errors")
-                if breakdown.get('batch_confirm', 0) > 0:
+                if breakdown.get("batch_confirm", 0) > 0:
                     print(f"   📦 Batch confirmation: {breakdown['batch_confirm']} errors")
-                if breakdown.get('manual_review', 0) > 0:
+                if breakdown.get("manual_review", 0) > 0:
                     print(f"   👤 Manual review required: {breakdown['manual_review']} errors")
-                if breakdown.get('skip', 0) > 0:
+                if breakdown.get("skip", 0) > 0:
                     print(f"   ⏭️  Skip (too risky): {breakdown['skip']} errors")
 
                 print(f"\n⏱️  Estimated time: {force_strategy['estimated_time_minutes']} minutes")
 
                 # Show recommendations
-                if force_strategy['recommendations']:
+                if force_strategy["recommendations"]:
                     print(f"\n💡 ML Recommendations:")
-                    for rec in force_strategy['recommendations']:
+                    for rec in force_strategy["recommendations"]:
                         print(f"   {rec}")
 
                 # Show batch plans
-                batch_plans = force_strategy['batch_plans']
+                batch_plans = force_strategy["batch_plans"]
                 if len(batch_plans) > 1:
                     print(f"\n📦 Batch Execution Plan:")
                     for batch in batch_plans:
                         if batch.batch_id == 0:
-                            print(f"   Batch 0 (Auto-Force): {len(batch.errors)} errors - {batch.risk_level} risk")
+                            print(
+                                f"   Batch 0 (Auto-Force): {len(batch.errors)} errors - {batch.risk_level} risk"
+                            )
                         else:
-                            print(f"   Batch {batch.batch_id}: {len(batch.errors)} errors - {batch.risk_level} risk - {batch.estimated_time}min")
+                            print(
+                                f"   Batch {batch.batch_id}: {len(batch.errors)} errors - {batch.risk_level} risk - {batch.estimated_time}min"
+                            )
 
                 # Get user confirmation for the strategy
-                auto_force_count = breakdown.get('auto_force', 0)
-                batch_count = breakdown.get('batch_confirm', 0)
-                manual_count = breakdown.get('manual_review', 0)
+                auto_force_count = breakdown.get("auto_force", 0)
+                batch_count = breakdown.get("batch_confirm", 0)
+                manual_count = breakdown.get("manual_review", 0)
 
                 if auto_force_count > 0:
-                    print(f"\n{Fore.GREEN}🤖 {auto_force_count} high-confidence errors will be fixed automatically{Style.RESET_ALL}")
+                    print(
+                        f"\n{Fore.GREEN}🤖 {auto_force_count} high-confidence errors will be fixed automatically{Style.RESET_ALL}"
+                    )
 
                 if batch_count > 0 or manual_count > 0:
                     confirm_msg = f"Proceed with intelligent force strategy?"
@@ -1009,11 +1142,15 @@ def main(
                 prioritized_errors = []
 
                 # Add auto-force errors (these will be processed without individual confirmation)
-                auto_force_decisions = [d for d in force_strategy['force_decisions'] if d.action == 'auto_force']
+                auto_force_decisions = [
+                    d for d in force_strategy["force_decisions"] if d.action == "auto_force"
+                ]
                 prioritized_errors.extend([d.error_analysis for d in auto_force_decisions])
 
                 # Add batch-confirm errors (these will be processed in batches)
-                batch_decisions = [d for d in force_strategy['force_decisions'] if d.action == 'batch_confirm']
+                batch_decisions = [
+                    d for d in force_strategy["force_decisions"] if d.action == "batch_confirm"
+                ]
                 prioritized_errors.extend([d.error_analysis for d in batch_decisions])
 
                 # Apply max_errors limit if specified
@@ -1036,12 +1173,16 @@ def main(
                 print(f"   Processing {len(prioritized_errors)} prioritized errors")
 
                 # Store force strategy for later use during fixing
-                globals()['_intelligent_force_strategy'] = force_strategy
+                globals()["_intelligent_force_strategy"] = force_strategy
 
             except ImportError:
-                print(f"\n{Fore.YELLOW}⚠️  Intelligent force mode not available, falling back to basic force mode{Style.RESET_ALL}")
+                print(
+                    f"\n{Fore.YELLOW}⚠️  Intelligent force mode not available, falling back to basic force mode{Style.RESET_ALL}"
+                )
                 # Fall back to original force mode logic
-                prioritized_errors = all_error_analyses[:max_errors] if max_errors else all_error_analyses
+                prioritized_errors = (
+                    all_error_analyses[:max_errors] if max_errors else all_error_analyses
+                )
 
                 # Basic confirmation
                 warning_msg = f"\n{Fore.RED}Are you sure you want to force-fix {len(prioritized_errors)} errors? This may cause issues.{Style.RESET_ALL}"
@@ -1085,7 +1226,11 @@ def main(
 
         # Check if architect mode should be used
         architect_results = []
-        if use_architect_mode and hasattr(assessment, 'architect_guidance') and assessment.architect_guidance:
+        if (
+            use_architect_mode
+            and hasattr(assessment, "architect_guidance")
+            and assessment.architect_guidance
+        ):
             guidance = assessment.architect_guidance
 
             if guidance.get("has_dangerous_errors"):
@@ -1094,14 +1239,14 @@ def main(
 
                 # Execute architect mode for dangerous errors
                 architect_results = aider_integration.execute_architect_guidance(
-                    guidance,
-                    architect_model=architect_model,
-                    editor_model=editor_model
+                    guidance, architect_model=architect_model, editor_model=editor_model
                 )
 
                 # If architect-only mode, skip regular automation
                 if architect_only:
-                    print(f"\n{Fore.CYAN}🏗️  Architect-only mode: Skipping safe automation{Style.RESET_ALL}")
+                    print(
+                        f"\n{Fore.CYAN}🏗️  Architect-only mode: Skipping safe automation{Style.RESET_ALL}"
+                    )
 
                     # Show architect mode summary
                     successful_architect = sum(1 for r in architect_results if r.success)
@@ -1111,15 +1256,23 @@ def main(
 
                     return 0 if successful_architect > 0 else 1
             else:
-                print(f"\n{Fore.CYAN}ℹ️  No dangerous errors found - proceeding with standard automation{Style.RESET_ALL}")
+                print(
+                    f"\n{Fore.CYAN}ℹ️  No dangerous errors found - proceeding with standard automation{Style.RESET_ALL}"
+                )
         elif use_architect_mode:
-            print(f"\n{Fore.YELLOW}⚠️  Architect mode requested but no risk assessment available{Style.RESET_ALL}")
+            print(
+                f"\n{Fore.YELLOW}⚠️  Architect mode requested but no risk assessment available{Style.RESET_ALL}"
+            )
             print(f"   Run without --skip-pre-lint-assessment to enable architect mode")
 
         # Continue with standard/safe automation (unless architect-only mode)
         if not architect_only:
             print(f"\n{Fore.CYAN}🤖 Standard Automation Phase:{Style.RESET_ALL}")
-            if use_architect_mode and hasattr(assessment, 'architect_guidance') and assessment.architect_guidance:
+            if (
+                use_architect_mode
+                and hasattr(assessment, "architect_guidance")
+                and assessment.architect_guidance
+            ):
                 guidance = assessment.architect_guidance
                 safe_plan = guidance.get("safe_automation_plan", {})
                 if safe_plan:

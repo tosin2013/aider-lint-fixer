@@ -8,7 +8,7 @@ package managers, and lint configurations.
 import configparser
 import json
 import logging
-import os
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
