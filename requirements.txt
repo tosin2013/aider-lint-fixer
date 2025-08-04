@@ -8,7 +8,7 @@ Jinja2==3.1.6
 MarkupSafe==3.0.2
 prompt_toolkit==3.0.51
 pyasn1_modules==0.4.2
-pydantic_core==2.33.2
+pydantic_core==2.37.2
 Pygments==2.19.2
 PyYAML==6.0.2
 subprocess.run==0.0.8
