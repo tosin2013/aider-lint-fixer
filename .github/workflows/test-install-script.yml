@@ -22,7 +22,7 @@ jobs:
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       
     - name: 🔧 Test script syntax
       run: |
@@ -82,7 +82,7 @@ jobs:
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       
     - name: 🔧 Prepare test environment
       run: |
@@ -191,7 +191,7 @@ jobs:
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       
     - name: 🧪 Test installation steps individually
       run: |
@@ -280,7 +280,7 @@ jobs:
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       
     - name: 🧪 Test script with different inputs
       run: |
