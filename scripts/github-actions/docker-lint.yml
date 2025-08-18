@@ -1,0 +1,354 @@
+# GitHub Actions Template for aider-lint-fixer Docker Integration
+# Copy this file to .github/workflows/aider-lint-fixer.yml to enable automatic linting
+
+name: 'Lint with aider-lint-fixer'
+
+on:
+  # Trigger on push to main branches
+  push:
+    branches: [ main, master, develop ]
+  
+  # Trigger on pull requests
+  pull_request:
+    branches: [ main, master, develop ]
+  
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      linters:
+        description: 'Comma-separated list of linters to run'
+        required: false
+        default: 'flake8,eslint,ansible-lint'
+      max_files:
+        description: 'Maximum number of files to process'
+        required: false
+        default: '10'
+      dry_run:
+        description: 'Run in dry-run mode (no changes)'
+        required: false
+        default: 'true'
+        type: boolean
+
+  # Weekly scheduled runs
+  schedule:
+    - cron: '0 2 * * 1'  # Every Monday at 2 AM UTC
+
+# Allow one concurrent run per branch
+concurrency:
+  group: aider-lint-fixer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: 'Lint Code with aider-lint-fixer'
+    runs-on: ubuntu-latest
+    
+    # Set timeout to prevent hanging
+    timeout-minutes: 30
+    
+    # Don't run on forks unless specifically configured
+    if: github.repository_owner == 'your-org-name' || github.event_name == 'workflow_dispatch'
+    
+    permissions:
+      contents: read
+      pull-requests: write  # For PR comments
+      security-events: write  # For SARIF uploads
+    
+    outputs:
+      # Expose results for dependent jobs
+      lint-results: ${{ steps.aider-lint.outputs.results }}
+      errors-fixed: ${{ steps.aider-lint.outputs.errors_fixed }}
+      total-errors: ${{ steps.aider-lint.outputs.total_errors }}
+    
+    steps:
+      - name: 'Checkout Code'
+        uses: actions/checkout@v5
+        with:
+          # Fetch full history for better analysis
+          fetch-depth: 0
+      
+      - name: 'Setup Docker Buildx'
+        uses: docker/setup-buildx-action@v3
+      
+      - name: 'Cache aider-lint-fixer learning data'
+        uses: actions/cache@v4
+        with:
+          path: .aider-lint-cache
+          key: aider-lint-cache-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            aider-lint-cache-${{ runner.os }}-
+            aider-lint-cache-
+      
+      - name: 'Create output directory'
+        run: mkdir -p ./lint-results
+      
+      - name: 'Build aider-lint-fixer Docker image'
+        run: |
+          # Build the production Docker image
+          docker build \
+            -f scripts/containers/Dockerfile.prod \
+            -t aider-lint-fixer:ci \
+            --cache-from aider-lint-fixer:latest \
+            --label "github-run-id=${{ github.run_id }}" \
+            --label "github-sha=${{ github.sha }}" \
+            .
+      
+      - name: 'Run aider-lint-fixer'
+        id: aider-lint
+        env:
+          # API key from repository secrets
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          # Alternative API keys (uncomment as needed)
+          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          
+          # CI-specific settings
+          CI: 'true'
+          GITHUB_ACTIONS: 'true'
+          AIDER_LINT_FIXER_NO_BANNER: 'true'
+          PYTHONUNBUFFERED: '1'
+        run: |
+          # Determine linters to run
+          LINTERS="${{ github.event.inputs.linters || 'flake8,eslint,ansible-lint' }}"
+          MAX_FILES="${{ github.event.inputs.max_files || '10' }}"
+          DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
+          
+          # Build Docker run command
+          DOCKER_ARGS=(
+            --rm
+            --name "aider-lint-fixer-ci-${{ github.run_id }}"
+            -e "CI=true"
+            -e "GITHUB_ACTIONS=true"
+            -e "AIDER_LINT_FIXER_NO_BANNER=true"
+            -e "PYTHONUNBUFFERED=1"
+            -v "${{ github.workspace }}:/workspace:ro"
+            -v "${{ github.workspace }}/lint-results:/output"
+            -v "${{ github.workspace }}/.aider-lint-cache:/workspace/.aider-lint-cache"
+          )
+          
+          # Add API key if available
+          if [[ -n "$DEEPSEEK_API_KEY" ]]; then
+            DOCKER_ARGS+=(-e "DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY")
+          elif [[ -n "$OPENAI_API_KEY" ]]; then
+            DOCKER_ARGS+=(-e "OPENAI_API_KEY=$OPENAI_API_KEY")
+          elif [[ -n "$ANTHROPIC_API_KEY" ]]; then
+            DOCKER_ARGS+=(-e "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY")
+          else
+            echo "::warning::No API key found. Running in dry-run mode only."
+            DRY_RUN="true"
+          fi
+          
+          # Build aider-lint-fixer arguments
+          AIDER_ARGS=(
+            /workspace
+            --linters "$LINTERS"
+            --max-files "$MAX_FILES"
+            --verbose
+            --output-format json
+          )
+          
+          # Add dry-run if specified
+          if [[ "$DRY_RUN" == "true" ]]; then
+            AIDER_ARGS+=(--dry-run)
+          fi
+          
+          # Run aider-lint-fixer
+          echo "::notice::Running aider-lint-fixer with linters: $LINTERS"
+          
+          docker run "${DOCKER_ARGS[@]}" aider-lint-fixer:ci "${AIDER_ARGS[@]}" | tee ./lint-results/aider-output.log
+          
+          # Extract results for output
+          if [[ -f "./lint-results/results.json" ]]; then
+            TOTAL_ERRORS=$(jq -r '.summary.total_errors // 0' ./lint-results/results.json)
+            ERRORS_FIXED=$(jq -r '.summary.errors_fixed // 0' ./lint-results/results.json)
+            echo "errors_fixed=$ERRORS_FIXED" >> $GITHUB_OUTPUT
+            echo "total_errors=$TOTAL_ERRORS" >> $GITHUB_OUTPUT
+            echo "::notice::Found $TOTAL_ERRORS errors, fixed $ERRORS_FIXED"
+          fi
+      
+      - name: 'Process Results'
+        if: always()
+        run: |
+          # Create summary for GitHub
+          {
+            echo "# 🔍 aider-lint-fixer Results"
+            echo ""
+            echo "**Linters:** ${{ github.event.inputs.linters || 'flake8,eslint,ansible-lint' }}"
+            echo "**Max Files:** ${{ github.event.inputs.max_files || '10' }}"
+            echo "**Dry Run:** ${{ github.event.inputs.dry_run || 'true' }}"
+            echo ""
+            
+            if [[ -f "./lint-results/results.json" ]]; then
+              echo "## Summary"
+              jq -r '.summary | "**Total Errors:** \(.total_errors // 0)\n**Errors Fixed:** \(.errors_fixed // 0)\n**Success Rate:** \(.success_rate // "N/A")%"' ./lint-results/results.json
+              echo ""
+              
+              # Show top issues
+              if [[ $(jq -r '.errors | length' ./lint-results/results.json 2>/dev/null) -gt 0 ]]; then
+                echo "## Top Issues Found"
+                jq -r '.errors[:5][] | "- **\(.file):\(.line)** - \(.error_type): \(.message)"' ./lint-results/results.json 2>/dev/null || echo "No detailed error information available"
+              fi
+            else
+              echo "No results file generated. Check logs for details."
+            fi
+          } > ./lint-results/summary.md
+      
+      - name: 'Upload Results as Artifacts'
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aider-lint-fixer-results-${{ github.run_id }}
+          path: |
+            lint-results/
+            .aider-lint-cache/
+          retention-days: 30
+      
+      - name: 'Comment on Pull Request'
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Read summary if it exists
+            let summary = "## 🔍 aider-lint-fixer Results\n\nLint analysis completed.";
+            
+            try {
+              if (fs.existsSync('./lint-results/summary.md')) {
+                summary = fs.readFileSync('./lint-results/summary.md', 'utf8');
+              }
+            } catch (error) {
+              console.log('Could not read summary file:', error.message);
+            }
+            
+            // Add workflow information
+            summary += `\n\n---\n*Workflow: [\`${{ github.workflow }}\`](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+            
+            // Find existing comment to update
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const existingComment = comments.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('🔍 aider-lint-fixer Results')
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: summary
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: summary
+              });
+            }
+      
+      - name: 'Generate SARIF Report'
+        if: always()
+        run: |
+          # Convert results to SARIF format for GitHub Security tab
+          if [[ -f "./lint-results/results.json" ]]; then
+            python3 -c "
+            import json
+            import sys
+            
+            try:
+              with open('./lint-results/results.json', 'r') as f:
+                results = json.load(f)
+              
+              sarif = {
+                'version': '2.1.0',
+                'schema': 'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json',
+                'runs': [{
+                  'tool': {
+                    'driver': {
+                      'name': 'aider-lint-fixer',
+                      'version': '1.9.0',
+                      'informationUri': 'https://github.com/tosin2013/aider-lint-fixer'
+                    }
+                  },
+                  'results': []
+                }]
+              }
+              
+              if 'errors' in results:
+                for error in results['errors'][:100]:  # Limit to 100 for SARIF
+                  sarif['runs'][0]['results'].append({
+                    'ruleId': error.get('error_type', 'unknown'),
+                    'message': {'text': error.get('message', 'Lint error')},
+                    'locations': [{
+                      'physicalLocation': {
+                        'artifactLocation': {'uri': error.get('file', '')},
+                        'region': {'startLine': error.get('line', 1)}
+                      }
+                    }],
+                    'level': 'warning'
+                  })
+              
+              with open('./lint-results/results.sarif', 'w') as f:
+                json.dump(sarif, f, indent=2)
+            except Exception as e:
+              print(f'Could not generate SARIF: {e}', file=sys.stderr)
+            "
+          fi
+      
+      - name: 'Upload SARIF Results'
+        if: always() && github.ref == 'refs/heads/main'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: lint-results/results.sarif
+        continue-on-error: true  # Don't fail the build if SARIF upload fails
+      
+      - name: 'Set Job Status'
+        if: always()
+        run: |
+          # Determine overall job status
+          if [[ -f "./lint-results/results.json" ]]; then
+            TOTAL_ERRORS=$(jq -r '.summary.total_errors // 0' ./lint-results/results.json)
+            CRITICAL_ERRORS=$(jq -r '.summary.critical_errors // 0' ./lint-results/results.json)
+            
+            if [[ "$CRITICAL_ERRORS" -gt 0 ]]; then
+              echo "::error::Found $CRITICAL_ERRORS critical lint errors"
+              exit 1
+            elif [[ "$TOTAL_ERRORS" -gt 50 ]]; then
+              echo "::warning::Found many lint errors ($TOTAL_ERRORS). Consider running aider-lint-fixer to fix them."
+            else
+              echo "::notice::Lint check completed successfully"
+            fi
+          fi
+
+  # Optional: Deploy or publish results
+  publish-results:
+    name: 'Publish Results'
+    needs: lint
+    runs-on: ubuntu-latest
+    if: always() && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: 'Download Results'
+        uses: actions/download-artifact@v4
+        with:
+          name: aider-lint-fixer-results-${{ github.run_id }}
+          path: ./results
+      
+      - name: 'Publish to GitHub Pages'
+        # Only if you want to publish results to GitHub Pages
+        # Uncomment and configure as needed
+        # uses: peaceiris/actions-gh-pages@v3
+        # with:
+        #   github_token: ${{ secrets.GITHUB_TOKEN }}
+        #   publish_dir: ./results
+        #   destination_dir: lint-reports/${{ github.sha }}
+        run: |
+          echo "Results ready for publishing"
+          ls -la ./results/

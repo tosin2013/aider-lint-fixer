@@ -1,0 +1,118 @@
+# Production Container for aider-lint-fixer
+# Multi-stage build for minimal production image
+# Usage: docker build -f scripts/containers/Dockerfile.prod -t aider-lint-fixer:latest .
+
+# Build stage
+FROM python:3.11-slim as builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js and npm for linters
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create build directory
+WORKDIR /build
+
+# Copy dependency files
+COPY requirements.txt pyproject.toml setup.py ./
+COPY aider_lint_fixer/ ./aider_lint_fixer/
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Install Python linters
+RUN pip install --no-cache-dir \
+    flake8==7.3.0 \
+    pylint==3.3.7 \
+    ansible-lint==25.6.1
+
+# Install Node.js linters
+RUN npm install -g \
+    eslint@8.57.1 \
+    jshint@2.13.6 \
+    prettier@3.6.2 \
+    && npm cache clean --force
+
+# Install aider-chat
+RUN pip install --no-cache-dir "aider-chat>=0.85.0"
+
+# Install the package
+RUN pip install --no-cache-dir .
+
+# Production stage
+FROM python:3.11-slim
+
+# Metadata
+LABEL name="aider-lint-fixer" \
+      version="1.9.0" \
+      description="AI-powered lint error detection and fixing" \
+      maintainer="Aider Lint Fixer Team <tosin@decisioncrafters.com>" \
+      vendor="aider-lint-fixer" \
+      summary="Production container for aider-lint-fixer"
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -r aider && useradd -r -g aider -d /app -s /bin/bash aider
+
+# Create application directory
+WORKDIR /app
+
+# Copy Python packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
+
+# Copy Node.js packages from builder
+COPY --from=builder /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
+COPY --from=builder /usr/local/bin/eslint /usr/local/bin/
+COPY --from=builder /usr/local/bin/jshint /usr/local/bin/
+COPY --from=builder /usr/local/bin/prettier /usr/local/bin/
+
+# Create cache directory for learning features
+RUN mkdir -p /app/.aider-lint-cache && chown aider:aider /app/.aider-lint-cache
+
+# Switch to non-root user
+USER aider
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV PATH="/usr/local/bin:$PATH"
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Default environment variables (can be overridden)
+ENV AIDER_LINT_FIXER_NO_BANNER=false
+ENV AIDER_LINT_FIXER_LOG_LEVEL=INFO
+ENV AIDER_LINT_FIXER_MAX_FILES=10
+ENV AIDER_LINT_FIXER_MAX_ERRORS=5
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -m aider_lint_fixer --version || exit 1
+
+# Volume for project code
+VOLUME ["/workspace"]
+
+# Working directory for mounted code
+WORKDIR /workspace
+
+# Entry point script
+COPY --chown=aider:aider scripts/containers/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["--help"]
