@@ -347,7 +347,20 @@ cat ~/.config/containers/registries.conf
 podman system reset
 ```
 
-#### 5. Network Issues
+#### 5. Package Conflicts (RHEL/UBI)
+```bash
+# Error: "conflicting requests" or curl package conflicts
+# This is resolved in the container setup - no action needed
+
+# If you see curl-minimal conflicts during build:
+# The Containerfile has been updated to exclude curl from system packages
+# curl-minimal is already available in the UBI base image
+
+# To rebuild with clean cache:
+podman build --no-cache -f scripts/containers/Containerfile.dev -t aider-lint-fixer:dev .
+```
+
+#### 6. Network Issues
 ```bash
 # Test with direct Docker run
 docker run --rm python:3.11-slim python --version

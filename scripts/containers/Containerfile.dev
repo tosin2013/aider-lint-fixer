@@ -19,7 +19,6 @@ USER 0
 RUN dnf update -y && \
     dnf install -y \
         git \
-        curl \
         wget \
         nodejs \
         npm \
@@ -53,12 +52,12 @@ RUN pip install --upgrade pip setuptools wheel && \
 
 # Install Python linters with specific versions
 RUN pip install --no-cache-dir \
-    flake8==7.3.0 \
-    pylint==3.3.7 \
-    ansible-lint==25.6.1 \
-    black>=23.0.0 \
-    isort>=5.12.0 \
-    mypy>=1.0.0 \
+    "flake8==7.3.0" \
+    "pylint==3.3.7" \
+    "ansible-lint==25.6.1" \
+    "black>=23.0.0" \
+    "isort>=5.12.0" \
+    "mypy>=1.0.0" \
     bandit \
     safety
 
@@ -68,11 +67,17 @@ RUN pip install --no-cache-dir "aider-chat>=0.85.0"
 # Copy the entire project
 COPY --chown=1001:0 . .
 
+# Switch back to root for installation
+USER 0
+
 # Install aider-lint-fixer in development mode
 RUN pip install --no-cache-dir -e ".[all]"
 
-# Create cache directory for learning features
-RUN mkdir -p .aider-lint-cache && chmod 755 .aider-lint-cache
+# Create cache directory for learning features (as root)
+RUN mkdir -p .aider-lint-cache && chown 1001:0 .aider-lint-cache && chmod 755 .aider-lint-cache
+
+# Switch back to non-root user
+USER 1001
 
 # Verify installations
 RUN echo "=== Python Version ===" && python --version && \
