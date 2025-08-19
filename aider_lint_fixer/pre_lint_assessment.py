@@ -72,13 +72,9 @@ class PreLintAssessor:
         recommendations = []
         # Volume risk assessment
         total_errors = sum(len(result.errors) for result in lint_results.values())
-        volume_risk = self._assess_volume_risk(
-            total_errors, risk_factors, recommendations
-        )
+        volume_risk = self._assess_volume_risk(total_errors, risk_factors, recommendations)
         # Error type risk assessment
-        error_breakdown = self._analyze_error_types(
-            lint_results, risk_factors, recommendations
-        )
+        error_breakdown = self._analyze_error_types(lint_results, risk_factors, recommendations)
         # Project context risk assessment
         self._assess_project_context(project_info, risk_factors, recommendations)
         # Test coverage assessment
@@ -86,13 +82,9 @@ class PreLintAssessor:
         # Determine overall risk
         overall_risk = self._calculate_overall_risk(risk_factors)
         # Generate approach recommendation
-        suggested_approach = self._suggest_approach(
-            overall_risk, total_errors, error_breakdown
-        )
+        suggested_approach = self._suggest_approach(overall_risk, total_errors, error_breakdown)
         # Generate architect mode guidance for dangerous errors
-        architect_guidance = generate_architect_guidance_for_dangerous_errors(
-            lint_results
-        )
+        architect_guidance = generate_architect_guidance_for_dangerous_errors(lint_results)
         return RiskAssessment(
             overall_risk=overall_risk,
             total_errors=total_errors,
@@ -123,9 +115,7 @@ class PreLintAssessor:
                             f"✅ Quick scan for {linter}: {len(result.errors)} errors, {len(result.warnings)} warnings"
                         )
                     else:
-                        logger.warning(
-                            f"❌ Quick scan for {linter}: No result returned"
-                        )
+                        logger.warning(f"❌ Quick scan for {linter}: No result returned")
                 except Exception as e:
                     logger.warning(f"❌ Quick scan failed for {linter}: {e}")
                     import traceback
@@ -211,16 +201,11 @@ class PreLintAssessor:
                     )
         return error_breakdown
 
-    def _assess_project_context(
-        self, project_info, risk_factors: List, recommendations: List
-    ):
+    def _assess_project_context(self, project_info, risk_factors: List, recommendations: List):
         """Assess risks based on project context."""
         # Check for web application indicators
         web_indicators = ["html", "css", "js", "react", "vue", "angular"]
-        if any(
-            indicator in str(project_info.languages).lower()
-            for indicator in web_indicators
-        ):
+        if any(indicator in str(project_info.languages).lower() for indicator in web_indicators):
             risk_factors.append(
                 (
                     RiskCategory.EXTERNAL_DEPS,
@@ -228,9 +213,7 @@ class PreLintAssessor:
                     RiskLevel.MEDIUM,
                 )
             )
-            recommendations.append(
-                "Verify that 'undefined' variables aren't from HTML globals"
-            )
+            recommendations.append("Verify that 'undefined' variables aren't from HTML globals")
         # Check for production indicators
         prod_indicators = [
             "dockerfile",
@@ -238,9 +221,7 @@ class PreLintAssessor:
             ".github/workflows",
             "makefile",
         ]
-        if any(
-            (self.project_root / indicator).exists() for indicator in prod_indicators
-        ):
+        if any((self.project_root / indicator).exists() for indicator in prod_indicators):
             risk_factors.append(
                 (
                     RiskCategory.PRODUCTION_CODE,
@@ -252,9 +233,7 @@ class PreLintAssessor:
                 "Test thoroughly after fixes - this appears to be production code"
             )
 
-    def _assess_test_coverage(
-        self, project_info, risk_factors: List, recommendations: List
-    ):
+    def _assess_test_coverage(self, project_info, risk_factors: List, recommendations: List):
         """Assess test coverage as a safety net."""
         test_indicators = [
             "test",
@@ -336,9 +315,7 @@ def display_risk_assessment(assessment: RiskAssessment) -> bool:
     # Error breakdown
     if assessment.error_breakdown:
         print("\n📋 Error Breakdown (Top 5):")
-        sorted_errors = sorted(
-            assessment.error_breakdown.items(), key=lambda x: x[1], reverse=True
-        )
+        sorted_errors = sorted(assessment.error_breakdown.items(), key=lambda x: x[1], reverse=True)
         for rule_id, count in sorted_errors[:5]:
             print(f"   • {rule_id}: {count} errors")
     # Recommendations
@@ -350,9 +327,7 @@ def display_risk_assessment(assessment: RiskAssessment) -> bool:
     print("\n🎯 Suggested Approach:")
     print(f"   {assessment.suggested_approach}")
     # Show architect guidance if available
-    if assessment.architect_guidance and assessment.architect_guidance.get(
-        "has_dangerous_errors"
-    ):
+    if assessment.architect_guidance and assessment.architect_guidance.get("has_dangerous_errors"):
         display_architect_guidance(assessment.architect_guidance)
     print("\n" + "=" * 70)
     # Get user decision
@@ -412,9 +387,7 @@ def generate_architect_guidance_for_dangerous_errors(lint_results: Dict) -> Dict
                         "line": error.line,
                         "rule": error.rule_id,
                         "message": error.message,
-                        "variable": _extract_variable_name(
-                            error.message, error.rule_id
-                        ),
+                        "variable": _extract_variable_name(error.message, error.rule_id),
                     }
                 )
                 dangerous_files[error.file_path]["error_count"] += 1
@@ -463,9 +436,7 @@ def _create_architect_prompts(dangerous_files: Dict) -> List[Dict]:
                 "architect_prompt": _generate_file_specific_prompt(
                     file_path, undefined_vars, file_info["errors"]
                 ),
-                "suggested_solutions": _suggest_solutions_for_file(
-                    file_path, undefined_vars
-                ),
+                "suggested_solutions": _suggest_solutions_for_file(file_path, undefined_vars),
             }
             prompts.append(prompt)
     return prompts
@@ -490,9 +461,7 @@ Please analyze this file and fix the undefined variable issues. These variables 
 """
     for error in errors:
         if error["variable"]:
-            prompt += (
-                f"\n- Line {error['line']}: `{error['variable']}` - {error['message']}"
-            )
+            prompt += f"\n- Line {error['line']}: `{error['variable']}` - {error['message']}"
     prompt += """
 ## Instructions
 1. Examine each undefined variable in context
@@ -518,21 +487,13 @@ def _suggest_solutions_for_file(file_path: str, undefined_vars: List[str]) -> Li
                 f"'{var}' appears to be a browser/Node.js global - consider adding to eslint globals"
             )
         elif var.lower().endswith("callback") or "callback" in var.lower():
-            suggestions.append(
-                f"'{var}' might be a callback parameter - check function signatures"
-            )
+            suggestions.append(f"'{var}' might be a callback parameter - check function signatures")
         elif file_name.endswith(".mjs") or "module" in file_name:
-            suggestions.append(
-                f"'{var}' might need an import statement in this ES module"
-            )
+            suggestions.append(f"'{var}' might need an import statement in this ES module")
         elif "config" in file_name or "settings" in file_name:
-            suggestions.append(
-                f"'{var}' might be a configuration variable - check config files"
-            )
+            suggestions.append(f"'{var}' might be a configuration variable - check config files")
         else:
-            suggestions.append(
-                f"'{var}' needs investigation - could be import, global, or typo"
-            )
+            suggestions.append(f"'{var}' needs investigation - could be import, global, or typo")
     return suggestions
 
 
@@ -554,12 +515,8 @@ def display_architect_guidance(guidance: Dict):
     safe_plan = guidance.get("safe_automation_plan", {})
     if safe_plan:
         print("\n✅ SAFE AUTOMATION PLAN:")
-        print(
-            f"   • {safe_plan['safe_errors_count']} safe errors can be fixed automatically"
-        )
-        print(
-            f"   • Recommended command: aider-lint-fixer {safe_plan['automation_command']}"
-        )
+        print(f"   • {safe_plan['safe_errors_count']} safe errors can be fixed automatically")
+        print(f"   • Recommended command: aider-lint-fixer {safe_plan['automation_command']}")
         print(f"   • Safe rules: {', '.join(safe_plan['safe_rules'][:5])}...")
     print("\n💡 WORKFLOW RECOMMENDATION:")
     print(
@@ -571,9 +528,7 @@ def display_architect_guidance(guidance: Dict):
     print("   3. Review each undefined variable manually")
     # Offer to generate CoT prompt for external AI review
     print("\n🧠 CHAIN OF THOUGHT ANALYSIS:")
-    print(
-        "   Would you like to generate a Chain of Thought prompt for external AI review?"
-    )
+    print("   Would you like to generate a Chain of Thought prompt for external AI review?")
     response = input("   Generate CoT prompt? [y/N]: ").strip().lower()
     if response in ["y", "yes"]:
         cot_prompt = generate_cot_prompt_for_dangerous_errors(guidance)
@@ -705,8 +660,7 @@ def save_cot_prompt(cot_prompt: str, guidance: Dict) -> None:
         # Show file stats
         dangerous_files = guidance.get("dangerous_files", {})
         total_vars = sum(
-            len(file_info.get("undefined_vars", set()))
-            for file_info in dangerous_files.values()
+            len(file_info.get("undefined_vars", set())) for file_info in dangerous_files.values()
         )
         print("\n📊 CoT Prompt Stats:")
         print(f"   Files to analyze: {len(dangerous_files)}")

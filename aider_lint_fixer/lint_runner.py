@@ -38,9 +38,7 @@ def _import_modular_linters():
             AnsibleLintLinter = _AnsibleLintLinter
             imported_linters.append("ansible-lint")
         except ImportError as e:
-            logger.debug(
-                f"Ansible-lint linter not available (platform compatibility): {e}"
-            )
+            logger.debug(f"Ansible-lint linter not available (platform compatibility): {e}")
             AnsibleLintLinter = None
         except Exception as e:
             logger.debug(f"Unexpected error importing ansible-lint: {e}")
@@ -87,9 +85,7 @@ def _import_modular_linters():
             PrettierLinter = None
         MODULAR_LINTERS_AVAILABLE = True
         if imported_linters:
-            logger.debug(
-                f"Successfully imported modular linters: {', '.join(imported_linters)}"
-            )
+            logger.debug(f"Successfully imported modular linters: {', '.join(imported_linters)}")
         else:
             logger.debug("No modular linters could be imported")
 
@@ -248,9 +244,7 @@ class LintRunner:
         if linter_name not in self.native_commands:
             # Detect native commands on first use
             if not self.native_commands:
-                self.native_commands = (
-                    self.native_detector.detect_all_native_lint_commands()
-                )
+                self.native_commands = self.native_detector.detect_all_native_lint_commands()
         return self.native_commands.get(linter_name)
 
     def _run_native_command(
@@ -273,9 +267,7 @@ class LintRunner:
             # Native commands like "npm run lint" are designed to run on the project's configured files
             # Adding specific file paths often breaks the command (e.g., "npm run lint unknown")
             # If file-specific linting is needed, we should fall back to modular implementation
-            logger.info(
-                f"Running native {native_command.linter_type}: {' '.join(command)}"
-            )
+            logger.info(f"Running native {native_command.linter_type}: {' '.join(command)}")
             # Execute the command
             result = subprocess.run(
                 command,
@@ -299,13 +291,10 @@ class LintRunner:
                 warnings = []
                 # Simple error counting for non-JSON output
                 output_lines = (result.stdout + result.stderr).split("\n")
-                error_count = len(
-                    [line for line in output_lines if "error" in line.lower()]
-                )
+                error_count = len([line for line in output_lines if "error" in line.lower()])
                 return LintResult(
                     linter=native_command.linter_type,
-                    success=result.returncode
-                    in [0, 1, 2],  # Many linters use 2 for "issues found"
+                    success=result.returncode in [0, 1, 2],  # Many linters use 2 for "issues found"
                     errors=errors,
                     warnings=warnings,
                     raw_output=result.stdout + result.stderr,
@@ -316,9 +305,7 @@ class LintRunner:
             # Fall back to legacy implementation
             return None
 
-    def _parse_eslint_json_output(
-        self, stdout: str, stderr: str, return_code: int
-    ) -> LintResult:
+    def _parse_eslint_json_output(self, stdout: str, stderr: str, return_code: int) -> LintResult:
         """Parse ESLint JSON output into LintResult."""
         errors = []
         warnings = []
@@ -370,9 +357,7 @@ class LintRunner:
             execution_time=0.0,
         )
 
-    def _parse_eslint_text_output(
-        self, stdout: str, stderr: str, return_code: int
-    ) -> LintResult:
+    def _parse_eslint_text_output(self, stdout: str, stderr: str, return_code: int) -> LintResult:
         """Parse ESLint text output into LintResult."""
         errors = []
         warnings = []
@@ -392,9 +377,7 @@ class LintRunner:
                 continue
             # Check if this line is a file path
             # ESLint file paths typically start with / or ./ and end with js/ts extensions
-            if (
-                line_stripped.startswith("/") or line_stripped.startswith("./")
-            ) and any(
+            if (line_stripped.startswith("/") or line_stripped.startswith("./")) and any(
                 line_stripped.endswith(ext)
                 for ext in [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"]
             ):
@@ -424,9 +407,7 @@ class LintRunner:
                             rule_id = parts[-1].strip()
                         # Determine severity
                         is_error = level == "error"
-                        severity = (
-                            ErrorSeverity.ERROR if is_error else ErrorSeverity.WARNING
-                        )
+                        severity = ErrorSeverity.ERROR if is_error else ErrorSeverity.WARNING
                         # Use the current file being tracked
                         file_path = current_file
                         lint_error = LintError(
@@ -510,9 +491,7 @@ class LintRunner:
             import platform
 
             if linter_name == "ansible-lint" and platform.system() == "Windows":
-                logger.debug(
-                    f"Skipping {linter_name} on Windows (platform incompatibility)"
-                )
+                logger.debug(f"Skipping {linter_name} on Windows (platform incompatibility)")
                 available[linter_name] = False
                 continue
             config = self.LINTER_COMMANDS[linter_name]
@@ -550,9 +529,7 @@ class LintRunner:
         # First, try to use native project commands (highest priority)
         native_command = self._get_native_command(linter_name)
         if native_command:
-            logger.info(
-                f"Using native {linter_name} command: {' '.join(native_command.command)}"
-            )
+            logger.info(f"Using native {linter_name} command: {' '.join(native_command.command)}")
             native_result = self._run_native_command(native_command, file_paths)
             if native_result:
                 return native_result
@@ -582,9 +559,7 @@ class LintRunner:
             self.available_linters.update(self._detect_available_linters([linter_name]))
         if not self.available_linters.get(linter_name, False):
             logger.warning(f"Linter {linter_name} is not available")
-            return LintResult(
-                linter=linter_name, success=False, raw_output="Linter not available"
-            )
+            return LintResult(linter=linter_name, success=False, raw_output="Linter not available")
         config = self.LINTER_COMMANDS[linter_name]
         command = config["command"].copy()
         # Add file paths or project root
@@ -593,9 +568,7 @@ class LintRunner:
             supported_extensions = config.get("file_extensions", [])
             if supported_extensions:
                 filtered_files = [
-                    f
-                    for f in file_paths
-                    if any(f.endswith(ext) for ext in supported_extensions)
+                    f for f in file_paths if any(f.endswith(ext) for ext in supported_extensions)
                 ]
                 if not filtered_files:
                     logger.info(f"No files with supported extensions for {linter_name}")
@@ -641,9 +614,7 @@ class LintRunner:
             )
         except Exception as e:
             logger.error(f"Error running linter {linter_name}: {e}")
-            return LintResult(
-                linter=linter_name, success=False, raw_output=f"Error: {str(e)}"
-            )
+            return LintResult(linter=linter_name, success=False, raw_output=f"Error: {str(e)}")
 
     def _parse_linter_output(
         self, linter_name: str, stdout: str, stderr: str, return_code: int
@@ -700,9 +671,7 @@ class LintRunner:
             ansible_linter = AnsibleLintLinter(self.project_info.root_path)
             # Extract profile from kwargs, default to 'basic'
             profile = kwargs.get("profile", "basic")
-            logger.debug(
-                f"ansible-lint profile from kwargs: {profile}, all kwargs: {kwargs}"
-            )
+            logger.debug(f"ansible-lint profile from kwargs: {profile}, all kwargs: {kwargs}")
             # Run the linter with all kwargs
             modular_result = ansible_linter.run(file_paths, **kwargs)
             # Convert modular result to our LintResult format
@@ -718,14 +687,10 @@ class LintRunner:
             # Fallback to legacy implementation
             return self._run_legacy_ansible_lint(file_paths, **kwargs)
 
-    def _run_modular_flake8(
-        self, file_paths: Optional[List[str]] = None, **kwargs
-    ) -> LintResult:
+    def _run_modular_flake8(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Run flake8 using the modular implementation."""
         if Flake8Linter is None:
-            logger.debug(
-                "Flake8 modular implementation not available, falling back to legacy"
-            )
+            logger.debug("Flake8 modular implementation not available, falling back to legacy")
             return self._run_legacy_flake8(file_paths, **kwargs)
         try:
             logger.info("Using modular flake8 implementation")
@@ -749,14 +714,10 @@ class LintRunner:
             # Fallback to legacy implementation
             return self._run_legacy_flake8(file_paths, **kwargs)
 
-    def _run_modular_pylint(
-        self, file_paths: Optional[List[str]] = None, **kwargs
-    ) -> LintResult:
+    def _run_modular_pylint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Run pylint using the modular implementation."""
         if PylintLinter is None:
-            logger.debug(
-                "Pylint modular implementation not available, falling back to legacy"
-            )
+            logger.debug("Pylint modular implementation not available, falling back to legacy")
             return self._run_legacy_pylint(file_paths, **kwargs)
         try:
             logger.info("Using modular pylint implementation")
@@ -780,15 +741,11 @@ class LintRunner:
             # Fallback to legacy implementation
             return self._run_legacy_pylint(file_paths, **kwargs)
 
-    def _run_modular_eslint(
-        self, file_paths: Optional[List[str]] = None, **kwargs
-    ) -> LintResult:
+    def _run_modular_eslint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Run ESLint using modular implementation."""
         logger.info("Using modular ESLint implementation")
         if ESLintLinter is None:
-            logger.warning(
-                "ESLintLinter not available, falling back to legacy implementation"
-            )
+            logger.warning("ESLintLinter not available, falling back to legacy implementation")
             return self._run_legacy_linter("eslint", file_paths)
         try:
             linter = ESLintLinter(project_root=str(self.project_info.root_path))
@@ -803,15 +760,11 @@ class LintRunner:
             logger.error(f"Error running modular ESLint: {e}")
             return self._run_legacy_linter("eslint", file_paths)
 
-    def _run_modular_jshint(
-        self, file_paths: Optional[List[str]] = None, **kwargs
-    ) -> LintResult:
+    def _run_modular_jshint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Run JSHint using modular implementation."""
         logger.info("Using modular JSHint implementation")
         if JSHintLinter is None:
-            logger.warning(
-                "JSHintLinter not available, falling back to legacy implementation"
-            )
+            logger.warning("JSHintLinter not available, falling back to legacy implementation")
             return self._run_legacy_linter("jshint", file_paths)
         try:
             linter = JSHintLinter(project_root=str(self.project_info.root_path))
@@ -826,15 +779,11 @@ class LintRunner:
             logger.error(f"Error running modular JSHint: {e}")
             return self._run_legacy_linter("jshint", file_paths)
 
-    def _run_modular_prettier(
-        self, file_paths: Optional[List[str]] = None, **kwargs
-    ) -> LintResult:
+    def _run_modular_prettier(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Run Prettier using modular implementation."""
         logger.info("Using modular Prettier implementation")
         if PrettierLinter is None:
-            logger.warning(
-                "PrettierLinter not available, falling back to legacy implementation"
-            )
+            logger.warning("PrettierLinter not available, falling back to legacy implementation")
             return self._run_legacy_linter("prettier", file_paths)
         try:
             linter = PrettierLinter(project_root=str(self.project_info.root_path))
@@ -849,16 +798,12 @@ class LintRunner:
             logger.error(f"Error running modular Prettier: {e}")
             return self._run_legacy_linter("prettier", file_paths)
 
-    def _run_legacy_flake8(
-        self, file_paths: Optional[List[str]] = None, **kwargs
-    ) -> LintResult:
+    def _run_legacy_flake8(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Fallback to legacy flake8 implementation."""
         logger.info("Using legacy flake8 implementation")
         return self._run_legacy_linter("flake8", file_paths)
 
-    def _run_legacy_pylint(
-        self, file_paths: Optional[List[str]] = None, **kwargs
-    ) -> LintResult:
+    def _run_legacy_pylint(self, file_paths: Optional[List[str]] = None, **kwargs) -> LintResult:
         """Fallback to legacy pylint implementation."""
         logger.info("Using legacy pylint implementation")
         return self._run_legacy_linter("pylint", file_paths)
@@ -882,9 +827,7 @@ class LintRunner:
             self.available_linters.update(self._detect_available_linters([linter_name]))
         if not self.available_linters.get(linter_name, False):
             logger.warning(f"Linter {linter_name} is not available")
-            return LintResult(
-                linter=linter_name, success=False, raw_output="Linter not available"
-            )
+            return LintResult(linter=linter_name, success=False, raw_output="Linter not available")
         # Continue with legacy implementation...
         config = self.LINTER_COMMANDS[linter_name]
         command = config["command"].copy()
@@ -894,9 +837,7 @@ class LintRunner:
             supported_extensions = config.get("file_extensions", [])
             if supported_extensions:
                 filtered_files = [
-                    f
-                    for f in file_paths
-                    if any(f.endswith(ext) for ext in supported_extensions)
+                    f for f in file_paths if any(f.endswith(ext) for ext in supported_extensions)
                 ]
                 if not filtered_files:
                     return LintResult(
@@ -1057,17 +998,15 @@ class LintRunner:
         lines = output.split("\n")
         if linter_name == "mypy":
             # MyPy format: file:line: error: message [error-code]
-            pattern = r"^(.+?):(\d+):(?:\s*(\d+):)?\s*(error|warning|note):\s*(.+?)(?:\s*\[(.+?)\])?$"
+            pattern = (
+                r"^(.+?):(\d+):(?:\s*(\d+):)?\s*(error|warning|note):\s*(.+?)(?:\s*\[(.+?)\])?$"
+            )
             for line in lines:
                 match = re.match(pattern, line.strip())
                 if match:
-                    file_path, line_num, col_num, severity_str, message, rule_id = (
-                        match.groups()
-                    )
+                    file_path, line_num, col_num, severity_str, message, rule_id = match.groups()
                     severity = (
-                        ErrorSeverity.ERROR
-                        if severity_str == "error"
-                        else ErrorSeverity.WARNING
+                        ErrorSeverity.ERROR if severity_str == "error" else ErrorSeverity.WARNING
                     )
                     lint_error = LintError(
                         file_path=file_path,
@@ -1231,9 +1170,7 @@ class LintRunner:
             for linter in linters_to_run:
                 confidence = selection_result.confidence_scores.get(linter, 0.0)
                 reasoning = selection_result.reasoning.get(linter, "No reason provided")
-                logger.info(
-                    f"   ✅ {linter} (confidence: {confidence:.0%}) - {reasoning}"
-                )
+                logger.info(f"   ✅ {linter} (confidence: {confidence:.0%}) - {reasoning}")
             if selection_result.skipped_linters:
                 logger.info(
                     f"⏭️ Skipped {len(selection_result.skipped_linters)} irrelevant linters:"
@@ -1241,9 +1178,7 @@ class LintRunner:
                 for linter in selection_result.skipped_linters[:5]:  # Show first 5
                     logger.info(f"   ⏭️ {linter}")
                 if len(selection_result.skipped_linters) > 5:
-                    logger.info(
-                        f"   ... and {len(selection_result.skipped_linters) - 5} more"
-                    )
+                    logger.info(f"   ... and {len(selection_result.skipped_linters) - 5} more")
                 logger.info(
                     f"⏱️ Estimated time saved: {selection_result.estimated_time_saved:.1f} seconds"
                 )
@@ -1256,20 +1191,15 @@ class LintRunner:
                 recommended_linters=linters_to_run,
                 skipped_linters=[],
                 reasoning={
-                    linter: "User specified or traditional selection"
-                    for linter in linters_to_run
+                    linter: "User specified or traditional selection" for linter in linters_to_run
                 },
                 confidence_scores={linter: 1.0 for linter in linters_to_run},
                 estimated_time_saved=0.0,
             )
             if not use_smart_selection:
-                logger.info(
-                    "🔧 Using traditional linter selection (smart selection disabled)"
-                )
+                logger.info("🔧 Using traditional linter selection (smart selection disabled)")
             else:
-                logger.info(
-                    "🎯 Using user-specified linters (smart selection bypassed)"
-                )
+                logger.info("🎯 Using user-specified linters (smart selection bypassed)")
         # Run the selected linters
         results = {}
         for linter_name in linters_to_run:
@@ -1340,7 +1270,5 @@ class LintRunner:
             "unique_rules": len(errors_by_rule),
             "errors_by_file": errors_by_file,
             "errors_by_rule": errors_by_rule,
-            "linter_results": {
-                name: len(result.errors) for name, result in results.items()
-            },
+            "linter_results": {name: len(result.errors) for name, result in results.items()},
         }

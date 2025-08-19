@@ -49,9 +49,7 @@ class Flake8Linter(BaseLinter):
             pass
         return None
 
-    def build_command(
-        self, file_paths: Optional[List[str]] = None, **kwargs
-    ) -> List[str]:
+    def build_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
         """Build flake8 command."""
         command = ["flake8"]
 

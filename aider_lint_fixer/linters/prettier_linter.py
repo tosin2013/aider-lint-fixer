@@ -75,9 +75,7 @@ class PrettierLinter(BaseLinter):
             pass
         return None
 
-    def build_command(
-        self, file_paths: Optional[List[str]] = None, **kwargs
-    ) -> List[str]:
+    def build_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
         """Build Prettier command."""
         # Use npx if available, otherwise global prettier
         command = ["npx", "prettier"] if self._has_npx() else ["prettier"]
@@ -133,11 +131,7 @@ class PrettierLinter(BaseLinter):
         if stdout.strip():
             for line in stdout.strip().split("\n"):
                 line = line.strip()
-                if (
-                    line
-                    and not line.startswith("[")
-                    and not line.startswith("Checking")
-                ):
+                if line and not line.startswith("[") and not line.startswith("Checking"):
                     file_path = line
 
                     # Convert absolute path to relative
