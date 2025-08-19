@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
 from .native_lint_detector import NativeLintDetector
 from .project_detector import ProjectInfo
 from .smart_linter_selector import LinterSelectionResult, SmartLinterSelector
@@ -407,8 +408,6 @@ class LintRunner:
             if ":" in line and ("error" in line or "warning" in line):
                 try:
                     # Find line:column pattern
-                    import re
-
                     match = re.search(r"(\d+):(\d+)\s+(error|warning)\s+(.+)", line)
                     if match:
                         line_num = int(match.group(1))

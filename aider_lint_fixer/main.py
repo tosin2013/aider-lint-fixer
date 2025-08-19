@@ -9,8 +9,10 @@ import os
 import sys
 from pathlib import Path
 from typing import Optional
+
 import click
 from colorama import Fore, Style, init
+
 from . import __version__
 from .aider_integration import AiderIntegration
 from .community_issue_reporter import integrate_community_issue_reporting
@@ -627,13 +629,12 @@ def main(
             return 1
     # Handle version flag
     if version:
-        from . import __version__
-
         print(f"aider-lint-fixer {__version__}")
         return
     # Handle list-linters flag
     if list_linters:
         import platform
+
         from .supported_versions import (
             get_platform_compatibility_info,
             get_supported_linters,
@@ -1005,7 +1006,7 @@ def main(
                 assessor = PreLintAssessor(actual_project_path)
                 # Convert linters string to list if needed
                 linters_list = (
-                    [l.strip() for l in linters.split(",")]
+                    [linter.strip() for linter in linters.split(",")]
                     if linters
                     else ["eslint", "flake8"]
                 )
@@ -1050,7 +1051,7 @@ def main(
         lint_runner = LintRunner(project_info)
         # Determine which linters to run
         if linters:
-            enabled_linters = [l.strip() for l in linters.split(",")]
+            enabled_linters = [linter.strip() for linter in linters.split(",")]
         else:
             enabled_linters = (
                 project_config.linters.enabled
@@ -1289,15 +1290,9 @@ def main(
                     while continue_loop and iteration <= max_iterations:
                         print(f"\n{Fore.CYAN}🔄 ITERATION {iteration}{Style.RESET_ALL}")
                         print("=" * 50)
-                        # Get current error count
-                        current_errors = sum(
-                            len(analysis.error_analyses)
-                            for analysis in file_analyses.values()
-                        )
                         # Run single force iteration (this will be the existing force mode logic)
                         import time
 
-                        iteration_start_time = time.time()
                         # Store the force mode logic result for this iteration
                         # (The existing force mode logic will continue below)
                         break  # Exit to run existing force mode logic once

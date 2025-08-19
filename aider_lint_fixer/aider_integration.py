@@ -631,7 +631,7 @@ class AiderIntegration:
                 # Fallback to basic prompt if no specific architect prompt
                 file_name = prompt_data.get("file", "unknown").split("/")[-1]
                 undefined_vars = prompt_data.get("undefined_variables", [])
-                architect_prompt = """# Fix undefined variables in {file_name}
+                architect_prompt = f"""# Fix undefined variables in {file_name}
 
 Please analyze and fix the undefined variable issues in this file.
 

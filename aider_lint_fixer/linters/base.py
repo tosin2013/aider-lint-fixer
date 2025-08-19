@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
 from ..lint_runner import ErrorSeverity, LintError
 
 logger = logging.getLogger(__name__)

@@ -14,11 +14,13 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple
+
 import networkx as nx
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
+
 from .ast_dependency_analyzer import EnhancedDependencyAnalyzer
 from .error_analyzer import ErrorAnalysis
 from .pattern_matcher import SmartErrorClassifier
