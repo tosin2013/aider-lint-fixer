@@ -368,7 +368,7 @@ class LanguagePatternMatcher:
                     "Dead code detected",
                 ),
                 ErrorPattern(
-                    "printf", "logic", "go", "govet", False, 0.8, "Printf format issue"
+                    "print", "logic", "go", "govet", False, 0.8, "Printf format issue"
                 ),
             ],
             "rust": [

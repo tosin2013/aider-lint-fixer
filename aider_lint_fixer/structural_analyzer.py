@@ -97,7 +97,7 @@ class StructuralProblemDetector:
 
         # Pattern definitions for structural problems
         self.structural_patterns = {
-            "undefined_variables": ["no-undef", "undefined-variable"],
+            "undefined_variables": ["no-unde", "undefined-variable"],
             "import_issues": [
                 "import/no-unresolved",
                 "import/no-extraneous-dependencies",

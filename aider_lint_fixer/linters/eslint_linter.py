@@ -99,7 +99,7 @@ class ESLintLinter(BaseLinter):
         # Add rules to disable/enable
         if "disable_rules" in kwargs:
             for rule in kwargs["disable_rules"]:
-                command.extend(["--rule", f"{rule}: off"])
+                command.extend(["--rule", f"{rule}: of"])
 
         # Add file paths
         if file_paths:

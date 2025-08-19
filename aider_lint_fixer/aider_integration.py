@@ -534,7 +534,7 @@ class AiderIntegration:
                     command.extend(["--editor-model", default_editor])
 
             # Use recommended edit format for architect mode
-            command.extend(["--editor-edit-format", "editor-diff"])
+            command.extend(["--editor-edit-format", "editor-dif"])
         else:
             # Standard mode - single model
             if llm_config.provider == "deepseek":
@@ -631,7 +631,7 @@ class AiderIntegration:
                 # Fallback to basic prompt if no specific architect prompt
                 file_name = prompt_data.get("file", "unknown").split("/")[-1]
                 undefined_vars = prompt_data.get("undefined_variables", [])
-                architect_prompt = f"""# Fix undefined variables in {file_name}
+                architect_prompt = """# Fix undefined variables in {file_name}
 
 Please analyze and fix the undefined variable issues in this file.
 
@@ -893,7 +893,7 @@ Instructions:
 
         # Use the existing fix_errors method but with exclusions for dangerous rules
         dangerous_rules = [
-            "no-undef",
+            "no-unde",
             "no-global-assign",
             "no-implicit-globals",
             "no-redeclare",
@@ -947,7 +947,7 @@ Instructions:
 
             for error_analysis in file_errors:
                 error = error_analysis.error
-                if error.rule_id == "no-undef":
+                if error.rule_id == "no-unde":
                     no_undef_errors.append(error)
                     # Extract variable name from error message
                     import re
@@ -998,7 +998,7 @@ Instructions:
                 prompt_parts.append("")
 
             # List other errors
-            other_errors = [e for e in file_errors if e.error.rule_id != "no-undef"]
+            other_errors = [e for e in file_errors if e.error.rule_id != "no-unde"]
             if other_errors:
                 prompt_parts.append("### Other Errors to Fix:")
                 for error_analysis in other_errors:

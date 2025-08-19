@@ -10,7 +10,7 @@ import webbrowser
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List
 from urllib.parse import quote
 
 import click
@@ -135,7 +135,7 @@ class CommunityIssueReporter:
         # Get sample error details
         sample_error = successful_attempts[0].error
 
-        body = f"""## 🎯 Enhancement Request: Improve {linter} {rule_id} Classification
+        body = """## 🎯 Enhancement Request: Improve {linter} {rule_id} Classification
 
 ### **Summary**
 Users have successfully fixed errors of type `{rule_id}` that were originally classified as "unfixable" by the system. This suggests the classification algorithm could be improved.
@@ -153,7 +153,7 @@ Users have successfully fixed errors of type `{rule_id}` that were originally cl
         for i, attempt in enumerate(
             successful_attempts[:3], 1
         ):  # Show up to 3 examples
-            body += f"""
+            body += """
 **Attempt {i}:**
 - File: `{attempt.error.file_path}:{attempt.error.line}`
 - Original Classification: {"Fixable" if attempt.original_classification else "Unfixable"}
@@ -163,7 +163,7 @@ Users have successfully fixed errors of type `{rule_id}` that were originally cl
 - Time to Fix: {attempt.time_to_fix_minutes or 'Unknown'} minutes
 """
 
-        body += f"""
+        body += """
 ### **Recommendation**
 Consider updating the error classification algorithm to mark `{linter}:{rule_id}` errors as fixable when they match similar patterns to the successful fixes above.
 
@@ -253,7 +253,7 @@ This enhancement request was automatically generated from user feedback in the e
             print(f"   Labels: {', '.join(issue.labels)}")
 
         if click.confirm(
-            f"\nWould you like to create GitHub issues for these improvements?"
+            "\nWould you like to create GitHub issues for these improvements?"
         ):
             return self._create_github_issues(issues)
 
@@ -269,17 +269,17 @@ This enhancement request was automatically generated from user feedback in the e
             # Create GitHub issue URL with pre-filled content
             github_url = self._generate_github_issue_url(issue)
 
-            print(f"   Opening browser for issue creation...")
+            print("   Opening browser for issue creation...")
 
             try:
                 webbrowser.open(github_url)
-                print(f"   ✅ Browser opened for issue creation")
+                print("   ✅ Browser opened for issue creation")
 
                 # Wait for user confirmation
                 if not click.confirm(
                     "   Did you successfully create the issue?", default=True
                 ):
-                    print(f"   ⏭️  Skipping this issue")
+                    print("   ⏭️  Skipping this issue")
                     continue
 
             except Exception as e:
@@ -355,7 +355,7 @@ def integrate_community_issue_reporting(
         ):
             reporter.prompt_for_issue_creation()
     else:
-        print(f"   No patterns identified for community contribution yet")
+        print("   No patterns identified for community contribution yet")
         print(
             f"   (Need {reporter.MIN_SAMPLES_FOR_ISSUE}+ successful fixes with {reporter.MIN_SUCCESS_RATE*100}%+ success rate)"
         )

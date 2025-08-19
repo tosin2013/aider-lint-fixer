@@ -150,13 +150,13 @@ class ErrorAnalyzer:
             ErrorCategory.FORMATTING: ["should"],
         },
         "govet": {
-            ErrorCategory.LOGIC: ["unreachable", "printf"],
+            ErrorCategory.LOGIC: ["unreachable", "print"],
             ErrorCategory.TYPE: ["assign"],
         },
         # Rust rules
         "clippy": {
             ErrorCategory.STYLE: ["style"],
-            ErrorCategory.PERFORMANCE: ["perf"],
+            ErrorCategory.PERFORMANCE: ["per"],
             ErrorCategory.COMPLEXITY: ["complexity"],
         },
         # Ansible rules

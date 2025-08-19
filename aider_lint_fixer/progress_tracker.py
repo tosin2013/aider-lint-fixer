@@ -104,7 +104,7 @@ class EnhancedProgressTracker:
         print(
             f"\n{Fore.CYAN}🚀 Large Project Detected ({self.total_errors} errors){Style.RESET_ALL}"
         )
-        print(f"   Enhanced progress tracking enabled")
+        print("   Enhanced progress tracking enabled")
 
         # File processing progress bar
         self.file_progress_bar = tqdm(

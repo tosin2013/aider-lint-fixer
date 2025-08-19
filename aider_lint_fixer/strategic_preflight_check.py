@@ -219,7 +219,7 @@ class StrategicPreFlightChecker:
     ) -> PreFlightResult:
         """Run enhanced strategic pre-flight check with research-based features."""
 
-        print(f"🔬 Running enhanced strategic analysis...")
+        print("🔬 Running enhanced strategic analysis...")
         print(f"   Enhanced analysis: {enable_enhanced_analysis}")
         print(f"   Technical debt quantification: {quantify_debt}")
         print(f"   Predictive outcomes: {predict_outcomes}")
@@ -244,7 +244,7 @@ class StrategicPreFlightChecker:
                 mock_error_analyses = self._create_mock_error_analyses()
 
                 if quantify_debt:
-                    print(f"\n📊 Technical Debt Analysis (SQALE Methodology):")
+                    print("\n📊 Technical Debt Analysis (SQALE Methodology):")
                     debt_metrics = enhanced_analyzer.analyze_technical_debt_metrics(
                         mock_error_analyses
                     )
@@ -255,7 +255,7 @@ class StrategicPreFlightChecker:
                     print(f"   Debt Ratio: {debt_metrics.debt_ratio:.2%}")
 
                 if predict_outcomes:
-                    print(f"\n🎯 Predictive Analysis:")
+                    print("\n🎯 Predictive Analysis:")
                     predictions = enhanced_analyzer.predict_fix_outcomes(
                         mock_error_analyses
                     )
@@ -323,7 +323,7 @@ class StrategicPreFlightChecker:
             line=10,
             column=5,
             message="'logCallback' is not defined",
-            rule_id="no-undef",
+            rule_id="no-unde",
             linter="eslint",
         )
 

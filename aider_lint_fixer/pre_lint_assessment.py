@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
 """
 Pre-Lint Risk Assessment System
-
 Analyzes project health and provides recommendations before automated linting.
 Similar to preflight check but focused on lint-specific risks.
 """
-
-import json
 import logging
-import subprocess
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-
 from .lint_runner import LintRunner
 from .project_detector import ProjectDetector
 
@@ -67,47 +62,36 @@ class PreLintAssessor:
     def assess_project(self, linters: Optional[List[str]] = None) -> RiskAssessment:
         """Perform comprehensive pre-lint risk assessment."""
         logger.info("🔍 Performing pre-lint risk assessment...")
-
         # Detect project info
         project_info = self.project_detector.detect_project(str(self.project_root))
-
         # Run quick lint scan
         lint_results = self._run_quick_lint_scan(linters)
-
         # Analyze risks
         risk_factors = []
         recommendations = []
-
         # Volume risk assessment
         total_errors = sum(len(result.errors) for result in lint_results.values())
         volume_risk = self._assess_volume_risk(
             total_errors, risk_factors, recommendations
         )
-
         # Error type risk assessment
         error_breakdown = self._analyze_error_types(
             lint_results, risk_factors, recommendations
         )
-
         # Project context risk assessment
         self._assess_project_context(project_info, risk_factors, recommendations)
-
         # Test coverage assessment
         self._assess_test_coverage(project_info, risk_factors, recommendations)
-
         # Determine overall risk
         overall_risk = self._calculate_overall_risk(risk_factors)
-
         # Generate approach recommendation
         suggested_approach = self._suggest_approach(
             overall_risk, total_errors, error_breakdown
         )
-
         # Generate architect mode guidance for dangerous errors
         architect_guidance = generate_architect_guidance_for_dangerous_errors(
             lint_results
         )
-
         return RiskAssessment(
             overall_risk=overall_risk,
             total_errors=total_errors,
@@ -124,10 +108,8 @@ class PreLintAssessor:
         try:
             # Use only fast linters for assessment
             quick_linters = linters or ["eslint", "flake8"]  # Fast, common linters
-
             logger.info(f"🔍 Quick scan starting for linters: {quick_linters}")
             logger.info(f"📁 Project root: {self.project_root}")
-
             results = {}
             for linter in quick_linters:
                 try:
@@ -149,7 +131,6 @@ class PreLintAssessor:
 
                     logger.debug(f"Quick scan traceback: {traceback.format_exc()}")
                     continue
-
             logger.info(f"📊 Quick scan complete: {len(results)} linters succeeded")
             return results
         except Exception as e:
@@ -203,21 +184,18 @@ class PreLintAssessor:
     ) -> Dict[str, int]:
         """Analyze types of errors and assess risks."""
         error_breakdown = {}
-
         # Dangerous error patterns
         dangerous_patterns = {
-            "no-undef": "undefined variables (could break runtime)",
+            "no-unde": "undefined variables (could break runtime)",
             "no-global-assign": "global variable assignment",
             "no-implicit-globals": "implicit global variables",
             "import/no-unresolved": "unresolved imports",
             "undefined-variable": "undefined variables",
         }
-
         for linter, result in lint_results.items():
             for error in result.errors:
                 rule_id = error.rule_id or "unknown"
                 error_breakdown[rule_id] = error_breakdown.get(rule_id, 0) + 1
-
                 # Check for dangerous patterns
                 if rule_id in dangerous_patterns:
                     risk_factors.append(
@@ -230,7 +208,6 @@ class PreLintAssessor:
                     recommendations.append(
                         f"Manually review '{rule_id}' errors before automated fixing"
                     )
-
         return error_breakdown
 
     def _assess_project_context(
@@ -253,7 +230,6 @@ class PreLintAssessor:
             recommendations.append(
                 "Verify that 'undefined' variables aren't from HTML globals"
             )
-
         # Check for production indicators
         prod_indicators = [
             "dockerfile",
@@ -291,13 +267,11 @@ class PreLintAssessor:
             ".test.",
             ".spec.",
         ]
-
         has_tests = False
         for indicator in test_indicators:
             if list(self.project_root.rglob(f"*{indicator}*")):
                 has_tests = True
                 break
-
         if not has_tests:
             risk_factors.append(
                 (
@@ -313,9 +287,7 @@ class PreLintAssessor:
         """Calculate overall risk level."""
         if not risk_factors:
             return RiskLevel.LOW
-
         risk_levels = [factor[2] for factor in risk_factors]
-
         if RiskLevel.CRITICAL in risk_levels:
             return RiskLevel.CRITICAL
         elif RiskLevel.HIGH in risk_levels:
@@ -344,7 +316,6 @@ def display_risk_assessment(assessment: RiskAssessment) -> bool:
     print("\n" + "=" * 70)
     print("🔍 PRE-LINT RISK ASSESSMENT")
     print("=" * 70)
-
     # Overall status
     risk_colors = {
         RiskLevel.LOW: "🟢",
@@ -352,45 +323,37 @@ def display_risk_assessment(assessment: RiskAssessment) -> bool:
         RiskLevel.HIGH: "🟠",
         RiskLevel.CRITICAL: "🔴",
     }
-
     print(
         f"\n📊 Overall Risk Level: {risk_colors[assessment.overall_risk]} {assessment.overall_risk.value.upper()}"
     )
     print(f"📈 Total Errors Found: {assessment.total_errors}")
-
     # Risk factors
     if assessment.risk_factors:
-        print(f"\n⚠️  Risk Factors Identified:")
+        print("\n⚠️  Risk Factors Identified:")
         for category, description, level in assessment.risk_factors:
             print(f"   {risk_colors[level]} {description}")
-
     # Error breakdown
     if assessment.error_breakdown:
-        print(f"\n📋 Error Breakdown (Top 5):")
+        print("\n📋 Error Breakdown (Top 5):")
         sorted_errors = sorted(
             assessment.error_breakdown.items(), key=lambda x: x[1], reverse=True
         )
         for rule_id, count in sorted_errors[:5]:
             print(f"   • {rule_id}: {count} errors")
-
     # Recommendations
     if assessment.recommendations:
-        print(f"\n💡 Recommendations:")
+        print("\n💡 Recommendations:")
         for i, rec in enumerate(assessment.recommendations, 1):
             print(f"   {i}. {rec}")
-
     # Suggested approach
-    print(f"\n🎯 Suggested Approach:")
+    print("\n🎯 Suggested Approach:")
     print(f"   {assessment.suggested_approach}")
-
     # Show architect guidance if available
     if assessment.architect_guidance and assessment.architect_guidance.get(
         "has_dangerous_errors"
     ):
         display_architect_guidance(assessment.architect_guidance)
-
     print("\n" + "=" * 70)
-
     # Get user decision
     if not assessment.safe_to_proceed:
         print("⚠️  Based on this assessment, automated linting is NOT recommended.")
@@ -411,13 +374,11 @@ def generate_architect_guidance_for_dangerous_errors(lint_results: Dict) -> Dict
         "safe_automation_plan": {},
         "architect_prompts": [],
     }
-
     if not lint_results:
         return guidance
-
     # Define dangerous vs safe error types
     dangerous_rules = [
-        "no-undef",
+        "no-unde",
         "no-global-assign",
         "no-implicit-globals",
         "no-redeclare",
@@ -432,23 +393,19 @@ def generate_architect_guidance_for_dangerous_errors(lint_results: Dict) -> Dict
         "eqeqeq",
         "no-trailing-spaces",
     ]
-
     dangerous_files = {}
     safe_errors_count = 0
-
     # Analyze each error
     for linter_name, result in lint_results.items():
         for error in result.errors:
             if error.rule_id in dangerous_rules:
                 guidance["has_dangerous_errors"] = True
-
                 if error.file_path not in dangerous_files:
                     dangerous_files[error.file_path] = {
                         "errors": [],
                         "undefined_vars": set(),
                         "error_count": 0,
                     }
-
                 dangerous_files[error.file_path]["errors"].append(
                     {
                         "line": error.line,
@@ -460,18 +417,14 @@ def generate_architect_guidance_for_dangerous_errors(lint_results: Dict) -> Dict
                     }
                 )
                 dangerous_files[error.file_path]["error_count"] += 1
-
                 # Track undefined variables specifically
-                if error.rule_id == "no-undef":
+                if error.rule_id == "no-unde":
                     var_name = _extract_variable_name(error.message, error.rule_id)
                     if var_name:
                         dangerous_files[error.file_path]["undefined_vars"].add(var_name)
-
             elif error.rule_id in safe_rules:
                 safe_errors_count += 1
-
     guidance["dangerous_files"] = dangerous_files
-
     # Generate recommendations if dangerous errors found
     if guidance["has_dangerous_errors"]:
         guidance["architect_mode_recommended"] = True
@@ -482,13 +435,12 @@ def generate_architect_guidance_for_dangerous_errors(lint_results: Dict) -> Dict
             "safe_rules": safe_rules,
             "automation_command": f"--max-errors {min(10, safe_errors_count)} --exclude-rules no-undef,no-global-assign",
         }
-
     return guidance
 
 
 def _extract_variable_name(message: str, rule_id: str) -> str:
     """Extract variable name from ESLint error message."""
-    if rule_id == "no-undef":
+    if rule_id == "no-unde":
         # "'variableName' is not defined"
         import re
 
@@ -500,10 +452,8 @@ def _extract_variable_name(message: str, rule_id: str) -> str:
 def _create_architect_prompts(dangerous_files: Dict) -> List[Dict]:
     """Create architect mode prompts for each file with dangerous errors."""
     prompts = []
-
     for file_path, file_info in dangerous_files.items():
         undefined_vars = list(file_info["undefined_vars"])
-
         if undefined_vars:
             prompt = {
                 "file": file_path,
@@ -517,7 +467,6 @@ def _create_architect_prompts(dangerous_files: Dict) -> List[Dict]:
                 ),
             }
             prompts.append(prompt)
-
     return prompts
 
 
@@ -526,32 +475,24 @@ def _generate_file_specific_prompt(
 ) -> str:
     """Generate a specific architect prompt for a file."""
     file_name = file_path.split("/")[-1]
-
-    prompt = f"""# Architect Mode: Fix undefined variables in {file_name}
-
+    prompt = """# Architect Mode: Fix undefined variables in {file_name}
 ## Context
 File: {file_path}
 Undefined variables detected: {', '.join(undefined_vars)}
-
 ## Task
 Please analyze this file and fix the undefined variable issues. These variables might be:
-
 1. **Missing imports** - Need to add proper import statements
 2. **Global variables** - Should be declared or imported from HTML/config
 3. **Typos** - Variable name misspellings
 4. **Scope issues** - Variables declared in wrong scope
-
 ## Specific Issues:
 """
-
     for error in errors:
         if error["variable"]:
             prompt += (
                 f"\n- Line {error['line']}: `{error['variable']}` - {error['message']}"
             )
-
-    prompt += f"""
-
+    prompt += """
 ## Instructions
 1. Examine each undefined variable in context
 2. Determine the correct solution for each:
@@ -561,9 +502,7 @@ Please analyze this file and fix the undefined variable issues. These variables 
    - Move declarations if it's a scope issue
 3. Apply the fixes while preserving functionality
 4. Ensure no runtime errors are introduced
-
 Please analyze and fix these undefined variable issues."""
-
     return prompt
 
 
@@ -571,7 +510,6 @@ def _suggest_solutions_for_file(file_path: str, undefined_vars: List[str]) -> Li
     """Suggest specific solutions based on file type and variable names."""
     suggestions = []
     file_name = file_path.split("/")[-1].lower()
-
     # Common patterns based on variable names and file types
     for var in undefined_vars:
         if var.lower() in ["console", "window", "document", "global", "process"]:
@@ -594,7 +532,6 @@ def _suggest_solutions_for_file(file_path: str, undefined_vars: List[str]) -> Li
             suggestions.append(
                 f"'{var}' needs investigation - could be import, global, or typo"
             )
-
     return suggestions
 
 
@@ -602,24 +539,20 @@ def display_architect_guidance(guidance: Dict):
     """Display architect mode guidance to the user."""
     if not guidance.get("has_dangerous_errors"):
         return
-
-    print(f"\n🏗️  ARCHITECT MODE RECOMMENDED")
+    print("\n🏗️  ARCHITECT MODE RECOMMENDED")
     print("=" * 50)
     print("Dangerous errors detected that require manual review:")
-
     for file_path, file_info in guidance["dangerous_files"].items():
         file_name = file_path.split("/")[-1]
         undefined_vars = list(file_info["undefined_vars"])
-
         print(f"\n📁 {file_name}")
         print(f"   Path: {file_path}")
         print(f"   Undefined variables: {', '.join(undefined_vars)}")
         print(f"   Total errors: {file_info['error_count']}")
-
     # Show safe automation plan
     safe_plan = guidance.get("safe_automation_plan", {})
     if safe_plan:
-        print(f"\n✅ SAFE AUTOMATION PLAN:")
+        print("\n✅ SAFE AUTOMATION PLAN:")
         print(
             f"   • {safe_plan['safe_errors_count']} safe errors can be fixed automatically"
         )
@@ -627,128 +560,98 @@ def display_architect_guidance(guidance: Dict):
             f"   • Recommended command: aider-lint-fixer {safe_plan['automation_command']}"
         )
         print(f"   • Safe rules: {', '.join(safe_plan['safe_rules'][:5])}...")
-
-    print(f"\n💡 WORKFLOW RECOMMENDATION:")
+    print("\n💡 WORKFLOW RECOMMENDATION:")
     print(
         f"   1. Run safe automation first: Fix {safe_plan.get('safe_errors_count', 0)} safe errors"
     )
     print(
         f"   2. Use architect mode for dangerous errors in {len(guidance['dangerous_files'])} files"
     )
-    print(f"   3. Review each undefined variable manually")
-
+    print("   3. Review each undefined variable manually")
     # Offer to generate CoT prompt for external AI review
-    print(f"\n🧠 CHAIN OF THOUGHT ANALYSIS:")
+    print("\n🧠 CHAIN OF THOUGHT ANALYSIS:")
     print(
-        f"   Would you like to generate a Chain of Thought prompt for external AI review?"
+        "   Would you like to generate a Chain of Thought prompt for external AI review?"
     )
     response = input("   Generate CoT prompt? [y/N]: ").strip().lower()
-
     if response in ["y", "yes"]:
         cot_prompt = generate_cot_prompt_for_dangerous_errors(guidance)
         save_cot_prompt(cot_prompt, guidance)
-
     return guidance
 
 
 def generate_cot_prompt_for_dangerous_errors(guidance: Dict) -> str:
     """Generate a Chain of Thought prompt for external AI analysis of dangerous errors.
-
     Args:
         guidance: Architect guidance containing dangerous error information
-
     Returns:
         Formatted CoT prompt string for external AI review
     """
     dangerous_files = guidance.get("dangerous_files", {})
     safe_plan = guidance.get("safe_automation_plan", {})
-
-    cot_prompt = f"""# Chain of Thought Analysis: Dangerous Lint Error Review
-
+    cot_prompt = """# Chain of Thought Analysis: Dangerous Lint Error Review
 ## Context
 I have a codebase with lint errors that have been categorized into "safe" and "dangerous" types. The dangerous errors require careful human review before automated fixing. Please analyze these dangerous errors and provide recommendations.
-
 ## Task
 Analyze the undefined variables and dangerous errors below using Chain of Thought reasoning. For each error, think through:
-
 1. **Context Analysis**: What might this variable represent?
 2. **Risk Assessment**: What could go wrong if fixed incorrectly?
 3. **Solution Options**: What are the possible ways to fix this?
 4. **Recommendation**: What's the safest approach?
-
 ## Dangerous Errors Found
-
 ### Summary
 - **Total dangerous files**: {len(dangerous_files)}
 - **Safe errors available for automation**: {safe_plan.get('safe_errors_count', 0)}
 - **Dangerous errors requiring review**: {sum(len(file_info.get('undefined_vars', set())) for file_info in dangerous_files.values())}
-
 ### File-by-File Analysis Needed
-
 """
-
     for file_path, file_info in dangerous_files.items():
         file_name = file_path.split("/")[-1]
         undefined_vars = list(file_info.get("undefined_vars", set()))
         errors = file_info.get("errors", [])
-
-        cot_prompt += f"""#### File: {file_name}
+        cot_prompt += """#### File: {file_name}
 **Path**: `{file_path}`
 **Undefined Variables**: {', '.join(f'`{var}`' for var in undefined_vars)}
 **Total Errors**: {file_info.get('error_count', 0)}
-
 **Chain of Thought Analysis Needed**:
 """
-
         for var in undefined_vars:
-            cot_prompt += f"""
+            cot_prompt += """
 **Variable: `{var}`**
 - **Step 1 - Context Analysis**:
   - What type of variable might `{var}` be? (global, import, parameter, typo)
   - Based on the file name `{file_name}`, what's the likely purpose?
   - Are there naming patterns that suggest its origin?
-
 - **Step 2 - Risk Assessment**:
   - What happens if we create a dummy variable?
   - What happens if we add it as a global?
   - What happens if we add an import?
   - What's the worst-case scenario for each approach?
-
 - **Step 3 - Solution Options**:
   - Option A: Add as global variable declaration
   - Option B: Add as import statement
   - Option C: Add as function parameter
   - Option D: Fix as typo/rename
   - Option E: Leave as-is with comment
-
 - **Step 4 - Recommendation**:
   - Which option is safest and why?
   - What additional investigation is needed?
   - Should this be fixed automatically or manually?
 """
-
-        cot_prompt += f"\n---\n"
-
-    cot_prompt += f"""
+        cot_prompt += "\n---\n"
+    cot_prompt += """
 ## Safe Automation Context
-
 The following error types have been identified as safe for automation:
 {', '.join(safe_plan.get('safe_rules', [])[:10])}
-
 **Safe errors count**: {safe_plan.get('safe_errors_count', 0)}
-
 ## Questions for Analysis
-
 1. **Priority Assessment**: Which dangerous errors should be fixed first?
 2. **Automation Potential**: Are any of these dangerous errors actually safe to automate?
 3. **Risk Mitigation**: What safeguards should be in place?
 4. **Testing Strategy**: What tests should be run after fixes?
 5. **Rollback Plan**: How can changes be safely reverted if needed?
-
 ## Expected Output Format
-
 For each undefined variable, please provide:
-
 ```
 Variable: `variableName`
 Analysis: [Your chain of thought reasoning]
@@ -756,23 +659,18 @@ Risk Level: [Low/Medium/High]
 Recommended Action: [Specific action to take]
 Rationale: [Why this is the safest approach]
 ```
-
 ## Additional Context
-
 - This is a production codebase that needs to maintain functionality
 - Automated fixes should be conservative and safe
 - Manual review is preferred for ambiguous cases
 - The goal is to fix errors without breaking existing functionality
-
 Please analyze each dangerous error using the Chain of Thought approach and provide specific, actionable recommendations.
 """
-
     return cot_prompt
 
 
 def save_cot_prompt(cot_prompt: str, guidance: Dict) -> None:
     """Save the CoT prompt to a file for external AI review.
-
     Args:
         cot_prompt: The generated CoT prompt
         guidance: Architect guidance for context
@@ -785,7 +683,6 @@ def save_cot_prompt(cot_prompt: str, guidance: Dict) -> None:
         # Create filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"cot_dangerous_errors_analysis_{timestamp}.md"
-
         # Save to current directory or temp directory
         try:
             filepath = os.path.join(os.getcwd(), filename)
@@ -799,28 +696,24 @@ def save_cot_prompt(cot_prompt: str, guidance: Dict) -> None:
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(cot_prompt)
             print(f"\n✅ CoT prompt saved to: {filepath}")
-
-        print(f"📋 You can now:")
-        print(f"   1. Copy this prompt to ChatGPT, Claude, or another AI")
-        print(f"   2. Get detailed Chain of Thought analysis")
-        print(f"   3. Use the recommendations to safely fix dangerous errors")
-        print(f"   4. Return to aider-lint-fixer with confidence")
-
+        print("📋 You can now:")
+        print("   1. Copy this prompt to ChatGPT, Claude, or another AI")
+        print("   2. Get detailed Chain of Thought analysis")
+        print("   3. Use the recommendations to safely fix dangerous errors")
+        print("   4. Return to aider-lint-fixer with confidence")
         # Show file stats
         dangerous_files = guidance.get("dangerous_files", {})
         total_vars = sum(
             len(file_info.get("undefined_vars", set()))
             for file_info in dangerous_files.values()
         )
-
-        print(f"\n📊 CoT Prompt Stats:")
+        print("\n📊 CoT Prompt Stats:")
         print(f"   Files to analyze: {len(dangerous_files)}")
         print(f"   Undefined variables: {total_vars}")
         print(f"   Prompt length: {len(cot_prompt):,} characters")
-
     except Exception as e:
         print(f"\n❌ Failed to save CoT prompt: {e}")
-        print(f"📋 CoT prompt content (copy manually):")
+        print("📋 CoT prompt content (copy manually):")
         print("=" * 50)
         print(cot_prompt[:1000] + "..." if len(cot_prompt) > 1000 else cot_prompt)
         print("=" * 50)
