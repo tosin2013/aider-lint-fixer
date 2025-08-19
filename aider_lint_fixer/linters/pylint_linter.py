@@ -172,6 +172,9 @@ class PylintLinter(BaseLinter):
             kwargs = {"no_score": True}
         else:
             # Default profile: Moderate checking
-            kwargs = {"disable": "missing-docstring,too-few-public-methods", "no_score": True}
+            kwargs = {
+                "disable": "missing-docstring,too-few-public-methods",
+                "no_score": True,
+            }
 
         return self.run(file_paths, **kwargs)

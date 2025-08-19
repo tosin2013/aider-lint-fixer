@@ -103,7 +103,13 @@ class ProjectDetector:
         "isort": [".isort.cfg", "setup.cfg", "pyproject.toml"],
         "mypy": ["mypy.ini", ".mypy.ini", "setup.cfg", "pyproject.toml"],
         # JavaScript/TypeScript linters
-        "eslint": [".eslintrc", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yml", "package.json"],
+        "eslint": [
+            ".eslintrc",
+            ".eslintrc.js",
+            ".eslintrc.json",
+            ".eslintrc.yml",
+            "package.json",
+        ],
         "prettier": [
             ".prettierrc",
             ".prettierrc.js",
@@ -390,7 +396,10 @@ class ProjectDetector:
 
                     return data
 
-            elif file_path.suffix in [".ini", ".cfg"] or file_path.name in ["setup.cfg", ".flake8"]:
+            elif file_path.suffix in [".ini", ".cfg"] or file_path.name in [
+                "setup.cfg",
+                ".flake8",
+            ]:
                 config = configparser.ConfigParser()
                 config.read(file_path)
 

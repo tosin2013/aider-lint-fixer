@@ -294,7 +294,10 @@ class NativeLintDetector:
             if result.returncode == 0:
                 return True, f"Command works: {' '.join(test_command)}"
             else:
-                return False, f"Command failed with code {result.returncode}: {result.stderr}"
+                return (
+                    False,
+                    f"Command failed with code {result.returncode}: {result.stderr}",
+                )
 
         except Exception as e:
             return False, f"Command test failed: {e}"

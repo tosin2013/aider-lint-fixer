@@ -82,7 +82,7 @@ class AiderStrategicRecommendationEngine:
         python_files = list(self.project_path.glob("*.py"))
 
         # Create aider prompt for file organization
-        prompt = f"""
+        prompt = """
 Analyze this Python project's file organization and provide specific refactoring recommendations.
 
 Current issues detected:
@@ -251,26 +251,26 @@ Focus on creating a clean, maintainable structure that follows Python best pract
                     print(f"   Description: {rec.description}")
 
                     if rec.specific_actions:
-                        print(f"   Actions:")
+                        print("   Actions:")
                         for action in rec.specific_actions[:3]:
                             print(f"     • {action}")
                         if len(rec.specific_actions) > 3:
                             print(f"     • ... and {len(rec.specific_actions) - 3} more")
 
                     if rec.aider_commands:
-                        print(f"   Aider Commands:")
+                        print("   Aider Commands:")
                         for cmd in rec.aider_commands[:2]:
                             print(f"     $ {cmd}")
                         if len(rec.aider_commands) > 2:
                             print(f"     $ ... and {len(rec.aider_commands) - 2} more commands")
 
-        print(f"\n🔄 Next Steps:")
+        print("\n🔄 Next Steps:")
         print("1. Address CRITICAL items first")
         print("2. Work through HIGH PRIORITY items")
         print("3. Re-run: aider-lint-fixer . --force-strategic-recheck")
         print("4. Once strategic check passes, proceed with lint fixing")
 
-        print(f"\n💡 Pro Tip:")
+        print("\n💡 Pro Tip:")
         print("Use aider.chat directly to implement these recommendations:")
         print("$ aider --message 'Help me reorganize this project structure'")
 

@@ -203,16 +203,18 @@ class StrategicPreFlightChecker:
 
         return result
 
-    def run_enhanced_preflight_check(self,
-                                   force_recheck: bool = False,
-                                   enable_enhanced_analysis: bool = False,
-                                   quantify_debt: bool = False,
-                                   predict_outcomes: bool = False,
-                                   export_for_llm: str = None,
-                                   chaos_dimensions: str = "basic") -> PreFlightResult:
+    def run_enhanced_preflight_check(
+        self,
+        force_recheck: bool = False,
+        enable_enhanced_analysis: bool = False,
+        quantify_debt: bool = False,
+        predict_outcomes: bool = False,
+        export_for_llm: str = None,
+        chaos_dimensions: str = "basic",
+    ) -> PreFlightResult:
         """Run enhanced strategic pre-flight check with research-based features."""
 
-        print(f"🔬 Running enhanced strategic analysis...")
+        print("🔬 Running enhanced strategic analysis...")
         print(f"   Enhanced analysis: {enable_enhanced_analysis}")
         print(f"   Technical debt quantification: {quantify_debt}")
         print(f"   Predictive outcomes: {predict_outcomes}")
@@ -227,20 +229,24 @@ class StrategicPreFlightChecker:
             try:
                 from .enhanced_strategic_analyzer import EnhancedStrategicAnalyzer
 
-                enhanced_analyzer = EnhancedStrategicAnalyzer(str(self.project_path), self.config_manager)
+                enhanced_analyzer = EnhancedStrategicAnalyzer(
+                    str(self.project_path), self.config_manager
+                )
 
                 # Mock error analyses for demonstration (in real implementation, this would come from linter results)
                 mock_error_analyses = self._create_mock_error_analyses()
 
                 if quantify_debt:
-                    print(f"\n📊 Technical Debt Analysis (SQALE Methodology):")
-                    debt_metrics = enhanced_analyzer.analyze_technical_debt_metrics(mock_error_analyses)
+                    print("\n📊 Technical Debt Analysis (SQALE Methodology):")
+                    debt_metrics = enhanced_analyzer.analyze_technical_debt_metrics(
+                        mock_error_analyses
+                    )
                     print(f"   Total Technical Debt: {debt_metrics.total_debt_hours:.1f} hours")
                     print(f"   SQALE Rating: {debt_metrics.sqale_rating}")
                     print(f"   Debt Ratio: {debt_metrics.debt_ratio:.2%}")
 
                 if predict_outcomes:
-                    print(f"\n🎯 Predictive Analysis:")
+                    print("\n🎯 Predictive Analysis:")
                     predictions = enhanced_analyzer.predict_fix_outcomes(mock_error_analyses)
                     print(f"   Fix Success Probability: {predictions.fix_success_probability:.1%}")
                     print(f"   Confidence Score: {predictions.confidence_score:.1%}")
@@ -259,17 +265,20 @@ class StrategicPreFlightChecker:
                     # Save export data
                     export_file = self.project_path / f"strategic_analysis_{export_for_llm}.json"
                     import json
-                    with open(export_file, 'w') as f:
+
+                    with open(export_file, "w") as f:
                         json.dump(export_data, f, indent=2, default=str)
 
                     print(f"   Export saved to: {export_file}")
-                    print(f"   Total files analyzed: {export_data['metadata']['total_files_analyzed']}")
+                    print(
+                        f"   Total files analyzed: {export_data['metadata']['total_files_analyzed']}"
+                    )
                     print(f"   Total errors: {export_data['metadata']['total_errors']}")
 
                     # Show recommended prompts
-                    if export_data.get('recommended_prompts'):
+                    if export_data.get("recommended_prompts"):
                         print(f"\n💡 Recommended {export_for_llm.upper()} Prompts:")
-                        for i, prompt in enumerate(export_data['recommended_prompts'], 1):
+                        for i, prompt in enumerate(export_data["recommended_prompts"], 1):
                             print(f"   {i}. {prompt[:100]}...")
 
             except ImportError as e:
@@ -293,21 +302,25 @@ class StrategicPreFlightChecker:
             line=10,
             column=5,
             message="'logCallback' is not defined",
-            rule_id="no-undef",
-            linter="eslint"
+            rule_id="no-unde",
+            linter="eslint",
         )
 
         mock_analysis = ErrorAnalysis(
             error=mock_error,
             category=ErrorCategory.UNDEFINED_VARIABLE,
             confidence=0.9,
-            context_lines=["function processData() {", "  logCallback('Processing...');", "}"],
-            suggested_fix="Define logCallback function or import it"
+            context_lines=[
+                "function processData() {",
+                "  logCallback('Processing...');",
+                "}",
+            ],
+            suggested_fix="Define logCallback function or import it",
         )
 
-        mock_analyses["src/example.js"] = type('MockFileAnalysis', (), {
-            'error_analyses': [mock_analysis]
-        })()
+        mock_analyses["src/example.js"] = type(
+            "MockFileAnalysis", (), {"error_analyses": [mock_analysis]}
+        )()
 
         return mock_analyses
 
@@ -444,7 +457,9 @@ class StrategicPreFlightChecker:
     def _generate_aider_recommendations(self, chaos_level: ChaosLevel, indicators: List):
         """Generate aider-powered strategic recommendations."""
         try:
-            from .aider_strategic_recommendations import AiderStrategicRecommendationEngine
+            from .aider_strategic_recommendations import (
+                AiderStrategicRecommendationEngine,
+            )
 
             engine = AiderStrategicRecommendationEngine(str(self.project_path), self.config_manager)
 

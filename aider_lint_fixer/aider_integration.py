@@ -4,18 +4,16 @@ Aider Integration Module
 This module integrates with aider.chat to automatically fix lint errors using LLMs.
 """
 
-import json
 import logging
 import os
 import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
-from .config_manager import Config, LLMConfig
+from .config_manager import Config
 from .error_analyzer import ErrorAnalysis, FileAnalysis, FixComplexity
-from .lint_runner import LintError, LintResult
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +87,10 @@ class AiderIntegration:
         for path in possible_paths:
             try:
                 result = subprocess.run(
-                    path.split() + ["--version"], capture_output=True, text=True, timeout=10
+                    path.split() + ["--version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
                 )
                 if result.returncode == 0:
                     logger.info(f"Found aider at: {path}")
@@ -376,7 +377,11 @@ class AiderIntegration:
             # Add context if available
             if error_analysis.context_lines:
                 prompt_parts.extend(
-                    ["   Context:", *[f"   {line}" for line in error_analysis.context_lines], ""]
+                    [
+                        "   Context:",
+                        *[f"   {line}" for line in error_analysis.context_lines],
+                        "",
+                    ]
                 )
 
         prompt_parts.extend(
@@ -519,7 +524,7 @@ class AiderIntegration:
                     command.extend(["--editor-model", default_editor])
 
             # Use recommended edit format for architect mode
-            command.extend(["--editor-edit-format", "editor-diff"])
+            command.extend(["--editor-edit-format", "editor-dif"])
         else:
             # Standard mode - single model
             if llm_config.provider == "deepseek":
@@ -706,7 +711,7 @@ Instructions:
 
             if success:
                 logger.info(f"Architect mode completed successfully for {file_path}")
-                description = f"Fixed undefined variables using architect mode"
+                description = "Fixed undefined variables using architect mode"
             else:
                 logger.error(f"Architect mode failed for {file_path}: {stderr}")
                 description = f"Architect mode failed: {stderr[:100]}..."
@@ -808,11 +813,11 @@ Instructions:
                 results.append(fix_result)
 
                 if result["success"]:
-                    print(f"   ✅ Architect mode completed successfully")
+                    print("   ✅ Architect mode completed successfully")
                     if result["changes_made"]:
-                        print(f"   📝 Changes were made to the file")
+                        print("   📝 Changes were made to the file")
                     else:
-                        print(f"   ℹ️  No changes needed")
+                        print("   ℹ️  No changes needed")
                 else:
                     print(f"   ❌ Architect mode failed: {result.get('error', 'Unknown error')}")
 
@@ -836,7 +841,7 @@ Instructions:
         successful = sum(1 for r in results if r.success)
         with_changes = sum(1 for r in results if r.changes_made)
 
-        print(f"\n🏗️  Architect Mode Summary:")
+        print("\n🏗️  Architect Mode Summary:")
         print(f"   📊 Files processed: {len(results)}")
         print(f"   ✅ Successful: {successful}")
         print(f"   📝 Files changed: {with_changes}")
@@ -868,12 +873,17 @@ Instructions:
             logger.info("No safe errors to automate")
             return results
 
-        print(f"\n🤖 Safe Automation Phase:")
+        print("\n🤖 Safe Automation Phase:")
         print(f"   📊 Safe errors to fix: {safe_errors_count}")
         print(f"   🔧 Linters: {', '.join(enabled_linters)}")
 
         # Use the existing fix_errors method but with exclusions for dangerous rules
-        dangerous_rules = ["no-undef", "no-global-assign", "no-implicit-globals", "no-redeclare"]
+        dangerous_rules = [
+            "no-unde",
+            "no-global-assign",
+            "no-implicit-globals",
+            "no-redeclare",
+        ]
 
         # This would integrate with the existing lint runner and error fixing logic
         # For now, we'll return a placeholder that indicates safe automation was attempted
@@ -919,7 +929,7 @@ Instructions:
 
             for error_analysis in file_errors:
                 error = error_analysis.error
-                if error.rule_id == "no-undef":
+                if error.rule_id == "no-unde":
                     no_undef_errors.append(error)
                     # Extract variable name from error message
                     import re
@@ -962,7 +972,7 @@ Instructions:
                 prompt_parts.append("")
 
             # List other errors
-            other_errors = [e for e in file_errors if e.error.rule_id != "no-undef"]
+            other_errors = [e for e in file_errors if e.error.rule_id != "no-unde"]
             if other_errors:
                 prompt_parts.append("### Other Errors to Fix:")
                 for error_analysis in other_errors:
@@ -1036,7 +1046,8 @@ Instructions:
                 os.environ["OLLAMA_API_KEY"] = api_key
         else:
             logger.error(
-                f"No API key found for provider: {llm_config.provider}. Please check your environment variables."
+                f"No API key found for provider: {llm_config.provider}. "
+                "Please check your environment variables."
             )
 
     def _create_aider_config(self, llm_config) -> None:
@@ -1216,7 +1227,7 @@ Instructions:
             "errors_fixed": len(fixed_errors),
             "errors_still_present": len(still_present),
             "new_errors": len(remaining_errors) - len(still_present),
-            "success_rate": len(fixed_errors) / len(original_errors) if original_errors else 1.0,
+            "success_rate": (len(fixed_errors) / len(original_errors) if original_errors else 1.0),
             "fixed_errors": fixed_errors,
             "remaining_errors": still_present,
             "verification_results": verification_results,
@@ -1252,7 +1263,10 @@ Instructions:
         # Use getattr with default to handle cases where complexity_score might be missing
         sorted_files = sorted(
             file_analyses.items(),
-            key=lambda x: (getattr(x[1], "complexity_score", 0.0), len(x[1].error_analyses)),
+            key=lambda x: (
+                getattr(x[1], "complexity_score", 0.0),
+                len(x[1].error_analyses),
+            ),
         )
 
         if max_files:
@@ -1271,7 +1285,8 @@ Instructions:
 
             file_errors = len(file_analysis.error_analyses)
             logger.info(
-                f"Processing file {processed_files + 1}/{total_files}: {file_path} ({file_errors} errors)"
+                f"Processing file {processed_files + 1}/{total_files}: "
+                f"{file_path} ({file_errors} errors)"
             )
 
             # Progress callback

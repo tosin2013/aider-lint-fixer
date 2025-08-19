@@ -125,7 +125,13 @@ class LanguagePatternMatcher:
                     "Import statements need sorting",
                 ),
                 ErrorPattern(
-                    "error: ", "type", "python", "mypy", False, 0.7, "Type checking error"
+                    "error: ",
+                    "type",
+                    "python",
+                    "mypy",
+                    False,
+                    0.7,
+                    "Type checking error",
                 ),
             ],
             "javascript": [
@@ -195,7 +201,13 @@ class LanguagePatternMatcher:
                     "Unused variable declaration",
                 ),
                 ErrorPattern(
-                    "Type", "type", "typescript", "eslint", False, 0.8, "TypeScript type error"
+                    "Type",
+                    "type",
+                    "typescript",
+                    "eslint",
+                    False,
+                    0.8,
+                    "TypeScript type error",
                 ),
                 ErrorPattern(
                     "Replace",
@@ -347,9 +359,15 @@ class LanguagePatternMatcher:
                     "Code formatting required",
                 ),
                 ErrorPattern(
-                    "unreachable code", "logic", "go", "govet", False, 0.9, "Dead code detected"
+                    "unreachable code",
+                    "logic",
+                    "go",
+                    "govet",
+                    False,
+                    0.9,
+                    "Dead code detected",
                 ),
-                ErrorPattern("printf", "logic", "go", "govet", False, 0.8, "Printf format issue"),
+                ErrorPattern("print", "logic", "go", "govet", False, 0.8, "Printf format issue"),
             ],
             "rust": [
                 ErrorPattern(
@@ -742,7 +760,14 @@ class SmartErrorClassifier:
         )
 
         # Formatting indicators
-        formatting_keywords = ["spacing", "indent", "format", "length", "comment", "style"]
+        formatting_keywords = [
+            "spacing",
+            "indent",
+            "format",
+            "length",
+            "comment",
+            "style",
+        ]
         features.mentions_formatting = any(word in message_lower for word in formatting_keywords)
 
         # Complexity analysis
@@ -871,7 +896,10 @@ class SmartErrorClassifier:
         # Fallback: Conservative approach based on linter
         fallback_fixable = self._get_fallback_fixability(linter, error_message)
         return PatternMatchResult(
-            fixable=fallback_fixable, confidence=0.3, method="fallback", error_type="unknown"
+            fixable=fallback_fixable,
+            confidence=0.3,
+            method="fallback",
+            error_type="unknown",
         )
 
     def _get_fallback_fixability(self, linter: str, error_message: str) -> bool:
@@ -882,7 +910,12 @@ class SmartErrorClassifier:
             return True
 
         # Syntax errors are usually not fixable
-        syntax_keywords = ["syntax error", "unexpected token", "parse error", "invalid syntax"]
+        syntax_keywords = [
+            "syntax error",
+            "unexpected token",
+            "parse error",
+            "invalid syntax",
+        ]
         error_lower = (error_message or "").lower()
         if any(keyword in error_lower for keyword in syntax_keywords):
             return False
@@ -1039,7 +1072,14 @@ class SmartErrorClassifier:
             return False
 
         # Look for error-like patterns
-        error_indicators = ["error", "warning", "should", "expected", "missing", "unused"]
+        error_indicators = [
+            "error",
+            "warning",
+            "should",
+            "expected",
+            "missing",
+            "unused",
+        ]
         return any(indicator in phrase for indicator in error_indicators)
 
     def _update_pattern_confidence(
@@ -1129,7 +1169,14 @@ class SmartErrorClassifier:
         if not SKLEARN_AVAILABLE:
             return
 
-        supported_languages = ["python", "javascript", "typescript", "go", "rust", "ansible"]
+        supported_languages = [
+            "python",
+            "javascript",
+            "typescript",
+            "go",
+            "rust",
+            "ansible",
+        ]
 
         for language in supported_languages:
             model_file = self.cache_dir / f"{language}_classifier.pkl"
@@ -1161,7 +1208,7 @@ class SmartErrorClassifier:
             "ml_classifier": {
                 "sklearn_available": SKLEARN_AVAILABLE,
                 "learning_enabled": SKLEARN_AVAILABLE,
-                "trained_languages": list(self.classifiers.keys()) if SKLEARN_AVAILABLE else [],
+                "trained_languages": (list(self.classifiers.keys()) if SKLEARN_AVAILABLE else []),
                 "cache_dir": str(self.cache_dir),
                 "setup_command": (
                     "pip install aider-lint-fixer[learning]" if not SKLEARN_AVAILABLE else None
@@ -1171,7 +1218,14 @@ class SmartErrorClassifier:
 
         # Add training data statistics
         if SKLEARN_AVAILABLE:
-            for language in ["python", "javascript", "typescript", "go", "rust", "ansible"]:
+            for language in [
+                "python",
+                "javascript",
+                "typescript",
+                "go",
+                "rust",
+                "ansible",
+            ]:
                 training_file = self.cache_dir / f"{language}_training.json"
                 if training_file.exists():
                     try:

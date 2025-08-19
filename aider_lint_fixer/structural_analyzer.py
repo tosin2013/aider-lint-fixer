@@ -97,8 +97,11 @@ class StructuralProblemDetector:
 
         # Pattern definitions for structural problems
         self.structural_patterns = {
-            "undefined_variables": ["no-undef", "undefined-variable"],
-            "import_issues": ["import/no-unresolved", "import/no-extraneous-dependencies"],
+            "undefined_variables": ["no-unde", "undefined-variable"],
+            "import_issues": [
+                "import/no-unresolved",
+                "import/no-extraneous-dependencies",
+            ],
             "global_usage": ["no-global-assign", "global-statement"],
             "complexity_indicators": ["max-len", "max-statements", "max-depth"],
             "coupling_indicators": ["import/no-cycle", "circular-import"],
@@ -342,7 +345,9 @@ class StructuralProblemDetector:
                     "Consider state machines for complex state management",
                 ],
                 metrics={
-                    "max_complexity_score": complexity_hotspots[0][1] if complexity_hotspots else 0,
+                    "max_complexity_score": (
+                        complexity_hotspots[0][1] if complexity_hotspots else 0
+                    ),
                     "average_complexity": sum(score for _, score in complexity_hotspots)
                     / len(complexity_hotspots),
                     "hotspot_count": len(complexity_hotspots),
@@ -485,7 +490,9 @@ class StructuralProblemDetector:
         return hotspots
 
     def _identify_refactoring_candidates(
-        self, file_metrics: List[FileStructuralMetrics], structural_issues: List[StructuralIssue]
+        self,
+        file_metrics: List[FileStructuralMetrics],
+        structural_issues: List[StructuralIssue],
     ) -> List[str]:
         """Identify files that are good candidates for refactoring."""
 
@@ -508,7 +515,9 @@ class StructuralProblemDetector:
         return list(candidates)
 
     def _calculate_architectural_score(
-        self, file_metrics: List[FileStructuralMetrics], structural_issues: List[StructuralIssue]
+        self,
+        file_metrics: List[FileStructuralMetrics],
+        structural_issues: List[StructuralIssue],
     ) -> float:
         """Calculate overall architectural health score (0-100)."""
 
@@ -542,7 +551,10 @@ class StructuralProblemDetector:
         return max(0.0, min(100.0, score))
 
     def _generate_architectural_recommendations(
-        self, structural_issues: List[StructuralIssue], hotspot_files: List[str], total_errors: int
+        self,
+        structural_issues: List[StructuralIssue],
+        hotspot_files: List[str],
+        total_errors: int,
     ) -> List[str]:
         """Generate high-level architectural recommendations."""
 

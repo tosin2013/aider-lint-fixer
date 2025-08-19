@@ -87,7 +87,6 @@ class BaseLinter(ABC):
                 warnings=[],
                 raw_output=f"{self.name} is not available",
             )
-
         # Filter files by supported extensions
         if file_paths:
             filtered_files = [
@@ -102,10 +101,8 @@ class BaseLinter(ABC):
                     raw_output="No supported files found",
                 )
             file_paths = filtered_files
-
         # Build command
         command = self.build_command(file_paths, **kwargs)
-
         # Run linter
         start_time = time.time()
         try:
@@ -117,13 +114,10 @@ class BaseLinter(ABC):
                 cwd=str(self.project_root),
             )
             execution_time = time.time() - start_time
-
             # Parse output
             errors, warnings = self.parse_output(result.stdout, result.stderr, result.returncode)
-
             # Determine success
             success = self.is_success(result.returncode, errors, warnings)
-
             return LinterResult(
                 linter=self.name,
                 success=success,
@@ -133,7 +127,6 @@ class BaseLinter(ABC):
                 version=self.get_version(),
                 execution_time=execution_time,
             )
-
         except subprocess.TimeoutExpired:
             return LinterResult(
                 linter=self.name,
@@ -164,12 +157,15 @@ class BaseLinter(ABC):
         version = self.get_version()
         if not version:
             return False
-
         # Simple version check - can be overridden for more complex logic
         return any(version.startswith(v) for v in self.supported_versions)
 
     def run_command(self, command: List[str], timeout: int = 30) -> subprocess.CompletedProcess:
         """Helper method to run a command."""
         return subprocess.run(
-            command, capture_output=True, text=True, timeout=timeout, cwd=str(self.project_root)
+            command,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=str(self.project_root),
         )

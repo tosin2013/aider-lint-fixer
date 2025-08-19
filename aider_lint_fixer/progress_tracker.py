@@ -104,7 +104,7 @@ class EnhancedProgressTracker:
         print(
             f"\n{Fore.CYAN}🚀 Large Project Detected ({self.total_errors} errors){Style.RESET_ALL}"
         )
-        print(f"   Enhanced progress tracking enabled")
+        print("   Enhanced progress tracking enabled")
 
         # File processing progress bar
         self.file_progress_bar = tqdm(
@@ -273,7 +273,11 @@ class EnhancedProgressTracker:
         elapsed = time.time() - self.session.metrics.start_time
 
         if elapsed == 0:
-            return {"files_per_minute": 0.0, "errors_per_minute": 0.0, "success_rate": 0.0}
+            return {
+                "files_per_minute": 0.0,
+                "errors_per_minute": 0.0,
+                "success_rate": 0.0,
+            }
 
         return {
             "files_per_minute": self.session.metrics.processed_files / elapsed * 60,
