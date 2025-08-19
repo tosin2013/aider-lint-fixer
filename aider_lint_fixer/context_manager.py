@@ -139,7 +139,8 @@ class ContextManager:
 
         # Sort context items by priority and recency
         sorted_items = sorted(
-            self.context_items, key=lambda x: (x.priority.value, -x.timestamp.timestamp())
+            self.context_items,
+            key=lambda x: (x.priority.value, -x.timestamp.timestamp()),
         )
 
         context_parts = []
@@ -155,7 +156,11 @@ class ContextManager:
                 used_tokens += item.tokens
 
         # Add other context by priority
-        for priority in [ContextPriority.HIGH, ContextPriority.MEDIUM, ContextPriority.LOW]:
+        for priority in [
+            ContextPriority.HIGH,
+            ContextPriority.MEDIUM,
+            ContextPriority.LOW,
+        ]:
             for item in sorted_items:
                 if (
                     item.priority == priority

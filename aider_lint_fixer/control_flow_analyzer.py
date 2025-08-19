@@ -354,10 +354,12 @@ class ControlFlowAnalyzer:
         for node in ast.walk(tree):
             if isinstance(node, ast.If):
                 structure = ControlStructure(
-                    structure_type="if",
+                    structure_type="i",
                     start_line=node.lineno,
                     end_line=getattr(node, "end_lineno", node.lineno),
-                    condition=ast.unparse(node.test) if hasattr(ast, "unparse") else str(node.test),
+                    condition=(
+                        ast.unparse(node.test) if hasattr(ast, "unparse") else str(node.test)
+                    ),
                 )
                 self._analyze_control_structure_complexity(structure, node)
                 self.current_analysis.control_structures.append(structure)
@@ -396,7 +398,7 @@ class ControlFlowAnalyzer:
                 condition = condition_match.group(1) if condition_match else ""
 
                 structure = ControlStructure(
-                    structure_type="if",
+                    structure_type="i",
                     start_line=i,
                     end_line=i,  # Simplified - would need proper parsing
                     condition=condition,
@@ -409,7 +411,10 @@ class ControlFlowAnalyzer:
                 condition = condition_match.group(2) if condition_match else ""
 
                 structure = ControlStructure(
-                    structure_type=loop_type, start_line=i, end_line=i, condition=condition
+                    structure_type=loop_type,
+                    start_line=i,
+                    end_line=i,
+                    condition=condition,
                 )
                 self.current_analysis.control_structures.append(structure)
 
@@ -432,7 +437,7 @@ class ControlFlowAnalyzer:
         # Additional complexity for specific structures
         if structure.structure_type in ["for", "while"]:
             base_complexity += 1.0
-        elif structure.structure_type == "if":
+        elif structure.structure_type == "i":
             base_complexity += 0.5
         elif structure.structure_type == "try":
             base_complexity += 1.5
@@ -497,7 +502,11 @@ class ControlFlowAnalyzer:
             if not def_lines:
                 # Variable used but never defined (potential undefined variable)
                 self.current_analysis.scoping_issues.append(
-                    {"type": "undefined_variable", "variable": var, "lines": list(use_lines)}
+                    {
+                        "type": "undefined_variable",
+                        "variable": var,
+                        "lines": list(use_lines),
+                    }
                 )
 
             elif len(def_lines) > 1:
@@ -530,7 +539,8 @@ class ControlFlowAnalyzer:
 
         # Nesting depth
         max_nesting = max(
-            (s.complexity_score for s in self.current_analysis.control_structures), default=0
+            (s.complexity_score for s in self.current_analysis.control_structures),
+            default=0,
         )
 
         # Control structure density
@@ -557,7 +567,10 @@ class ControlFlowAnalyzer:
         node_id = f"node_{self.node_counter}"
 
         node = ControlFlowNode(
-            node_id=node_id, node_type=node_type, line_number=line_number, code_snippet=code_snippet
+            node_id=node_id,
+            node_type=node_type,
+            line_number=line_number,
+            code_snippet=code_snippet,
         )
 
         self.current_analysis.control_flow_graph[node_id] = node

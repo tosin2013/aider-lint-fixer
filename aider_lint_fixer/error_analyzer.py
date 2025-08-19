@@ -122,13 +122,24 @@ class ErrorAnalyzer:
             ErrorCategory.LOGIC: ["unreachable", "pointless-statement"],
         },
         "mypy": {
-            ErrorCategory.TYPE: ["type-arg", "attr-defined", "assignment", "return-value"],
+            ErrorCategory.TYPE: [
+                "type-arg",
+                "attr-defined",
+                "assignment",
+                "return-value",
+            ],
             ErrorCategory.IMPORT: ["import"],
         },
         # JavaScript/TypeScript rules
         "eslint": {
             ErrorCategory.SYNTAX: ["parsing-error"],
-            ErrorCategory.FORMATTING: ["indent", "quotes", "semi", "max-len", "no-trailing-spaces"],
+            ErrorCategory.FORMATTING: [
+                "indent",
+                "quotes",
+                "semi",
+                "max-len",
+                "no-trailing-spaces",
+            ],
             ErrorCategory.STYLE: ["camelcase", "no-console"],
             ErrorCategory.UNUSED: ["no-unused-vars"],
             ErrorCategory.SECURITY: ["no-eval", "no-implied-eval"],
@@ -139,13 +150,13 @@ class ErrorAnalyzer:
             ErrorCategory.FORMATTING: ["should"],
         },
         "govet": {
-            ErrorCategory.LOGIC: ["unreachable", "printf"],
+            ErrorCategory.LOGIC: ["unreachable", "print"],
             ErrorCategory.TYPE: ["assign"],
         },
         # Rust rules
         "clippy": {
             ErrorCategory.STYLE: ["style"],
-            ErrorCategory.PERFORMANCE: ["perf"],
+            ErrorCategory.PERFORMANCE: ["per"],
             ErrorCategory.COMPLEXITY: ["complexity"],
         },
         # Ansible rules
@@ -317,7 +328,9 @@ class ErrorAnalyzer:
             FileAnalysis object
         """
         file_analysis = FileAnalysis(
-            file_path=file_path, total_errors=len(errors), language=self._detect_language(file_path)
+            file_path=file_path,
+            total_errors=len(errors),
+            language=self._detect_language(file_path),
         )
 
         # Load file content for context

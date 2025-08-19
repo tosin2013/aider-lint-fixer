@@ -351,7 +351,11 @@ class AdvancedConvergenceAnalyzer:
                 action = "CONTINUE - Moderate progress"
                 optimizations.append("Monitor for plateau in next 2 iterations")
 
-        return {"action": action, "risk_factors": risk_factors, "optimizations": optimizations}
+        return {
+            "action": action,
+            "risk_factors": risk_factors,
+            "optimizations": optimizations,
+        }
 
     def _calculate_confidence(self, state: ConvergenceState, predictions: Dict) -> float:
         """Calculate confidence in the convergence analysis."""
@@ -379,7 +383,11 @@ class AdvancedConvergenceAnalyzer:
         return min(1.0, total_confidence)
 
     def _calculate_complexity_score(
-        self, errors_before: int, errors_after: int, success_rate: float, new_errors: int
+        self,
+        errors_before: int,
+        errors_after: int,
+        success_rate: float,
+        new_errors: int,
     ) -> float:
         """Calculate complexity score for the iteration."""
 

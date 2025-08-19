@@ -130,7 +130,10 @@ def _process_fixable_error(
         print(f"   Confidence: {error_analysis.confidence_score:.1f}%")
 
     choice = click.prompt(
-        "   Action", type=click.Choice(["fix", "skip", "abort"]), default="fix", show_default=True
+        "   Action",
+        type=click.Choice(["fix", "skip", "abort"]),
+        default="fix",
+        show_default=True,
     )
 
     user_confidence = 5
@@ -268,7 +271,10 @@ class CommunityLearningIntegration:
 
                 # Estimate fix time based on complexity
                 if attempt.fix_successful:
-                    if attempt.error.rule_id in ["yaml[trailing-spaces]", "yaml[line-length]"]:
+                    if attempt.error.rule_id in [
+                        "yaml[trailing-spaces]",
+                        "yaml[line-length]",
+                    ]:
                         attempt.time_to_fix_minutes = 1
                     elif "syntax" in attempt.error.message.lower():
                         attempt.time_to_fix_minutes = 10
