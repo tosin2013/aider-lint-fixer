@@ -49,7 +49,9 @@ class ManualFixAttempt:
     fix_description: Optional[str] = None
     time_to_fix_minutes: Optional[int] = None
     user_confidence: int = 5
-    override_classification: bool = False  # Whether user overrode the original classification
+    override_classification: bool = (
+        False  # Whether user overrode the original classification
+    )
 
 
 def enhanced_interactive_mode(
@@ -92,20 +94,26 @@ def enhanced_interactive_mode(
             if max_errors and len(choices) >= max_errors:
                 break
 
-            choice = _process_fixable_error(error_analysis, i, enable_community_learning)
+            choice = _process_fixable_error(
+                error_analysis, i, enable_community_learning
+            )
             if choice.choice == UserChoice.ABORT:
                 break
             choices.append(choice)
 
     # Process unfixable errors with warnings
     if unfixable_errors and (not max_errors or len(choices) < max_errors):
-        print(f"\n{Fore.YELLOW}⚠️  Unfixable Errors (Manual Review Recommended):{Style.RESET_ALL}")
+        print(
+            f"\n{Fore.YELLOW}⚠️  Unfixable Errors (Manual Review Recommended):{Style.RESET_ALL}"
+        )
 
         for i, error_analysis in enumerate(unfixable_errors, 1):
             if max_errors and len(choices) >= max_errors:
                 break
 
-            choice = _process_unfixable_error(error_analysis, i, enable_community_learning)
+            choice = _process_unfixable_error(
+                error_analysis, i, enable_community_learning
+            )
             if choice.choice == UserChoice.ABORT:
                 break
             choices.append(choice)
@@ -119,7 +127,9 @@ def _process_fixable_error(
     """Process a fixable error with user interaction."""
     error = error_analysis.error
 
-    print(f"\n{index}. {Fore.GREEN}[FIXABLE]{Style.RESET_ALL} {error.file_path}:{error.line}")
+    print(
+        f"\n{index}. {Fore.GREEN}[FIXABLE]{Style.RESET_ALL} {error.file_path}:{error.line}"
+    )
     print(f"   {error.linter} {error.rule_id}: {error.message}")
     print(
         f"   Category: {error_analysis.category.value}, Complexity: {error_analysis.complexity.value}"
@@ -130,7 +140,10 @@ def _process_fixable_error(
         print(f"   Confidence: {error_analysis.confidence_score:.1f}%")
 
     choice = click.prompt(
-        "   Action", type=click.Choice(["fix", "skip", "abort"]), default="fix", show_default=True
+        "   Action",
+        type=click.Choice(["fix", "skip", "abort"]),
+        default="fix",
+        show_default=True,
     )
 
     user_confidence = 5
@@ -156,7 +169,9 @@ def _process_unfixable_error(
     """Process an unfixable error with warnings and override options."""
     error = error_analysis.error
 
-    print(f"\n{index}. {Fore.YELLOW}[UNFIXABLE]{Style.RESET_ALL} {error.file_path}:{error.line}")
+    print(
+        f"\n{index}. {Fore.YELLOW}[UNFIXABLE]{Style.RESET_ALL} {error.file_path}:{error.line}"
+    )
     print(f"   {error.linter} {error.rule_id}: {error.message}")
     print(
         f"   Category: {error_analysis.category.value}, Complexity: {error_analysis.complexity.value}"
@@ -164,7 +179,9 @@ def _process_unfixable_error(
 
     # Show warning based on complexity
     if error_analysis.complexity == FixComplexity.MANUAL:
-        print(f"   {Fore.RED}⚠️  WARNING: This error requires manual intervention{Style.RESET_ALL}")
+        print(
+            f"   {Fore.RED}⚠️  WARNING: This error requires manual intervention{Style.RESET_ALL}"
+        )
     elif error_analysis.complexity == FixComplexity.COMPLEX:
         print(
             f"   {Fore.YELLOW}⚠️  WARNING: This error is complex and may need domain knowledge{Style.RESET_ALL}"
@@ -268,7 +285,10 @@ class CommunityLearningIntegration:
 
                 # Estimate fix time based on complexity
                 if attempt.fix_successful:
-                    if attempt.error.rule_id in ["yaml[trailing-spaces]", "yaml[line-length]"]:
+                    if attempt.error.rule_id in [
+                        "yaml[trailing-spaces]",
+                        "yaml[line-length]",
+                    ]:
                         attempt.time_to_fix_minutes = 1
                     elif "syntax" in attempt.error.message.lower():
                         attempt.time_to_fix_minutes = 10
@@ -351,7 +371,9 @@ class CommunityLearningIntegration:
         print(f"   💾 Saved {len(self.manual_attempts)} community feedback records")
 
 
-def integrate_with_error_analyzer(choices: List[InteractiveChoice], error_analyzer) -> None:
+def integrate_with_error_analyzer(
+    choices: List[InteractiveChoice], error_analyzer
+) -> None:
     """Integrate interactive choices with the error analyzer's learning system."""
     for choice in choices:
         if choice.choice == UserChoice.FIX:

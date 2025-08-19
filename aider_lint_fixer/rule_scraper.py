@@ -73,7 +73,9 @@ class RuleScraper:
     def scrape_all_rules(self) -> Dict[str, Dict[str, RuleInfo]]:
         """Scrape all linter documentation and return rule database."""
         if not SCRAPING_AVAILABLE:
-            logger.warning("requests and beautifulsoup4 not available, cannot scrape rules")
+            logger.warning(
+                "requests and beautifulsoup4 not available, cannot scrape rules"
+            )
             return {}
 
         all_rules = {}
@@ -115,7 +117,9 @@ class RuleScraper:
 
         return {}
 
-    def _parse_ansible_lint_rules(self, soup: BeautifulSoup, url: str) -> Dict[str, RuleInfo]:
+    def _parse_ansible_lint_rules(
+        self, soup: BeautifulSoup, url: str
+    ) -> Dict[str, RuleInfo]:
         """Parse ansible-lint documentation with enhanced rule detection."""
         rules = {}
 
@@ -233,7 +237,9 @@ class RuleScraper:
             # Match rule links like "/docs/latest/rules/rule-name"
             if "/rules/" in href and not href.endswith("/rules/"):
                 rule_id = href.split("/rules/")[-1].strip("/")
-                if rule_id and not any(x in rule_id for x in ["#", "?", "deprecated", "removed"]):
+                if rule_id and not any(
+                    x in rule_id for x in ["#", "?", "deprecated", "removed"]
+                ):
                     # Get the description from the link text or nearby text
                     description = link.text.strip()
 
@@ -254,7 +260,10 @@ class RuleScraper:
                             auto_fixable = True
 
                         # Try to get better description from parent text
-                        if len(parent_text) > len(description) and len(parent_text) < 200:
+                        if (
+                            len(parent_text) > len(description)
+                            and len(parent_text) < 200
+                        ):
                             description = parent_text.strip()
 
                     category = self._categorize_eslint_rule(rule_id, description)
@@ -285,7 +294,8 @@ class RuleScraper:
 
                 # Check for fixable indicator (wrench icon or "fixable" text)
                 auto_fixable = any(
-                    "wrench" in str(cell) or "fixable" in cell.text.lower() for cell in cells
+                    "wrench" in str(cell) or "fixable" in cell.text.lower()
+                    for cell in cells
                 )
 
                 category = self._categorize_eslint_rule(rule_id, description)
@@ -466,7 +476,9 @@ def scrape_and_update_knowledge_base(cache_dir: Path = None) -> Dict[str, Dict]:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Scrape linter documentation for rules")
+    parser = argparse.ArgumentParser(
+        description="Scrape linter documentation for rules"
+    )
     parser.add_argument(
         "--linter",
         choices=["ansible-lint", "eslint", "flake8", "all"],
@@ -474,7 +486,9 @@ if __name__ == "__main__":
         help="Which linter to scrape",
     )
     parser.add_argument("--output", help="Output file for scraped rules")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be scraped")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would be scraped"
+    )
 
     args = parser.parse_args()
 

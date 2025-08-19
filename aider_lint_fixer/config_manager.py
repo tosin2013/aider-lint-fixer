@@ -21,7 +21,9 @@ class LLMConfig:
 
     provider: str = "deepseek"
     model: str = "deepseek/deepseek-chat"
-    fallback_providers: List[str] = field(default_factory=lambda: ["openrouter", "ollama"])
+    fallback_providers: List[str] = field(
+        default_factory=lambda: ["openrouter", "ollama"]
+    )
     api_key: Optional[str] = None
     api_base: Optional[str] = None
 
@@ -51,10 +53,10 @@ class LinterConfig:
     # Environment-specific smart selection defaults
     smart_selection_defaults: Dict[str, bool] = field(
         default_factory=lambda: {
-            "development": True,    # Fast feedback in development
-            "ci": False,           # Comprehensive checking in CI
-            "tutorial": True,      # Always smart for tutorials
-            "production": False,   # Safety first in production
+            "development": True,  # Fast feedback in development
+            "ci": False,  # Comprehensive checking in CI
+            "tutorial": True,  # Always smart for tutorials
+            "production": False,  # Safety first in production
         }
     )
 
@@ -209,7 +211,9 @@ class ConfigManager:
 
         # LLM configuration
         if os.getenv("AIDER_LLM_PROVIDER"):
-            env_config.setdefault("llm", {})["provider"] = os.getenv("AIDER_LLM_PROVIDER")
+            env_config.setdefault("llm", {})["provider"] = os.getenv(
+                "AIDER_LLM_PROVIDER"
+            )
 
         if os.getenv("AIDER_LLM_MODEL"):
             env_config.setdefault("llm", {})["model"] = os.getenv("AIDER_LLM_MODEL")
@@ -238,7 +242,9 @@ class ConfigManager:
 
         return env_config
 
-    def _merge_configs(self, base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+    def _merge_configs(
+        self, base: Dict[str, Any], override: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Merge two configuration dictionaries.
 
         Args:
@@ -251,7 +257,11 @@ class ConfigManager:
         result = base.copy()
 
         for key, value in override.items():
-            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            if (
+                key in result
+                and isinstance(result[key], dict)
+                and isinstance(value, dict)
+            ):
                 result[key] = self._merge_configs(result[key], value)
             else:
                 result[key] = value
@@ -336,7 +346,9 @@ class ConfigManager:
                 auto_commit=aider_dict.get("auto_commit", config.aider.auto_commit),
                 backup_files=aider_dict.get("backup_files", config.aider.backup_files),
                 max_retries=aider_dict.get("max_retries", config.aider.max_retries),
-                context_window=aider_dict.get("context_window", config.aider.context_window),
+                context_window=aider_dict.get(
+                    "context_window", config.aider.context_window
+                ),
             )
 
         # Project configuration
@@ -358,7 +370,9 @@ class ConfigManager:
                 level=logging_dict.get("level", config.logging.level),
                 file=logging_dict.get("file", config.logging.file),
                 max_size=logging_dict.get("max_size", config.logging.max_size),
-                backup_count=logging_dict.get("backup_count", config.logging.backup_count),
+                backup_count=logging_dict.get(
+                    "backup_count", config.logging.backup_count
+                ),
             )
 
         return config

@@ -53,7 +53,9 @@ class AiderStrategicRecommendationEngine:
 
         # Generate overall project structure recommendations
         if chaos_level in [ChaosLevel.CHAOTIC, ChaosLevel.DISASTER]:
-            structure_rec = self._generate_structure_recommendation(chaos_level, indicators)
+            structure_rec = self._generate_structure_recommendation(
+                chaos_level, indicators
+            )
             if structure_rec:
                 recommendations.append(structure_rec)
 
@@ -224,7 +226,9 @@ Focus on creating a clean, maintainable structure that follows Python best pract
         """Display recommendations in a user-friendly format."""
 
         if not recommendations:
-            print("✅ No strategic recommendations needed - codebase structure looks good!")
+            print(
+                "✅ No strategic recommendations needed - codebase structure looks good!"
+            )
             return
 
         print(f"\n🎯 Strategic Cleanup Recommendations ({len(recommendations)} items)")
@@ -255,14 +259,18 @@ Focus on creating a clean, maintainable structure that follows Python best pract
                         for action in rec.specific_actions[:3]:
                             print(f"     • {action}")
                         if len(rec.specific_actions) > 3:
-                            print(f"     • ... and {len(rec.specific_actions) - 3} more")
+                            print(
+                                f"     • ... and {len(rec.specific_actions) - 3} more"
+                            )
 
                     if rec.aider_commands:
                         print(f"   Aider Commands:")
                         for cmd in rec.aider_commands[:2]:
                             print(f"     $ {cmd}")
                         if len(rec.aider_commands) > 2:
-                            print(f"     $ ... and {len(rec.aider_commands) - 2} more commands")
+                            print(
+                                f"     $ ... and {len(rec.aider_commands) - 2} more commands"
+                            )
 
         print(f"\n🔄 Next Steps:")
         print("1. Address CRITICAL items first")

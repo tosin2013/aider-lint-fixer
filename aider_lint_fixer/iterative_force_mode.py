@@ -106,7 +106,9 @@ class IterativeForceMode:
         self.refactor_dangerous_error_ratio = 0.3  # 30% dangerous errors
         self.refactor_iteration_threshold = 5  # Iterations without major progress
 
-    def should_continue_loop(self, current_iteration: int) -> Tuple[bool, LoopExitReason, str]:
+    def should_continue_loop(
+        self, current_iteration: int
+    ) -> Tuple[bool, LoopExitReason, str]:
         """Determine if the loop should continue based on intelligent analysis."""
 
         # Check budget limits first
@@ -149,7 +151,10 @@ class IterativeForceMode:
         previous = self.iteration_results[-2]
 
         # Check for error increase
-        if latest.errors_after > previous.errors_after + self.max_error_increase_tolerance:
+        if (
+            latest.errors_after
+            > previous.errors_after + self.max_error_increase_tolerance
+        ):
             return (
                 False,
                 LoopExitReason.ERROR_INCREASE,
@@ -158,7 +163,11 @@ class IterativeForceMode:
 
         # Check for no improvement
         if latest.improvement_percentage <= 0:
-            return False, LoopExitReason.NO_IMPROVEMENT, "No improvement in latest iteration"
+            return (
+                False,
+                LoopExitReason.NO_IMPROVEMENT,
+                "No improvement in latest iteration",
+            )
 
         # Check improvement threshold
         if latest.improvement_percentage < self.improvement_threshold:
@@ -170,7 +179,9 @@ class IterativeForceMode:
 
         # Check for diminishing returns
         if len(self.iteration_results) >= 3:
-            recent_improvements = [r.improvement_percentage for r in self.iteration_results[-3:]]
+            recent_improvements = [
+                r.improvement_percentage for r in self.iteration_results[-3:]
+            ]
             avg_improvement = sum(recent_improvements) / len(recent_improvements)
 
             if avg_improvement < self.diminishing_returns_threshold:
@@ -231,7 +242,8 @@ class IterativeForceMode:
         # Fallback to simple convergence check
         if len(self.iteration_results) >= self.convergence_window:
             recent_errors = [
-                r.errors_after for r in self.iteration_results[-self.convergence_window :]
+                r.errors_after
+                for r in self.iteration_results[-self.convergence_window :]
             ]
             error_variance = max(recent_errors) - min(recent_errors)
 
@@ -269,7 +281,9 @@ class IterativeForceMode:
 
         # Many iterations without major progress
         if len(self.iteration_results) >= self.refactor_iteration_threshold:
-            total_improvement = self.iteration_results[0].errors_before - latest.errors_after
+            total_improvement = (
+                self.iteration_results[0].errors_before - latest.errors_after
+            )
             improvement_rate = total_improvement / len(self.iteration_results)
 
             if improvement_rate < 3:  # Less than 3 errors fixed per iteration
@@ -341,7 +355,9 @@ class IterativeForceMode:
         )
 
         # Determine context priority based on iteration success
-        priority = ContextPriority.HIGH if success_rate > 0.8 else ContextPriority.MEDIUM
+        priority = (
+            ContextPriority.HIGH if success_rate > 0.8 else ContextPriority.MEDIUM
+        )
 
         self.context_manager.add_context(
             iteration_summary,
@@ -403,16 +419,24 @@ class IterativeForceMode:
             "success_rate_trend": (
                 "improving" if success_rates[-1] > success_rates[0] else "declining"
             ),
-            "ml_learning_trend": "improving" if ml_accuracies[-1] > ml_accuracies[0] else "stable",
+            "ml_learning_trend": (
+                "improving" if ml_accuracies[-1] > ml_accuracies[0] else "stable"
+            ),
             "total_time": self.total_time,
-            "efficiency": self.total_errors_fixed / self.total_time if self.total_time > 0 else 0,
+            "efficiency": (
+                self.total_errors_fixed / self.total_time if self.total_time > 0 else 0
+            ),
             "total_cost": total_cost,
             "total_tokens": total_tokens,
             "cost_per_error_fixed": (
-                total_cost / self.total_errors_fixed if self.total_errors_fixed > 0 else 0
+                total_cost / self.total_errors_fixed
+                if self.total_errors_fixed > 0
+                else 0
             ),
             "tokens_per_error_fixed": (
-                total_tokens / self.total_errors_fixed if self.total_errors_fixed > 0 else 0
+                total_tokens / self.total_errors_fixed
+                if self.total_errors_fixed > 0
+                else 0
             ),
             "average_cost_per_iteration": total_cost / len(self.iteration_results),
             "cost_efficiency_trend": (
@@ -471,7 +495,10 @@ class IterativeForceMode:
         # Add final session summary to context
         if self.iteration_results:
             total_improvement = (
-                (self.iteration_results[0].errors_before - self.iteration_results[-1].errors_after)
+                (
+                    self.iteration_results[0].errors_before
+                    - self.iteration_results[-1].errors_after
+                )
                 / self.iteration_results[0].errors_before
                 if self.iteration_results[0].errors_before > 0
                 else 0
@@ -491,7 +518,8 @@ class IterativeForceMode:
                 session_summary,
                 ContextPriority.CRITICAL,
                 "session_summary",
-                success=final_state in [ConvergenceState.CONVERGED, ConvergenceState.PLATEAUING],
+                success=final_state
+                in [ConvergenceState.CONVERGED, ConvergenceState.PLATEAUING],
             )
 
         logger.info(f"Session {session_id} finalized with state: {final_state.value}")

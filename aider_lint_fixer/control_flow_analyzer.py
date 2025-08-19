@@ -97,7 +97,9 @@ class ControlFlowAnalyzer:
         self.current_analysis = None
         self.node_counter = 0
 
-    def analyze_file(self, file_path: str, error_lines: Set[int] = None) -> ControlFlowAnalysis:
+    def analyze_file(
+        self, file_path: str, error_lines: Set[int] = None
+    ) -> ControlFlowAnalysis:
         """Analyze control flow for a file, focusing on areas with errors."""
 
         self.current_analysis = ControlFlowAnalysis(file_path=file_path)
@@ -138,7 +140,9 @@ class ControlFlowAnalyzer:
         except SyntaxError as e:
             logger.warning(f"Python syntax error, skipping control flow analysis: {e}")
 
-    def _analyze_javascript_control_flow(self, content: str, error_lines: Set[int] = None):
+    def _analyze_javascript_control_flow(
+        self, content: str, error_lines: Set[int] = None
+    ):
         """Analyze JavaScript control flow using regex patterns."""
 
         lines = content.split("\n")
@@ -174,10 +178,14 @@ class ControlFlowAnalyzer:
         # Create condition node - handle different node types
         if isinstance(node, ast.For):
             # For loops have 'iter' instead of 'test'
-            condition_code = ast.unparse(node.iter) if hasattr(ast, "unparse") else str(node.iter)
+            condition_code = (
+                ast.unparse(node.iter) if hasattr(ast, "unparse") else str(node.iter)
+            )
         else:
             # If and While have 'test'
-            condition_code = ast.unparse(node.test) if hasattr(ast, "unparse") else str(node.test)
+            condition_code = (
+                ast.unparse(node.test) if hasattr(ast, "unparse") else str(node.test)
+            )
 
         condition_node = self._create_node(
             ControlFlowNodeType.CONDITION, node.lineno, condition_code
@@ -194,7 +202,9 @@ class ControlFlowAnalyzer:
 
             # Process else block if present
             if node.orelse:
-                else_nodes = self._process_python_block(node.orelse, [condition_node.node_id])
+                else_nodes = self._process_python_block(
+                    node.orelse, [condition_node.node_id]
+                )
                 body_nodes.extend(else_nodes)
 
         elif isinstance(node, (ast.While, ast.For)):
@@ -213,7 +223,9 @@ class ControlFlowAnalyzer:
 
         return body_nodes if body_nodes else [condition_node.node_id]
 
-    def _process_python_try_node(self, node: ast.Try, current_nodes: List[str]) -> List[str]:
+    def _process_python_try_node(
+        self, node: ast.Try, current_nodes: List[str]
+    ) -> List[str]:
         """Process Python try-except blocks."""
 
         # Process try block
@@ -233,13 +245,17 @@ class ControlFlowAnalyzer:
                 self._add_edge(try_node, handler_node.node_id)
 
             # Process handler body
-            handler_body = self._process_python_block(handler.body, [handler_node.node_id])
+            handler_body = self._process_python_block(
+                handler.body, [handler_node.node_id]
+            )
             handler_nodes.extend(handler_body)
 
         # Process finally block
         finally_nodes = []
         if node.finalbody:
-            finally_nodes = self._process_python_block(node.finalbody, try_nodes + handler_nodes)
+            finally_nodes = self._process_python_block(
+                node.finalbody, try_nodes + handler_nodes
+            )
 
         return finally_nodes if finally_nodes else (try_nodes + handler_nodes)
 
@@ -311,7 +327,9 @@ class ControlFlowAnalyzer:
 
             # Detect control structures
             if re.match(r"\s*if\s*\(", line):
-                condition_node = self._create_node(ControlFlowNodeType.CONDITION, i, line)
+                condition_node = self._create_node(
+                    ControlFlowNodeType.CONDITION, i, line
+                )
                 for current_id in current_nodes:
                     self._add_edge(current_id, condition_node.node_id)
                 current_nodes = [condition_node.node_id]
@@ -329,7 +347,9 @@ class ControlFlowAnalyzer:
                 current_nodes = [try_node.node_id]
 
             elif re.match(r"\s*catch\s*\(", line):
-                catch_node = self._create_node(ControlFlowNodeType.EXCEPTION_HANDLER, i, line)
+                catch_node = self._create_node(
+                    ControlFlowNodeType.EXCEPTION_HANDLER, i, line
+                )
                 # Connect to previous nodes (exception can occur anywhere)
                 for current_id in current_nodes:
                     self._add_edge(current_id, catch_node.node_id)
@@ -357,7 +377,11 @@ class ControlFlowAnalyzer:
                     structure_type="if",
                     start_line=node.lineno,
                     end_line=getattr(node, "end_lineno", node.lineno),
-                    condition=ast.unparse(node.test) if hasattr(ast, "unparse") else str(node.test),
+                    condition=(
+                        ast.unparse(node.test)
+                        if hasattr(ast, "unparse")
+                        else str(node.test)
+                    ),
                 )
                 self._analyze_control_structure_complexity(structure, node)
                 self.current_analysis.control_structures.append(structure)
@@ -409,11 +433,16 @@ class ControlFlowAnalyzer:
                 condition = condition_match.group(2) if condition_match else ""
 
                 structure = ControlStructure(
-                    structure_type=loop_type, start_line=i, end_line=i, condition=condition
+                    structure_type=loop_type,
+                    start_line=i,
+                    end_line=i,
+                    condition=condition,
                 )
                 self.current_analysis.control_structures.append(structure)
 
-    def _analyze_control_structure_complexity(self, structure: ControlStructure, ast_node):
+    def _analyze_control_structure_complexity(
+        self, structure: ControlStructure, ast_node
+    ):
         """Analyze complexity of a control structure."""
 
         # Calculate nesting depth
@@ -481,7 +510,9 @@ class ControlFlowAnalyzer:
         """Analyze variable scoping issues."""
 
         # Track variable definitions and uses across control flow
-        variable_defs = defaultdict(set)  # variable -> set of line numbers where defined
+        variable_defs = defaultdict(
+            set
+        )  # variable -> set of line numbers where defined
         variable_uses = defaultdict(set)  # variable -> set of line numbers where used
 
         for node in self.current_analysis.control_flow_graph.values():
@@ -497,7 +528,11 @@ class ControlFlowAnalyzer:
             if not def_lines:
                 # Variable used but never defined (potential undefined variable)
                 self.current_analysis.scoping_issues.append(
-                    {"type": "undefined_variable", "variable": var, "lines": list(use_lines)}
+                    {
+                        "type": "undefined_variable",
+                        "variable": var,
+                        "lines": list(use_lines),
+                    }
                 )
 
             elif len(def_lines) > 1:
@@ -523,19 +558,24 @@ class ControlFlowAnalyzer:
         decision_nodes = sum(
             1
             for node in self.current_analysis.control_flow_graph.values()
-            if node.node_type in [ControlFlowNodeType.CONDITION, ControlFlowNodeType.LOOP_HEADER]
+            if node.node_type
+            in [ControlFlowNodeType.CONDITION, ControlFlowNodeType.LOOP_HEADER]
         )
 
         cyclomatic_complexity = decision_nodes + 1
 
         # Nesting depth
         max_nesting = max(
-            (s.complexity_score for s in self.current_analysis.control_structures), default=0
+            (s.complexity_score for s in self.current_analysis.control_structures),
+            default=0,
         )
 
         # Control structure density
         total_lines = max(
-            (node.line_number for node in self.current_analysis.control_flow_graph.values()),
+            (
+                node.line_number
+                for node in self.current_analysis.control_flow_graph.values()
+            ),
             default=1,
         )
         control_density = len(self.current_analysis.control_structures) / total_lines
@@ -557,7 +597,10 @@ class ControlFlowAnalyzer:
         node_id = f"node_{self.node_counter}"
 
         node = ControlFlowNode(
-            node_id=node_id, node_type=node_type, line_number=line_number, code_snippet=code_snippet
+            node_id=node_id,
+            node_type=node_type,
+            line_number=line_number,
+            code_snippet=code_snippet,
         )
 
         self.current_analysis.control_flow_graph[node_id] = node
@@ -571,8 +614,12 @@ class ControlFlowAnalyzer:
             and to_node_id in self.current_analysis.control_flow_graph
         ):
 
-            self.current_analysis.control_flow_graph[from_node_id].successors.add(to_node_id)
-            self.current_analysis.control_flow_graph[to_node_id].predecessors.add(from_node_id)
+            self.current_analysis.control_flow_graph[from_node_id].successors.add(
+                to_node_id
+            )
+            self.current_analysis.control_flow_graph[to_node_id].predecessors.add(
+                from_node_id
+            )
 
     def get_control_flow_insights(self, error_line: int) -> Dict[str, any]:
         """Get control flow insights for a specific error line."""

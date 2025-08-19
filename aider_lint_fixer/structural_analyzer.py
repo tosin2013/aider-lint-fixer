@@ -98,17 +98,24 @@ class StructuralProblemDetector:
         # Pattern definitions for structural problems
         self.structural_patterns = {
             "undefined_variables": ["no-undef", "undefined-variable"],
-            "import_issues": ["import/no-unresolved", "import/no-extraneous-dependencies"],
+            "import_issues": [
+                "import/no-unresolved",
+                "import/no-extraneous-dependencies",
+            ],
             "global_usage": ["no-global-assign", "global-statement"],
             "complexity_indicators": ["max-len", "max-statements", "max-depth"],
             "coupling_indicators": ["import/no-cycle", "circular-import"],
             "cohesion_indicators": ["unused-import", "unused-variable"],
         }
 
-    def analyze_structural_problems(self, file_analyses: Dict[str, any]) -> ArchitecturalAnalysis:
+    def analyze_structural_problems(
+        self, file_analyses: Dict[str, any]
+    ) -> ArchitecturalAnalysis:
         """Perform comprehensive structural problem analysis."""
 
-        total_errors = sum(len(analysis.error_analyses) for analysis in file_analyses.values())
+        total_errors = sum(
+            len(analysis.error_analyses) for analysis in file_analyses.values()
+        )
 
         logger.info(
             f"Analyzing structural problems for {len(file_analyses)} files "
@@ -124,7 +131,9 @@ class StructuralProblemDetector:
         if total_errors >= self.high_error_threshold:
             # High error count triggers comprehensive structural analysis
             structural_issues.extend(self._detect_monolithic_files(file_metrics))
-            structural_issues.extend(self._detect_tight_coupling(file_metrics, file_analyses))
+            structural_issues.extend(
+                self._detect_tight_coupling(file_metrics, file_analyses)
+            )
             structural_issues.extend(self._detect_complexity_hotspots(file_metrics))
             structural_issues.extend(
                 self._detect_architectural_violations(file_metrics, file_analyses)
@@ -138,7 +147,9 @@ class StructuralProblemDetector:
         )
 
         # Calculate overall architectural score
-        architectural_score = self._calculate_architectural_score(file_metrics, structural_issues)
+        architectural_score = self._calculate_architectural_score(
+            file_metrics, structural_issues
+        )
 
         # Generate recommendations
         recommendations = self._generate_architectural_recommendations(
@@ -155,7 +166,9 @@ class StructuralProblemDetector:
             recommendations=recommendations,
         )
 
-    def _calculate_file_metrics(self, file_analyses: Dict[str, any]) -> List[FileStructuralMetrics]:
+    def _calculate_file_metrics(
+        self, file_analyses: Dict[str, any]
+    ) -> List[FileStructuralMetrics]:
         """Calculate structural metrics for each file."""
 
         file_metrics = []
@@ -169,11 +182,17 @@ class StructuralProblemDetector:
             error_density = error_count / max(lines_of_code, 1)
 
             # Calculate complexity indicators
-            complexity_indicators = self._calculate_complexity_indicators(analysis.error_analyses)
+            complexity_indicators = self._calculate_complexity_indicators(
+                analysis.error_analyses
+            )
 
             # Calculate coupling and cohesion scores
-            coupling_score = self._calculate_coupling_score(error_types, analysis.error_analyses)
-            cohesion_score = self._calculate_cohesion_score(error_types, analysis.error_analyses)
+            coupling_score = self._calculate_coupling_score(
+                error_types, analysis.error_analyses
+            )
+            cohesion_score = self._calculate_cohesion_score(
+                error_types, analysis.error_analyses
+            )
 
             metrics = FileStructuralMetrics(
                 file_path=file_path,
@@ -265,7 +284,9 @@ class StructuralProblemDetector:
             ):
                 highly_coupled_files.append(metrics.file_path)
 
-        if len(highly_coupled_files) > len(file_metrics) * 0.3:  # More than 30% of files
+        if (
+            len(highly_coupled_files) > len(file_metrics) * 0.3
+        ):  # More than 30% of files
             issue = StructuralIssue(
                 problem_type=StructuralProblemType.TIGHT_COUPLING,
                 severity="high",
@@ -284,7 +305,8 @@ class StructuralProblemDetector:
                     "Consider event-driven architecture",
                 ],
                 metrics={
-                    "affected_file_percentage": len(highly_coupled_files) / len(file_metrics),
+                    "affected_file_percentage": len(highly_coupled_files)
+                    / len(file_metrics),
                     "average_coupling_score": sum(
                         m.coupling_score
                         for m in file_metrics
@@ -342,7 +364,9 @@ class StructuralProblemDetector:
                     "Consider state machines for complex state management",
                 ],
                 metrics={
-                    "max_complexity_score": complexity_hotspots[0][1] if complexity_hotspots else 0,
+                    "max_complexity_score": (
+                        complexity_hotspots[0][1] if complexity_hotspots else 0
+                    ),
                     "average_complexity": sum(score for _, score in complexity_hotspots)
                     / len(complexity_hotspots),
                     "hotspot_count": len(complexity_hotspots),
@@ -368,14 +392,19 @@ class StructuralProblemDetector:
             undefined_count = sum(
                 1
                 for error in analysis.error_analyses
-                if error.error.rule_id in self.structural_patterns["undefined_variables"]
+                if error.error.rule_id
+                in self.structural_patterns["undefined_variables"]
             )
 
-            if undefined_count > 5:  # Threshold for significant undefined variable issues
+            if (
+                undefined_count > 5
+            ):  # Threshold for significant undefined variable issues
                 undefined_var_files.append(file_path)
                 total_undefined_errors += undefined_count
 
-        if len(undefined_var_files) > len(file_analyses) * 0.2:  # More than 20% of files
+        if (
+            len(undefined_var_files) > len(file_analyses) * 0.2
+        ):  # More than 20% of files
             issue = StructuralIssue(
                 problem_type=StructuralProblemType.ARCHITECTURAL_VIOLATIONS,
                 severity="high",
@@ -393,7 +422,8 @@ class StructuralProblemDetector:
                 metrics={
                     "undefined_variable_density": total_undefined_errors
                     / sum(len(a.error_analyses) for a in file_analyses.values()),
-                    "affected_file_ratio": len(undefined_var_files) / len(file_analyses),
+                    "affected_file_ratio": len(undefined_var_files)
+                    / len(file_analyses),
                 },
             )
 
@@ -418,7 +448,8 @@ class StructuralProblemDetector:
                 metrics.error_density * 10  # Error density weight
                 + (1 - metrics.cohesion_score) * 5  # Low cohesion penalty
                 + metrics.coupling_score * 5  # High coupling penalty
-                + sum(metrics.complexity_indicators.values()) * 0.5  # Complexity penalty
+                + sum(metrics.complexity_indicators.values())
+                * 0.5  # Complexity penalty
             )
 
             if debt_score > 5:  # Threshold for significant technical debt
@@ -437,7 +468,9 @@ class StructuralProblemDetector:
                 description=f"Technical debt clusters detected in {len(debt_files)} files",
                 affected_files=[f[0] for f in debt_files],
                 error_count=sum(
-                    m.error_count for m in file_metrics if m.file_path in [f[0] for f in debt_files]
+                    m.error_count
+                    for m in file_metrics
+                    if m.file_path in [f[0] for f in debt_files]
                 ),
                 confidence=0.8,
                 recommendations=[
@@ -458,7 +491,9 @@ class StructuralProblemDetector:
 
         return issues
 
-    def _identify_hotspot_files(self, file_metrics: List[FileStructuralMetrics]) -> List[str]:
+    def _identify_hotspot_files(
+        self, file_metrics: List[FileStructuralMetrics]
+    ) -> List[str]:
         """Identify files that are architectural hotspots."""
 
         hotspots = []
@@ -485,7 +520,9 @@ class StructuralProblemDetector:
         return hotspots
 
     def _identify_refactoring_candidates(
-        self, file_metrics: List[FileStructuralMetrics], structural_issues: List[StructuralIssue]
+        self,
+        file_metrics: List[FileStructuralMetrics],
+        structural_issues: List[StructuralIssue],
     ) -> List[str]:
         """Identify files that are good candidates for refactoring."""
 
@@ -508,7 +545,9 @@ class StructuralProblemDetector:
         return list(candidates)
 
     def _calculate_architectural_score(
-        self, file_metrics: List[FileStructuralMetrics], structural_issues: List[StructuralIssue]
+        self,
+        file_metrics: List[FileStructuralMetrics],
+        structural_issues: List[StructuralIssue],
     ) -> float:
         """Calculate overall architectural health score (0-100)."""
 
@@ -528,7 +567,9 @@ class StructuralProblemDetector:
                 score -= 5
 
         # Penalty for high error density
-        avg_error_density = sum(m.error_density for m in file_metrics) / len(file_metrics)
+        avg_error_density = sum(m.error_density for m in file_metrics) / len(
+            file_metrics
+        )
         score -= min(30, avg_error_density * 1000)  # Cap penalty at 30 points
 
         # Penalty for low cohesion
@@ -542,7 +583,10 @@ class StructuralProblemDetector:
         return max(0.0, min(100.0, score))
 
     def _generate_architectural_recommendations(
-        self, structural_issues: List[StructuralIssue], hotspot_files: List[str], total_errors: int
+        self,
+        structural_issues: List[StructuralIssue],
+        hotspot_files: List[str],
+        total_errors: int,
     ) -> List[str]:
         """Generate high-level architectural recommendations."""
 
@@ -560,13 +604,19 @@ class StructuralProblemDetector:
         issue_types = set(issue.problem_type for issue in structural_issues)
 
         if StructuralProblemType.MONOLITHIC_FILES in issue_types:
-            recommendations.append("🔨 Break down monolithic files using modular architecture")
+            recommendations.append(
+                "🔨 Break down monolithic files using modular architecture"
+            )
 
         if StructuralProblemType.TIGHT_COUPLING in issue_types:
-            recommendations.append("🔗 Implement loose coupling through dependency injection")
+            recommendations.append(
+                "🔗 Implement loose coupling through dependency injection"
+            )
 
         if StructuralProblemType.COMPLEXITY_HOTSPOTS in issue_types:
-            recommendations.append("🧩 Refactor complexity hotspots using design patterns")
+            recommendations.append(
+                "🧩 Refactor complexity hotspots using design patterns"
+            )
 
         if StructuralProblemType.TECHNICAL_DEBT_CLUSTERS in issue_types:
             recommendations.append("💳 Establish technical debt reduction roadmap")
@@ -610,7 +660,9 @@ class StructuralProblemDetector:
 
         return dict(indicators)
 
-    def _calculate_coupling_score(self, error_types: Set[str], error_analyses: List) -> float:
+    def _calculate_coupling_score(
+        self, error_types: Set[str], error_analyses: List
+    ) -> float:
         """Calculate coupling score based on error patterns."""
 
         coupling_indicators = 0
@@ -626,7 +678,9 @@ class StructuralProblemDetector:
 
         return min(1.0, coupling_indicators / max(1, total_errors * 0.1))
 
-    def _calculate_cohesion_score(self, error_types: Set[str], error_analyses: List) -> float:
+    def _calculate_cohesion_score(
+        self, error_types: Set[str], error_analyses: List
+    ) -> float:
         """Calculate cohesion score based on error patterns."""
 
         cohesion_issues = 0

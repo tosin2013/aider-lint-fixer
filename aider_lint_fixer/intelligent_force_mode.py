@@ -109,11 +109,15 @@ class IntelligentForceMode:
         batch_plan = self._optimize_batching(force_decisions, is_chaotic)
 
         # Step 5: Create execution strategy
-        strategy = self._create_execution_strategy(force_decisions, batch_plan, is_chaotic)
+        strategy = self._create_execution_strategy(
+            force_decisions, batch_plan, is_chaotic
+        )
 
         return strategy
 
-    def _predict_force_decisions(self, error_analyses: List[ErrorAnalysis]) -> List[ForceDecision]:
+    def _predict_force_decisions(
+        self, error_analyses: List[ErrorAnalysis]
+    ) -> List[ForceDecision]:
         """Predict confidence and action for each error."""
         decisions = []
 
@@ -132,8 +136,18 @@ class IntelligentForceMode:
 
             # Enhanced action determination with research-based improvements
             # Special cases: Safe formatting errors should be auto-forced more aggressively
-            safe_auto_force_rules = ["max-len", "semi", "no-trailing-spaces", "no-unused-vars", "quotes", "indent"]
-            if error_analysis.error.rule_id in safe_auto_force_rules and final_confidence >= 0.70:
+            safe_auto_force_rules = [
+                "max-len",
+                "semi",
+                "no-trailing-spaces",
+                "no-unused-vars",
+                "quotes",
+                "indent",
+            ]
+            if (
+                error_analysis.error.rule_id in safe_auto_force_rules
+                and final_confidence >= 0.70
+            ):
                 action = "auto_force"
             # Standard action determination
             elif final_confidence >= self.auto_force_threshold:
@@ -167,7 +181,9 @@ class IntelligentForceMode:
         features.extend(
             [
                 1 if error.rule_id == "no-undef" else 0,  # Dangerous undefined variable
-                1 if error.rule_id in ["max-len", "no-unused-vars"] else 0,  # Safe formatting
+                (
+                    1 if error.rule_id in ["max-len", "no-unused-vars"] else 0
+                ),  # Safe formatting
                 1 if error.severity.value == "error" else 0,  # Error vs warning
                 len(error.message),  # Message complexity
                 error.line,  # Line number (early vs late in file)
@@ -211,13 +227,27 @@ class IntelligentForceMode:
             return 0.2  # Low confidence for unfixable errors
 
         # Safe error types get higher confidence, with enhanced JavaScript handling
-        safe_rules = ["max-len", "no-unused-vars", "no-useless-escape", "prefer-const", "semi", "no-trailing-spaces", "quotes", "indent"]
+        safe_rules = [
+            "max-len",
+            "no-unused-vars",
+            "no-useless-escape",
+            "prefer-const",
+            "semi",
+            "no-trailing-spaces",
+            "quotes",
+            "indent",
+        ]
         if error_analysis.error.rule_id in safe_rules:
             # Enhanced handling for max-len in JavaScript files
-            if error_analysis.error.rule_id == "max-len" and error_analysis.file_path.endswith(('.js', '.mjs', '.ts')):
+            if (
+                error_analysis.error.rule_id == "max-len"
+                and error_analysis.file_path.endswith((".js", ".mjs", ".ts"))
+            ):
                 # Check if this is a complex template literal or string concatenation
                 if self._is_complex_javascript_string(error_analysis):
-                    return 0.75  # Still high confidence - research shows these are fixable
+                    return (
+                        0.75  # Still high confidence - research shows these are fixable
+                    )
             return 0.85
 
         # Dangerous error types get lower confidence
@@ -244,17 +274,23 @@ class IntelligentForceMode:
     def _is_complex_javascript_string(self, error_analysis: ErrorAnalysis) -> bool:
         """Check if this is a complex JavaScript string that needs special handling."""
         try:
-            with open(error_analysis.file_path, 'r', encoding='utf-8') as f:
+            with open(error_analysis.file_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
                 if error_analysis.error.line <= len(lines):
                     line = lines[error_analysis.error.line - 1]
                     # Check for template literals, string concatenation, or complex patterns
-                    return ('`' in line and '+' in line) or ('REPOSITORY CONTEXT' in line) or (line.count('"') > 4)
+                    return (
+                        ("`" in line and "+" in line)
+                        or ("REPOSITORY CONTEXT" in line)
+                        or (line.count('"') > 4)
+                    )
         except Exception:
             pass
         return False
 
-    def _identify_risk_factors(self, error_analysis: ErrorAnalysis, confidence: float) -> List[str]:
+    def _identify_risk_factors(
+        self, error_analysis: ErrorAnalysis, confidence: float
+    ) -> List[str]:
         """Identify specific risk factors for this error."""
         risk_factors = []
 
@@ -296,7 +332,9 @@ class IntelligentForceMode:
 
         try:
             # Use AST analysis for enhanced dependency detection
-            logger.info(f"Building AST-based dependency graph for {len(file_paths)} files")
+            logger.info(
+                f"Building AST-based dependency graph for {len(file_paths)} files"
+            )
             enhanced_graph = self.ast_analyzer.analyze_files(file_paths)
 
             # Merge the enhanced graph with our dependency graph
@@ -305,7 +343,9 @@ class IntelligentForceMode:
             # Add error-specific metadata to nodes
             for file_path, error_list in files_with_errors.items():
                 if file_path in self.dependency_graph:
-                    self.dependency_graph.nodes[file_path]["error_count"] = len(error_list)
+                    self.dependency_graph.nodes[file_path]["error_count"] = len(
+                        error_list
+                    )
                     self.dependency_graph.nodes[file_path]["error_types"] = [
                         error.error.rule_id for error in error_list
                     ]
@@ -324,12 +364,16 @@ class IntelligentForceMode:
             )
 
         except Exception as e:
-            logger.warning(f"AST analysis failed, falling back to simple heuristics: {e}")
+            logger.warning(
+                f"AST analysis failed, falling back to simple heuristics: {e}"
+            )
 
             # Fallback to simple heuristic-based approach
             for file_path in files_with_errors:
                 self.dependency_graph.add_node(
-                    file_path, type="file", error_count=len(files_with_errors[file_path])
+                    file_path,
+                    type="file",
+                    error_count=len(files_with_errors[file_path]),
                 )
 
                 # Simple heuristic: files in same directory are related
@@ -366,20 +410,26 @@ class IntelligentForceMode:
 
                         if edge_data:
                             # Calculate cascade risk based on dependency type and error type
-                            risk_score = self._calculate_cascade_risk(error_type, edge_data)
+                            risk_score = self._calculate_cascade_risk(
+                                error_type, edge_data
+                            )
 
                             if risk_score > 0.3:  # Only include significant risks
                                 predicted_cascades.append(
                                     {
                                         "file": dep_file,
                                         "risk_score": risk_score,
-                                        "dependency_type": edge_data.get("type", "unknown"),
+                                        "dependency_type": edge_data.get(
+                                            "type", "unknown"
+                                        ),
                                     }
                                 )
 
                     # Sort by risk score and take top 3
                     predicted_cascades.sort(key=lambda x: x["risk_score"], reverse=True)
-                    decision.predicted_cascades = [c["file"] for c in predicted_cascades[:3]]
+                    decision.predicted_cascades = [
+                        c["file"] for c in predicted_cascades[:3]
+                    ]
 
                     # Add risk information to decision
                     if predicted_cascades:
@@ -396,8 +446,12 @@ class IntelligentForceMode:
                 # Enhanced cascade prediction for specific error types
                 if error_type in ["no-undef", "no-global-assign"]:
                     # Variable-related errors have higher cascade risk
-                    function_deps = self.ast_analyzer.get_function_dependencies(file_path)
-                    variable_deps = self.ast_analyzer.get_variable_dependencies(file_path)
+                    function_deps = self.ast_analyzer.get_function_dependencies(
+                        file_path
+                    )
+                    variable_deps = self.ast_analyzer.get_variable_dependencies(
+                        file_path
+                    )
 
                     all_deps = set(function_deps + variable_deps)
                     for dep_file in all_deps:
@@ -485,8 +539,12 @@ class IntelligentForceMode:
                 )
 
         # Sort by connection count
-        insights["highly_connected_files"].sort(key=lambda x: x["connections"], reverse=True)
-        insights["import_heavy_files"].sort(key=lambda x: x["import_count"], reverse=True)
+        insights["highly_connected_files"].sort(
+            key=lambda x: x["connections"], reverse=True
+        )
+        insights["import_heavy_files"].sort(
+            key=lambda x: x["import_count"], reverse=True
+        )
 
         return insights
 
@@ -558,13 +616,16 @@ class IntelligentForceMode:
         batches = []
         for batch_id in range(n_batches):
             batch_decisions = [
-                decisions[i] for i, label in enumerate(cluster_labels) if label == batch_id
+                decisions[i]
+                for i, label in enumerate(cluster_labels)
+                if label == batch_id
             ]
 
             if batch_decisions:
                 avg_confidence = np.mean([d.confidence for d in batch_decisions])
                 total_risk_factors = sum(
-                    len(d.risk_factors) if d.risk_factors else 0 for d in batch_decisions
+                    len(d.risk_factors) if d.risk_factors else 0
+                    for d in batch_decisions
                 )
 
                 # Determine risk level
@@ -587,7 +648,10 @@ class IntelligentForceMode:
         return batches
 
     def _create_execution_strategy(
-        self, force_decisions: List[ForceDecision], batch_plans: List[BatchPlan], is_chaotic: bool
+        self,
+        force_decisions: List[ForceDecision],
+        batch_plans: List[BatchPlan],
+        is_chaotic: bool,
     ) -> Dict:
         """Create final execution strategy."""
 
@@ -614,7 +678,9 @@ class IntelligentForceMode:
             "batch_plans": batch_plans,
             "estimated_time_minutes": estimated_time,
             "auto_force_enabled": total_auto_force > 0,
-            "recommendations": self._generate_recommendations(force_decisions, is_chaotic),
+            "recommendations": self._generate_recommendations(
+                force_decisions, is_chaotic
+            ),
             "force_decisions": force_decisions,
         }
 
@@ -641,11 +707,17 @@ class IntelligentForceMode:
             recommendations.append(
                 f"🤖 {auto_force_count} safe errors will be auto-fixed without confirmation"
             )
-            recommendations.append(f"⚠️  {dangerous_count} dangerous errors require manual review")
-            recommendations.append(f"📊 Use progressive fixing: safe errors first, then risky ones")
+            recommendations.append(
+                f"⚠️  {dangerous_count} dangerous errors require manual review"
+            )
+            recommendations.append(
+                f"📊 Use progressive fixing: safe errors first, then risky ones"
+            )
 
         if auto_force_count > 50:
-            recommendations.append(f"⚡ Large auto-force batch: Consider running in smaller chunks")
+            recommendations.append(
+                f"⚡ Large auto-force batch: Consider running in smaller chunks"
+            )
 
         if dangerous_count > 10:
             recommendations.append(
@@ -677,7 +749,9 @@ class IntelligentForceMode:
 
         # Add cascade-specific recommendations
         high_cascade_decisions = [
-            d for d in force_decisions if d.predicted_cascades and len(d.predicted_cascades) > 2
+            d
+            for d in force_decisions
+            if d.predicted_cascades and len(d.predicted_cascades) > 2
         ]
 
         if high_cascade_decisions:
@@ -713,9 +787,13 @@ class IntelligentForceMode:
 
         # Calculate success rates by confidence range
         high_conf_success = sum(
-            1 for o in recent_outcomes if o["decision"].confidence > 0.8 and o["success"]
+            1
+            for o in recent_outcomes
+            if o["decision"].confidence > 0.8 and o["success"]
         )
-        high_conf_total = sum(1 for o in recent_outcomes if o["decision"].confidence > 0.8)
+        high_conf_total = sum(
+            1 for o in recent_outcomes if o["decision"].confidence > 0.8
+        )
 
         if high_conf_total > 10:
             success_rate = high_conf_success / high_conf_total

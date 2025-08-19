@@ -4,18 +4,16 @@ Aider Integration Module
 This module integrates with aider.chat to automatically fix lint errors using LLMs.
 """
 
-import json
 import logging
 import os
 import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
-from .config_manager import Config, LLMConfig
+from .config_manager import Config
 from .error_analyzer import ErrorAnalysis, FileAnalysis, FixComplexity
-from .lint_runner import LintError, LintResult
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +87,10 @@ class AiderIntegration:
         for path in possible_paths:
             try:
                 result = subprocess.run(
-                    path.split() + ["--version"], capture_output=True, text=True, timeout=10
+                    path.split() + ["--version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
                 )
                 if result.returncode == 0:
                     logger.info(f"Found aider at: {path}")
@@ -249,7 +250,9 @@ class AiderIntegration:
 
         return groups
 
-    def _fix_error_group(self, errors: List[ErrorAnalysis], session_id: str) -> List[FixResult]:
+    def _fix_error_group(
+        self, errors: List[ErrorAnalysis], session_id: str
+    ) -> List[FixResult]:
         """Fix a group of errors with similar complexity using intelligent batching.
 
         Args:
@@ -273,13 +276,17 @@ class AiderIntegration:
         logger.info(f"Processing {len(errors)} errors in {len(batches)} batches")
 
         for batch_num, batch_errors in enumerate(batches, 1):
-            logger.info(f"Processing batch {batch_num}/{len(batches)} ({len(batch_errors)} errors)")
+            logger.info(
+                f"Processing batch {batch_num}/{len(batches)} ({len(batch_errors)} errors)"
+            )
 
             # Create a prompt for this batch
             prompt = self._create_fix_prompt(batch_errors)
 
             # Run aider to fix the errors in this batch
-            aider_result = self._run_aider_fix(file_path, prompt, f"{session_id}-batch{batch_num}")
+            aider_result = self._run_aider_fix(
+                file_path, prompt, f"{session_id}-batch{batch_num}"
+            )
 
             # Create results for each error in this batch
             for error_analysis in batch_errors:
@@ -301,7 +308,9 @@ class AiderIntegration:
 
         return results
 
-    def _create_error_batches(self, errors: List[ErrorAnalysis]) -> List[List[ErrorAnalysis]]:
+    def _create_error_batches(
+        self, errors: List[ErrorAnalysis]
+    ) -> List[List[ErrorAnalysis]]:
         """Split errors into manageable batches.
 
         Args:
@@ -376,7 +385,11 @@ class AiderIntegration:
             # Add context if available
             if error_analysis.context_lines:
                 prompt_parts.extend(
-                    ["   Context:", *[f"   {line}" for line in error_analysis.context_lines], ""]
+                    [
+                        "   Context:",
+                        *[f"   {line}" for line in error_analysis.context_lines],
+                        "",
+                    ]
                 )
 
         prompt_parts.extend(
@@ -396,7 +409,9 @@ class AiderIntegration:
 
         return "\n".join(prompt_parts)
 
-    def _run_aider_fix(self, file_path: str, prompt: str, session_id: str) -> Dict[str, Any]:
+    def _run_aider_fix(
+        self, file_path: str, prompt: str, session_id: str
+    ) -> Dict[str, Any]:
         """Run aider to fix errors in a file.
 
         Args:
@@ -529,7 +544,9 @@ class AiderIntegration:
             elif llm_config.provider == "ollama":
                 # Extract model name from full model string
                 model_name = (
-                    llm_config.model.split("/")[-1] if "/" in llm_config.model else llm_config.model
+                    llm_config.model.split("/")[-1]
+                    if "/" in llm_config.model
+                    else llm_config.model
                 )
                 command.extend(["--model", f"ollama_chat/{model_name}"])
 
@@ -706,7 +723,7 @@ Instructions:
 
             if success:
                 logger.info(f"Architect mode completed successfully for {file_path}")
-                description = f"Fixed undefined variables using architect mode"
+                description = "Fixed undefined variables using architect mode"
             else:
                 logger.error(f"Architect mode failed for {file_path}: {stderr}")
                 description = f"Architect mode failed: {stderr[:100]}..."
@@ -808,13 +825,15 @@ Instructions:
                 results.append(fix_result)
 
                 if result["success"]:
-                    print(f"   ✅ Architect mode completed successfully")
+                    print("   ✅ Architect mode completed successfully")
                     if result["changes_made"]:
-                        print(f"   📝 Changes were made to the file")
+                        print("   📝 Changes were made to the file")
                     else:
-                        print(f"   ℹ️  No changes needed")
+                        print("   ℹ️  No changes needed")
                 else:
-                    print(f"   ❌ Architect mode failed: {result.get('error', 'Unknown error')}")
+                    print(
+                        f"   ❌ Architect mode failed: {result.get('error', 'Unknown error')}"
+                    )
 
             except Exception as e:
                 logger.error(f"Error executing architect mode for {file_path}: {e}")
@@ -836,7 +855,7 @@ Instructions:
         successful = sum(1 for r in results if r.success)
         with_changes = sum(1 for r in results if r.changes_made)
 
-        print(f"\n🏗️  Architect Mode Summary:")
+        print("\n🏗️  Architect Mode Summary:")
         print(f"   📊 Files processed: {len(results)}")
         print(f"   ✅ Successful: {successful}")
         print(f"   📝 Files changed: {with_changes}")
@@ -868,17 +887,26 @@ Instructions:
             logger.info("No safe errors to automate")
             return results
 
-        print(f"\n🤖 Safe Automation Phase:")
+        print("\n🤖 Safe Automation Phase:")
         print(f"   📊 Safe errors to fix: {safe_errors_count}")
         print(f"   🔧 Linters: {', '.join(enabled_linters)}")
 
         # Use the existing fix_errors method but with exclusions for dangerous rules
-        dangerous_rules = ["no-undef", "no-global-assign", "no-implicit-globals", "no-redeclare"]
+        dangerous_rules = [
+            "no-undef",
+            "no-global-assign",
+            "no-implicit-globals",
+            "no-redeclare",
+        ]
 
         # This would integrate with the existing lint runner and error fixing logic
         # For now, we'll return a placeholder that indicates safe automation was attempted
-        logger.info(f"Safe automation would exclude rules: {', '.join(dangerous_rules)}")
-        logger.info(f"Safe automation would fix up to {max_errors or 'unlimited'} errors per file")
+        logger.info(
+            f"Safe automation would exclude rules: {', '.join(dangerous_rules)}"
+        )
+        logger.info(
+            f"Safe automation would fix up to {max_errors or 'unlimited'} errors per file"
+        )
 
         # TODO: Integrate with existing LintRunner and error fixing workflow
         # This requires coordination with the main lint fixing pipeline
@@ -930,7 +958,9 @@ Instructions:
 
             if undefined_vars:
                 prompt_parts.append("### ⚠️ CRITICAL: Undefined Variables Detected")
-                prompt_parts.append("These variables are undefined and may break functionality:")
+                prompt_parts.append(
+                    "These variables are undefined and may break functionality:"
+                )
                 prompt_parts.append("")
 
                 for var in undefined_vars:
@@ -943,11 +973,15 @@ Instructions:
                             # Find suggestions for this variable
                             suggestions = self._get_variable_suggestions(var, file_name)
                             if suggestions:
-                                prompt_parts.append(f"  💡 Suggestion: {suggestions[0]}")
+                                prompt_parts.append(
+                                    f"  💡 Suggestion: {suggestions[0]}"
+                                )
 
                 prompt_parts.append("")
                 prompt_parts.append("### Instructions for Undefined Variables:")
-                prompt_parts.append("1. **DO NOT** create dummy variables or empty objects")
+                prompt_parts.append(
+                    "1. **DO NOT** create dummy variables or empty objects"
+                )
                 prompt_parts.append(
                     "2. **ANALYZE CONTEXT** - determine what each variable should be:"
                 )
@@ -958,7 +992,9 @@ Instructions:
                 prompt_parts.append(
                     "3. **PRESERVE FUNCTIONALITY** - ensure fixes don't break the code"
                 )
-                prompt_parts.append("4. **ADD COMMENTS** explaining your reasoning for each fix")
+                prompt_parts.append(
+                    "4. **ADD COMMENTS** explaining your reasoning for each fix"
+                )
                 prompt_parts.append("")
 
             # List other errors
@@ -967,7 +1003,9 @@ Instructions:
                 prompt_parts.append("### Other Errors to Fix:")
                 for error_analysis in other_errors:
                     error = error_analysis.error
-                    prompt_parts.append(f"- Line {error.line}: {error.rule_id} - {error.message}")
+                    prompt_parts.append(
+                        f"- Line {error.line}: {error.rule_id} - {error.message}"
+                    )
                 prompt_parts.append("")
 
         prompt_parts.extend(
@@ -1003,7 +1041,9 @@ Instructions:
         suggestions = []
 
         if var_name.lower() in ["console", "window", "document", "global", "process"]:
-            suggestions.append(f"'{var_name}' is a global - add /* global {var_name} */ comment")
+            suggestions.append(
+                f"'{var_name}' is a global - add /* global {var_name} */ comment"
+            )
         elif var_name.lower().endswith("callback") or "callback" in var_name.lower():
             suggestions.append(f"'{var_name}' might be a missing function parameter")
         elif file_name.endswith(".mjs") or "module" in file_name:
@@ -1036,7 +1076,8 @@ Instructions:
                 os.environ["OLLAMA_API_KEY"] = api_key
         else:
             logger.error(
-                f"No API key found for provider: {llm_config.provider}. Please check your environment variables."
+                f"No API key found for provider: {llm_config.provider}. "
+                "Please check your environment variables."
             )
 
     def _create_aider_config(self, llm_config) -> None:
@@ -1152,7 +1193,9 @@ Instructions:
 
         return "Fixes applied"
 
-    def verify_fixes(self, session: FixSession, lint_runner, error_analyzer=None) -> Dict[str, Any]:
+    def verify_fixes(
+        self, session: FixSession, lint_runner, error_analyzer=None
+    ) -> Dict[str, Any]:
         """Verify that fixes were successful by re-running linters.
 
         Args:
@@ -1216,7 +1259,9 @@ Instructions:
             "errors_fixed": len(fixed_errors),
             "errors_still_present": len(still_present),
             "new_errors": len(remaining_errors) - len(still_present),
-            "success_rate": len(fixed_errors) / len(original_errors) if original_errors else 1.0,
+            "success_rate": (
+                len(fixed_errors) / len(original_errors) if original_errors else 1.0
+            ),
             "fixed_errors": fixed_errors,
             "remaining_errors": still_present,
             "verification_results": verification_results,
@@ -1252,7 +1297,10 @@ Instructions:
         # Use getattr with default to handle cases where complexity_score might be missing
         sorted_files = sorted(
             file_analyses.items(),
-            key=lambda x: (getattr(x[1], "complexity_score", 0.0), len(x[1].error_analyses)),
+            key=lambda x: (
+                getattr(x[1], "complexity_score", 0.0),
+                len(x[1].error_analyses),
+            ),
         )
 
         if max_files:
@@ -1263,7 +1311,9 @@ Instructions:
         processed_files = 0
         processed_errors = 0
 
-        logger.info(f"Starting batch processing: {total_files} files, {total_errors} total errors")
+        logger.info(
+            f"Starting batch processing: {total_files} files, {total_errors} total errors"
+        )
 
         for file_path, file_analysis in sorted_files:
             if not file_analysis.error_analyses:
@@ -1271,7 +1321,8 @@ Instructions:
 
             file_errors = len(file_analysis.error_analyses)
             logger.info(
-                f"Processing file {processed_files + 1}/{total_files}: {file_path} ({file_errors} errors)"
+                f"Processing file {processed_files + 1}/{total_files}: "
+                f"{file_path} ({file_errors} errors)"
             )
 
             # Progress callback
@@ -1306,7 +1357,9 @@ Instructions:
                             "total_files": total_files,
                             "processed_errors": processed_errors,
                             "total_errors": total_errors,
-                            "session_results": len([r for r in session.results if r.success]),
+                            "session_results": len(
+                                [r for r in session.results if r.success]
+                            ),
                         }
                     )
 
@@ -1323,5 +1376,7 @@ Instructions:
                 processed_files += 1
                 continue
 
-        logger.info(f"Batch processing complete: {processed_files}/{total_files} files processed")
+        logger.info(
+            f"Batch processing complete: {processed_files}/{total_files} files processed"
+        )
         return sessions

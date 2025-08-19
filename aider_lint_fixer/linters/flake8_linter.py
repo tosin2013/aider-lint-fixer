@@ -49,7 +49,9 @@ class Flake8Linter(BaseLinter):
             pass
         return None
 
-    def build_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
+    def build_command(
+        self, file_paths: Optional[List[str]] = None, **kwargs
+    ) -> List[str]:
         """Build flake8 command."""
         command = ["flake8"]
 
@@ -147,7 +149,10 @@ class Flake8Linter(BaseLinter):
         """
         if profile == "basic":
             # Basic profile: Focus on errors and important warnings
-            kwargs = {"ignore": "W293,W291", "max_line_length": "100"}  # Ignore whitespace warnings
+            kwargs = {
+                "ignore": "W293,W291",
+                "max_line_length": "100",
+            }  # Ignore whitespace warnings
         elif profile == "strict":
             # Strict profile: All checks enabled
             kwargs = {"max_line_length": "79"}  # PEP 8 standard

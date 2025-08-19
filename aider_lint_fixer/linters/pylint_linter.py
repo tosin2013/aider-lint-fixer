@@ -50,7 +50,9 @@ class PylintLinter(BaseLinter):
             pass
         return None
 
-    def build_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
+    def build_command(
+        self, file_paths: Optional[List[str]] = None, **kwargs
+    ) -> List[str]:
         """Build pylint command."""
         command = ["pylint", "--output-format=json"]
 
@@ -172,6 +174,9 @@ class PylintLinter(BaseLinter):
             kwargs = {"no_score": True}
         else:
             # Default profile: Moderate checking
-            kwargs = {"disable": "missing-docstring,too-few-public-methods", "no_score": True}
+            kwargs = {
+                "disable": "missing-docstring,too-few-public-methods",
+                "no_score": True,
+            }
 
         return self.run(file_paths, **kwargs)

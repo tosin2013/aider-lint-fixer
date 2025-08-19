@@ -100,7 +100,8 @@ class MessyCodebaseAnalyzer:
         for file in self.project_path.glob("*.py"):
             name = file.stem.lower()
             if any(
-                keyword in name for keyword in ["demo", "test", "debug", "experimental", "temp"]
+                keyword in name
+                for keyword in ["demo", "test", "debug", "experimental", "temp"]
             ):
                 experimental_files.append(file.name)
 
@@ -124,7 +125,9 @@ class MessyCodebaseAnalyzer:
 
         return indicators
 
-    def _check_readme_reality_mismatch(self, readme_path: Path) -> Optional[ChaosIndicator]:
+    def _check_readme_reality_mismatch(
+        self, readme_path: Path
+    ) -> Optional[ChaosIndicator]:
         """Check if README describes a different project than what exists."""
         try:
             readme_content = readme_path.read_text().lower()
@@ -160,7 +163,9 @@ class StrategicPreFlightChecker:
 
     def __init__(self, project_path: str, config_manager=None):
         self.project_path = Path(project_path)
-        self.cache_file = self.project_path / ".aider-lint-cache" / "strategic_analysis.json"
+        self.cache_file = (
+            self.project_path / ".aider-lint-cache" / "strategic_analysis.json"
+        )
         self.analyzer = MessyCodebaseAnalyzer(str(project_path))
         self.config_manager = config_manager
 
@@ -203,13 +208,15 @@ class StrategicPreFlightChecker:
 
         return result
 
-    def run_enhanced_preflight_check(self,
-                                   force_recheck: bool = False,
-                                   enable_enhanced_analysis: bool = False,
-                                   quantify_debt: bool = False,
-                                   predict_outcomes: bool = False,
-                                   export_for_llm: str = None,
-                                   chaos_dimensions: str = "basic") -> PreFlightResult:
+    def run_enhanced_preflight_check(
+        self,
+        force_recheck: bool = False,
+        enable_enhanced_analysis: bool = False,
+        quantify_debt: bool = False,
+        predict_outcomes: bool = False,
+        export_for_llm: str = None,
+        chaos_dimensions: str = "basic",
+    ) -> PreFlightResult:
         """Run enhanced strategic pre-flight check with research-based features."""
 
         print(f"🔬 Running enhanced strategic analysis...")
@@ -223,29 +230,45 @@ class StrategicPreFlightChecker:
         result = self.run_preflight_check(force_recheck)
 
         # Add enhanced analysis if requested
-        if any([enable_enhanced_analysis, quantify_debt, predict_outcomes, export_for_llm]):
+        if any(
+            [enable_enhanced_analysis, quantify_debt, predict_outcomes, export_for_llm]
+        ):
             try:
                 from .enhanced_strategic_analyzer import EnhancedStrategicAnalyzer
 
-                enhanced_analyzer = EnhancedStrategicAnalyzer(str(self.project_path), self.config_manager)
+                enhanced_analyzer = EnhancedStrategicAnalyzer(
+                    str(self.project_path), self.config_manager
+                )
 
                 # Mock error analyses for demonstration (in real implementation, this would come from linter results)
                 mock_error_analyses = self._create_mock_error_analyses()
 
                 if quantify_debt:
                     print(f"\n📊 Technical Debt Analysis (SQALE Methodology):")
-                    debt_metrics = enhanced_analyzer.analyze_technical_debt_metrics(mock_error_analyses)
-                    print(f"   Total Technical Debt: {debt_metrics.total_debt_hours:.1f} hours")
+                    debt_metrics = enhanced_analyzer.analyze_technical_debt_metrics(
+                        mock_error_analyses
+                    )
+                    print(
+                        f"   Total Technical Debt: {debt_metrics.total_debt_hours:.1f} hours"
+                    )
                     print(f"   SQALE Rating: {debt_metrics.sqale_rating}")
                     print(f"   Debt Ratio: {debt_metrics.debt_ratio:.2%}")
 
                 if predict_outcomes:
                     print(f"\n🎯 Predictive Analysis:")
-                    predictions = enhanced_analyzer.predict_fix_outcomes(mock_error_analyses)
-                    print(f"   Fix Success Probability: {predictions.fix_success_probability:.1%}")
+                    predictions = enhanced_analyzer.predict_fix_outcomes(
+                        mock_error_analyses
+                    )
+                    print(
+                        f"   Fix Success Probability: {predictions.fix_success_probability:.1%}"
+                    )
                     print(f"   Confidence Score: {predictions.confidence_score:.1%}")
-                    print(f"   Recommended Approach: {predictions.recommended_approach}")
-                    print(f"   Estimated Effort: {predictions.estimated_effort_hours:.1f} hours")
+                    print(
+                        f"   Recommended Approach: {predictions.recommended_approach}"
+                    )
+                    print(
+                        f"   Estimated Effort: {predictions.estimated_effort_hours:.1f} hours"
+                    )
 
                 if export_for_llm:
                     print(f"\n🤖 Exporting for {export_for_llm.upper()} Analysis:")
@@ -257,19 +280,26 @@ class StrategicPreFlightChecker:
                     )
 
                     # Save export data
-                    export_file = self.project_path / f"strategic_analysis_{export_for_llm}.json"
+                    export_file = (
+                        self.project_path / f"strategic_analysis_{export_for_llm}.json"
+                    )
                     import json
-                    with open(export_file, 'w') as f:
+
+                    with open(export_file, "w") as f:
                         json.dump(export_data, f, indent=2, default=str)
 
                     print(f"   Export saved to: {export_file}")
-                    print(f"   Total files analyzed: {export_data['metadata']['total_files_analyzed']}")
+                    print(
+                        f"   Total files analyzed: {export_data['metadata']['total_files_analyzed']}"
+                    )
                     print(f"   Total errors: {export_data['metadata']['total_errors']}")
 
                     # Show recommended prompts
-                    if export_data.get('recommended_prompts'):
+                    if export_data.get("recommended_prompts"):
                         print(f"\n💡 Recommended {export_for_llm.upper()} Prompts:")
-                        for i, prompt in enumerate(export_data['recommended_prompts'], 1):
+                        for i, prompt in enumerate(
+                            export_data["recommended_prompts"], 1
+                        ):
                             print(f"   {i}. {prompt[:100]}...")
 
             except ImportError as e:
@@ -294,24 +324,30 @@ class StrategicPreFlightChecker:
             column=5,
             message="'logCallback' is not defined",
             rule_id="no-undef",
-            linter="eslint"
+            linter="eslint",
         )
 
         mock_analysis = ErrorAnalysis(
             error=mock_error,
             category=ErrorCategory.UNDEFINED_VARIABLE,
             confidence=0.9,
-            context_lines=["function processData() {", "  logCallback('Processing...');", "}"],
-            suggested_fix="Define logCallback function or import it"
+            context_lines=[
+                "function processData() {",
+                "  logCallback('Processing...');",
+                "}",
+            ],
+            suggested_fix="Define logCallback function or import it",
         )
 
-        mock_analyses["src/example.js"] = type('MockFileAnalysis', (), {
-            'error_analyses': [mock_analysis]
-        })()
+        mock_analyses["src/example.js"] = type(
+            "MockFileAnalysis", (), {"error_analyses": [mock_analysis]}
+        )()
 
         return mock_analyses
 
-    def _should_proceed_with_fixes(self, chaos_level: ChaosLevel, indicators: List) -> bool:
+    def _should_proceed_with_fixes(
+        self, chaos_level: ChaosLevel, indicators: List
+    ) -> bool:
         """Determine if automated fixing should proceed."""
 
         # Never proceed for disaster-level chaos without manual intervention
@@ -328,7 +364,9 @@ class StrategicPreFlightChecker:
 
         # For messy codebases, check for major blocking issues
         if chaos_level == ChaosLevel.MESSY:
-            major_indicators = [i for i in indicators if i.severity in ["critical", "major"]]
+            major_indicators = [
+                i for i in indicators if i.severity in ["critical", "major"]
+            ]
             if len(major_indicators) > 2:  # Too many major issues
                 return False
             return True  # Allow messy with few major issues
@@ -346,7 +384,9 @@ class StrategicPreFlightChecker:
 
         return blocking
 
-    def _get_recommended_actions(self, chaos_level: ChaosLevel, indicators: List) -> List[str]:
+    def _get_recommended_actions(
+        self, chaos_level: ChaosLevel, indicators: List
+    ) -> List[str]:
         """Get recommended actions before proceeding with fixes."""
         actions = []
 
@@ -383,7 +423,9 @@ class StrategicPreFlightChecker:
         """Display pre-flight analysis results."""
 
         print(f"📊 Chaos Level: {result.chaos_level.upper()}")
-        print(f"🚦 Proceed with Fixes: {'✅ YES' if result.should_proceed else '❌ NO'}")
+        print(
+            f"🚦 Proceed with Fixes: {'✅ YES' if result.should_proceed else '❌ NO'}"
+        )
 
         # Only show blocking issues if they actually block
         if result.blocking_issues and not result.should_proceed:
@@ -441,19 +483,27 @@ class StrategicPreFlightChecker:
         except Exception:
             pass  # Cache failure shouldn't block execution
 
-    def _generate_aider_recommendations(self, chaos_level: ChaosLevel, indicators: List):
+    def _generate_aider_recommendations(
+        self, chaos_level: ChaosLevel, indicators: List
+    ):
         """Generate aider-powered strategic recommendations."""
         try:
-            from .aider_strategic_recommendations import AiderStrategicRecommendationEngine
+            from .aider_strategic_recommendations import (
+                AiderStrategicRecommendationEngine,
+            )
 
-            engine = AiderStrategicRecommendationEngine(str(self.project_path), self.config_manager)
+            engine = AiderStrategicRecommendationEngine(
+                str(self.project_path), self.config_manager
+            )
 
             recommendations = engine.generate_recommendations(chaos_level, indicators)
             engine.display_recommendations(recommendations)
 
         except ImportError:
             print("\n💡 Manual Cleanup Recommendations:")
-            print("Since aider recommendations are not available, here are manual steps:")
+            print(
+                "Since aider recommendations are not available, here are manual steps:"
+            )
 
             for indicator in indicators:
                 if indicator.severity in ["critical", "major"]:

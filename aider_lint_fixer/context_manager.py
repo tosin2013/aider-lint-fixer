@@ -139,7 +139,8 @@ class ContextManager:
 
         # Sort context items by priority and recency
         sorted_items = sorted(
-            self.context_items, key=lambda x: (x.priority.value, -x.timestamp.timestamp())
+            self.context_items,
+            key=lambda x: (x.priority.value, -x.timestamp.timestamp()),
         )
 
         context_parts = []
@@ -150,18 +151,29 @@ class ContextManager:
 
         # Add critical context first
         for item in sorted_items:
-            if item.priority == ContextPriority.CRITICAL and used_tokens < critical_token_budget:
+            if (
+                item.priority == ContextPriority.CRITICAL
+                and used_tokens < critical_token_budget
+            ):
                 context_parts.append(self._format_context_item(item))
                 used_tokens += item.tokens
 
         # Add other context by priority
-        for priority in [ContextPriority.HIGH, ContextPriority.MEDIUM, ContextPriority.LOW]:
+        for priority in [
+            ContextPriority.HIGH,
+            ContextPriority.MEDIUM,
+            ContextPriority.LOW,
+        ]:
             for item in sorted_items:
                 if (
                     item.priority == priority
                     and used_tokens < self.target_tokens
                     and item
-                    not in [i for i in sorted_items if i.priority == ContextPriority.CRITICAL]
+                    not in [
+                        i
+                        for i in sorted_items
+                        if i.priority == ContextPriority.CRITICAL
+                    ]
                 ):
 
                     if used_tokens + item.tokens <= self.target_tokens:
@@ -298,7 +310,8 @@ class ContextManager:
         for error_type, error_items in error_types.items():
             files = set(item.file_path for item in error_items if item.file_path)
             summary_parts.append(
-                f"- {error_type}: {len(error_items)} occurrences " f"across {len(files)} files"
+                f"- {error_type}: {len(error_items)} occurrences "
+                f"across {len(files)} files"
             )
 
         return "\n".join(summary_parts)
@@ -345,9 +358,7 @@ class ContextManager:
 
     def _format_summary(self, summary: ContextSummary) -> str:
         """Format a summary for AI consumption."""
-        time_range = (
-            f"{summary.time_range[0].strftime('%H:%M')} - {summary.time_range[1].strftime('%H:%M')}"
-        )
+        time_range = f"{summary.time_range[0].strftime('%H:%M')} - {summary.time_range[1].strftime('%H:%M')}"
         header = f"[SUMMARY] {summary.original_items} items ({time_range})"
         return f"{header}:\n{summary.summarized_content}"
 
@@ -384,7 +395,9 @@ class ContextManager:
                 for priority in ContextPriority
             },
             "items_by_category": {
-                category: len([item for item in self.context_items if item.category == category])
+                category: len(
+                    [item for item in self.context_items if item.category == category]
+                )
                 for category in set(item.category for item in self.context_items)
             },
         }
