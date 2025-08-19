@@ -8,8 +8,11 @@ import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Dict, List, Optional, Set
 from urllib.parse import urljoin, urlparse
+
+if TYPE_CHECKING:
+    from bs4 import BeautifulSoup
 
 try:
     import requests
@@ -17,6 +20,8 @@ try:
 
     SCRAPING_AVAILABLE = True
 except ImportError:
+    requests = None
+    BeautifulSoup = None
     SCRAPING_AVAILABLE = False
 logger = logging.getLogger(__name__)
 
@@ -106,7 +111,7 @@ class RuleScraper:
         return {}
 
     def _parse_ansible_lint_rules(
-        self, soup: BeautifulSoup, url: str
+        self, soup: "BeautifulSoup", url: str
     ) -> Dict[str, RuleInfo]:
         """Parse ansible-lint documentation with enhanced rule detection."""
         rules = {}
@@ -134,7 +139,7 @@ class RuleScraper:
                 )
         return rules
 
-    def _parse_yaml_rules(self, soup: BeautifulSoup, url: str) -> Dict[str, RuleInfo]:
+    def _parse_yaml_rules(self, soup: "BeautifulSoup", url: str) -> Dict[str, RuleInfo]:
         """Parse YAML-specific rules from ansible-lint documentation."""
         rules = {}
         # Look for bullet points with yaml[rule] format
@@ -157,7 +162,7 @@ class RuleScraper:
                 )
         return rules
 
-    def _parse_rules_index(self, soup: BeautifulSoup, url: str) -> Dict[str, RuleInfo]:
+    def _parse_rules_index(self, soup: "BeautifulSoup", url: str) -> Dict[str, RuleInfo]:
         """Parse rules from the main index page."""
         rules = {}
         # Look for links to rule pages
@@ -204,7 +209,7 @@ class RuleScraper:
         ]
         return rule_name in fixable_yaml_rules
 
-    def _parse_eslint_rules(self, soup: BeautifulSoup, url: str) -> Dict[str, RuleInfo]:
+    def _parse_eslint_rules(self, soup: "BeautifulSoup", url: str) -> Dict[str, RuleInfo]:
         """Parse ESLint documentation with enhanced rule detection."""
         rules = {}
         # Method 1: Look for rule links in the new ESLint format
@@ -276,7 +281,7 @@ class RuleScraper:
                 )
         return rules
 
-    def _parse_flake8_rules(self, soup: BeautifulSoup, url: str) -> Dict[str, RuleInfo]:
+    def _parse_flake8_rules(self, soup: "BeautifulSoup", url: str) -> Dict[str, RuleInfo]:
         """Parse Flake8 documentation."""
         rules = {}
         # Flake8 typically has error codes in a list or table
