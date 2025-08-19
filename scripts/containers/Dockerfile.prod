@@ -34,12 +34,14 @@ RUN pip install --no-cache-dir \
     pylint==3.3.7 \
     ansible-lint==25.6.1
 
-# Install Node.js linters
+# Install Node.js linters globally
 RUN npm install -g \
     eslint@8.57.1 \
     jshint@2.13.6 \
     prettier@3.6.2 \
-    && npm cache clean --force
+    && npm cache clean --force \
+    && ls -la /usr/local/bin/eslint* /usr/local/bin/jshint* /usr/local/bin/prettier* || true \
+    && ls -la /usr/local/lib/node_modules/ || true
 
 # Install aider-chat
 RUN pip install --no-cache-dir "aider-chat>=0.85.0"
@@ -58,12 +60,9 @@ LABEL name="aider-lint-fixer" \
       vendor="aider-lint-fixer" \
       summary="Production container for aider-lint-fixer"
 
-# Install runtime dependencies
+# Install basic runtime dependencies  
 RUN apt-get update && apt-get install -y \
-    curl \
     git \
-    nodejs \
-    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
@@ -76,11 +75,19 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
-# Copy Node.js packages from builder
-COPY --from=builder /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
-COPY --from=builder /usr/local/bin/eslint /usr/local/bin/
-COPY --from=builder /usr/local/bin/jshint /usr/local/bin/
-COPY --from=builder /usr/local/bin/prettier /usr/local/bin/
+# Install Node.js and npm in production stage (simpler approach)
+RUN apt-get update && apt-get install -y \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js linters in production stage
+RUN npm install -g \
+    eslint@8.57.1 \
+    jshint@2.13.6 \
+    prettier@3.6.2 \
+    && npm cache clean --force
 
 # Create cache directory for learning features
 RUN mkdir -p /app/.aider-lint-cache && chown aider:aider /app/.aider-lint-cache
