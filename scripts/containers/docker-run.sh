@@ -5,7 +5,8 @@
 set -e
 
 # Configuration
-IMAGE_NAME="aider-lint-fixer:latest"
+# Default to quay.io published image, can be overridden with --image
+IMAGE_NAME="quay.io/takinosh/aider-lint-fixer:latest"
 CONTAINER_NAME="aider-lint-fixer-$(date +%s)"
 
 # Color codes
@@ -33,8 +34,9 @@ DESCRIPTION:
     Perfect for CI/CD pipelines and systems without Python 3.11+.
 
 OPTIONS:
-    --build                 Build the Docker image first
-    --image IMAGE          Use specific image (default: aider-lint-fixer:latest)
+    --build                 Build the Docker image locally
+    --local                 Use local image (aider-lint-fixer:latest) instead of quay.io
+    --image IMAGE          Use specific image (default: quay.io/takinosh/aider-lint-fixer:latest)
     --env-file FILE        Load environment variables from file (default: .env)
     --api-key KEY          Set DEEPSEEK_API_KEY directly
     --workspace DIR        Set workspace directory (default: current directory)
@@ -51,13 +53,16 @@ AIDER_ARGS:
     Use --help after -- to see aider-lint-fixer options.
 
 EXAMPLES:
-    # Basic usage - analyze current directory
+    # Basic usage - analyze current directory (uses quay.io image)
     ./scripts/containers/docker-run.sh
 
-    # Build image and run with specific linters
-    ./scripts/containers/docker-run.sh --build --linters flake8,eslint
+    # Use local built image instead of quay.io
+    ./scripts/containers/docker-run.sh --local --linters flake8,eslint
 
-    # CI/CD usage with API key
+    # Build image locally and run
+    ./scripts/containers/docker-run.sh --build --local --linters flake8,eslint
+
+    # CI/CD usage with API key (uses quay.io image)
     ./scripts/containers/docker-run.sh --ci --api-key sk-xxx --max-files 10
 
     # Dry run for testing
@@ -120,6 +125,7 @@ build_image() {
 # Main function to run Docker container
 run_docker() {
     local build_image=false
+    local use_local=false
     local env_file=".env"
     local api_key=""
     local workspace="$(pwd)"
@@ -137,6 +143,10 @@ run_docker() {
         case $1 in
             --build)
                 build_image=true
+                shift
+                ;;
+            --local)
+                use_local=true
                 shift
                 ;;
             --image)
@@ -195,13 +205,16 @@ run_docker() {
         esac
     done
     
-    # Use custom image if provided
+    # Use custom image if provided, or local if requested
     if [[ -n "${custom_image}" ]]; then
         IMAGE_NAME="${custom_image}"
+    elif [[ "${use_local}" == "true" ]]; then
+        IMAGE_NAME="aider-lint-fixer:latest"
     fi
     
     # Build image if requested
     if [[ "${build_image}" == "true" ]]; then
+        IMAGE_NAME="aider-lint-fixer:latest"  # Always use local name when building
         build_image
     fi
     

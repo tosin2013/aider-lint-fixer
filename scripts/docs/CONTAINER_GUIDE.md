@@ -2,6 +2,20 @@
 
 This guide covers running aider-lint-fixer in containerized environments using Podman (development) and Docker (production/CI).
 
+## 📦 Pre-built Images
+
+Official pre-built images are available on quay.io:
+```bash
+# Pull the latest release
+docker pull quay.io/takinosh/aider-lint-fixer:latest
+
+# Pull a specific version
+docker pull quay.io/takinosh/aider-lint-fixer:v1.9.0
+
+# Run directly without pulling first
+docker run --rm -v $(pwd):/workspace:ro quay.io/takinosh/aider-lint-fixer:latest --help
+```
+
 ## 🎯 Why Containers?
 
 - **RHEL 9 Compatibility**: RHEL 9 ships with Python 3.9, but aider-lint-fixer requires Python 3.11+
@@ -240,17 +254,14 @@ pipeline {
         stage('Lint with aider-lint-fixer') {
             steps {
                 script {
-                    // Build image
-                    sh 'docker build -f scripts/containers/Dockerfile.prod -t aider-lint-fixer:ci .'
-                    
-                    // Run linting
+                    // Run linting using pre-built quay.io image
                     sh '''
                         docker run --rm \
                             -v ${WORKSPACE}:/workspace:ro \
                             -v ${WORKSPACE}/results:/output \
                             -e DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY} \
                             -e CI=true \
-                            aider-lint-fixer:ci \
+                            quay.io/takinosh/aider-lint-fixer:latest \
                             /workspace --linters flake8,eslint --ci --max-files 10
                     '''
                 }
