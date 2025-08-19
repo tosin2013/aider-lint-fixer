@@ -399,6 +399,60 @@ def print_verification_summary(verification_results):
     help="Bypass strategic check warnings and proceed anyway (not recommended)",
 )
 @click.option(
+    "--enable-enhanced-analysis",
+    is_flag=True,
+    help="Enable research-based enhanced strategic analysis (experimental)",
+)
+@click.option(
+    "--quantify-debt",
+    is_flag=True,
+    help="Quantify technical debt using SQALE methodology",
+)
+@click.option(
+    "--predict-outcomes",
+    is_flag=True,
+    help="Use ML-based prediction for fix success probability",
+)
+@click.option(
+    "--export-for-llm",
+    help="Export structured data for external LLM analysis (claude, gpt4, etc.)",
+)
+@click.option(
+    "--chaos-dimensions",
+    default="basic",
+    help="Chaos analysis depth: basic, enhanced, all (default: basic)",
+)
+@click.option(
+    "--export-cross-communication",
+    help="Export for external LLM cross-communication analysis (claude, gpt4, o1)",
+)
+@click.option(
+    "--import-llm-response",
+    help="Import and process external LLM response file",
+)
+@click.option(
+    "--enable-file-relationships",
+    is_flag=True,
+    help="Enable detailed file relationship analysis for external LLMs",
+)
+@click.option(
+    "--read-cot-analysis",
+    help="Read and enhance existing COT analysis file (path to .md file)",
+)
+@click.option(
+    "--update-cot-framework",
+    is_flag=True,
+    help="Update COT analysis with enhanced framework capabilities",
+)
+@click.option(
+    "--export-structured-format",
+    help="Export structured format for external LLM processing (claude, gpt4, o1)",
+)
+@click.option(
+    "--process-llm-fixes",
+    help="Process external LLM response with applied fixes (path to response JSON)",
+)
+@click.option(
     "--skip-pre-lint-assessment",
     is_flag=True,
     help="Skip pre-lint risk assessment and proceed directly to linting",
@@ -462,6 +516,35 @@ def print_verification_summary(verification_results):
     is_flag=True,
     help="Show cost predictions before starting operations",
 )
+# Smart Linter Selection Options
+@click.option(
+    "--smart-linter-selection/--no-smart-linter-selection",
+    default=True,
+    help="Enable/disable smart linter selection (default: enabled)",
+)
+@click.option(
+    "--max-linter-time",
+    type=float,
+    help="Maximum time budget for linters in seconds (smart selection only)",
+)
+@click.option(
+    "--confidence-threshold",
+    type=float,
+    default=0.7,
+    help="Minimum confidence threshold for linter selection (0.0-1.0, default: 0.7)",
+)
+# DAG Workflow Options
+@click.option(
+    "--dag-workflow/--no-dag-workflow",
+    default=True,
+    help="Enable/disable DAG workflow parallel execution (default: enabled)",
+)
+@click.option(
+    "--max-workers",
+    type=int,
+    default=4,
+    help="Maximum number of parallel workers for DAG execution (default: 4)",
+)
 def main(
     project_path: str,
     version: bool,
@@ -496,6 +579,18 @@ def main(
     skip_strategic_check: bool,
     force_strategic_recheck: bool,
     bypass_strategic_check: bool,
+    enable_enhanced_analysis: bool,
+    quantify_debt: bool,
+    predict_outcomes: bool,
+    export_for_llm: Optional[str],
+    chaos_dimensions: str,
+    export_cross_communication: Optional[str],
+    import_llm_response: Optional[str],
+    enable_file_relationships: bool,
+    read_cot_analysis: Optional[str],
+    update_cot_framework: bool,
+    export_structured_format: Optional[str],
+    process_llm_fixes: Optional[str],
     skip_pre_lint_assessment: bool,
     resume_session: Optional[str],
     list_sessions: bool,
@@ -507,6 +602,13 @@ def main(
     max_iteration_cost: float,
     ai_model: str,
     show_cost_prediction: bool,
+    # Smart Linter Selection Parameters
+    smart_linter_selection: bool,
+    max_linter_time: Optional[float],
+    confidence_threshold: float,
+    # DAG Workflow Parameters
+    dag_workflow: bool,
+    max_workers: int,
 ):
     """Aider Lint Fixer - Automated lint error detection and fixing.
 
@@ -638,6 +740,161 @@ def main(
             print(f"\n💡 Resume with: --resume-session <session_id>")
         return 0
 
+    # Handle cross-communication export
+    if export_cross_communication:
+        print(f"\n{Fore.CYAN}🔄 Cross-Communication Export for {export_cross_communication.upper()}{Style.RESET_ALL}")
+
+        try:
+            from .external_llm_integration import ExternalLLMIntegrationFramework
+
+            # Create mock dangerous errors for demonstration
+            mock_dangerous_errors = {
+                "src/mcp-server.mjs": [
+                    {"message": "'HttpServerTransport' is not defined", "line": 15},
+                    {"message": "'app' is not defined", "line": 25},
+                    {"message": "'mcpServer' is not defined", "line": 35}
+                ],
+                "src/controller/edit.js": [
+                    {"message": "'fieldName' is not defined", "line": 12}
+                ]
+            }
+
+            # Create mock file analyses
+            mock_file_analyses = {
+                "src/mcp-server.mjs": type('MockAnalysis', (), {'error_analyses': []})(),
+                "src/controller/edit.js": type('MockAnalysis', (), {'error_analyses': []})(),
+                "src/controller/list.js": type('MockAnalysis', (), {'error_analyses': []})(),
+                "src/main.js": type('MockAnalysis', (), {'error_analyses': []})()
+            }
+
+            integration_framework = ExternalLLMIntegrationFramework(str(actual_project_path))
+            export_file = integration_framework.export_for_external_analysis(
+                mock_dangerous_errors,
+                mock_file_analyses,
+                export_cross_communication
+            )
+
+            print(f"   ✅ Export created: {export_file}")
+            print(f"   📝 Prompt file created for {export_cross_communication.upper()} analysis")
+            print(f"   🔄 Send the export to external LLM for analysis")
+            print(f"   📥 Use --import-llm-response to process the response")
+
+        except Exception as e:
+            print(f"   ❌ Export failed: {e}")
+
+        return 0
+
+    # Handle LLM response import
+    if import_llm_response:
+        print(f"\n{Fore.CYAN}📥 Importing External LLM Response{Style.RESET_ALL}")
+
+        try:
+            from .external_llm_integration import ExternalLLMIntegrationFramework
+
+            integration_framework = ExternalLLMIntegrationFramework(str(actual_project_path))
+            response = integration_framework.import_external_response(import_llm_response)
+            processing_result = integration_framework.process_external_feedback(response)
+
+            print(f"   🤖 Analysis ID: {response.analysis_id}")
+            print(f"   📊 Confidence Score: {response.confidence_score:.0%}")
+            print(f"   🔧 LLM Model: {response.llm_model}")
+
+            print(f"\n📊 Processing Results:")
+            print(f"   ✅ High-confidence automated fixes: {processing_result['confidence_metrics']['high_confidence_fixes']}")
+            print(f"   ⚠️  Medium-confidence fixes: {processing_result['confidence_metrics']['medium_confidence_fixes']}")
+            print(f"   🔍 Manual review required: {len(processing_result['manual_review_required'])}")
+
+            if processing_result['automated_fixes_ready']:
+                print(f"\n🚀 Automated Fixes Applied:")
+                for fix in processing_result['automated_fixes_ready']:
+                    print(f"   ✅ {fix.get('fix_type', 'Fix')}: {fix.get('fix_content', 'Applied')[:60]}...")
+
+            if processing_result['manual_review_required']:
+                print(f"\n🔍 Manual Review Required:")
+                for item in processing_result['manual_review_required']:
+                    print(f"   📁 {item.get('file_path', 'Unknown file')}")
+                    print(f"   🔍 {item.get('issue', 'Review needed')}")
+
+            if processing_result['architectural_insights']:
+                print(f"\n🏗️  Architectural Insights:")
+                for insight in processing_result['architectural_insights']:
+                    print(f"   💡 {insight.get('pattern', 'Pattern identified')}")
+
+        except Exception as e:
+            print(f"   ❌ Import failed: {e}")
+
+        return 0
+
+    # Handle COT analysis reading and enhancement
+    if read_cot_analysis:
+        print(f"\n{Fore.CYAN}📖 Reading COT Analysis File{Style.RESET_ALL}")
+
+        try:
+            from .cot_analysis_framework import COTAnalysisFramework
+
+            if not Path(read_cot_analysis).exists():
+                print(f"   ❌ COT analysis file not found: {read_cot_analysis}")
+                return 1
+
+            framework = COTAnalysisFramework(str(actual_project_path))
+
+            print(f"   📄 Reading: {read_cot_analysis}")
+            cot_analysis = framework.read_cot_analysis_file(read_cot_analysis)
+
+            print(f"   📊 Analysis Summary:")
+            print(f"      Total dangerous files: {cot_analysis.total_dangerous_files}")
+            print(f"      Dangerous errors: {cot_analysis.dangerous_errors_count}")
+            print(f"      Variables analyzed: {len(cot_analysis.variables)}")
+
+            if update_cot_framework:
+                print(f"\n🔧 Enhancing with Framework Capabilities...")
+                enhanced_analysis = framework.enhance_cot_analysis(cot_analysis)
+
+                # Export enhanced analysis
+                json_file = framework.export_enhanced_analysis(enhanced_analysis)
+                markdown_file = framework.create_updated_cot_file(enhanced_analysis)
+
+                print(f"   ✅ Enhanced JSON exported: {json_file}")
+                print(f"   ✅ Enhanced markdown created: {markdown_file}")
+
+                # Show automation recommendations
+                auto_recs = enhanced_analysis["automation_recommendations"]
+                print(f"\n🤖 Automation Recommendations:")
+                print(f"   ✅ Safe for automation: {len(auto_recs['safe_for_automation'])} variables")
+                print(f"   ⚠️  Review needed: {len(auto_recs['review_needed'])} variables")
+                print(f"   🔍 Manual only: {len(auto_recs['manual_only'])} variables")
+
+                if auto_recs['safe_for_automation']:
+                    print(f"\n✅ Safe Automation Candidates:")
+                    for item in auto_recs['safe_for_automation']:
+                        print(f"      {item['variable']} ({item['file']}) - {item['confidence']:.0%} confidence")
+
+                if auto_recs['review_needed']:
+                    print(f"\n⚠️  Review Needed:")
+                    for item in auto_recs['review_needed']:
+                        print(f"      {item['variable']} ({item['file']}) - {item['review_reason']}")
+
+                # Show external LLM export readiness
+                export_data = enhanced_analysis["external_llm_export"]
+                print(f"\n🔄 External LLM Export Ready:")
+                print(f"   High confidence: {len(export_data['high_confidence_variables'])} variables")
+                print(f"   Medium confidence: {len(export_data['medium_confidence_variables'])} variables")
+                print(f"   Low confidence: {len(export_data['low_confidence_variables'])} variables")
+
+            else:
+                print(f"\n💡 Use --update-cot-framework to enhance with framework capabilities")
+
+                # Show basic analysis
+                print(f"\n📋 Variables Found:")
+                for var in cot_analysis.variables:
+                    print(f"   {var.name} ({var.file_name}) - {var.likely_type} ({var.confidence_level:.0%} confidence)")
+
+        except Exception as e:
+            print(f"   ❌ COT analysis failed: {e}")
+            return 1
+
+        return 0
+
     # Handle quiet mode
     if quiet:
         import logging
@@ -701,9 +958,22 @@ def main(
                 from .strategic_preflight_check import StrategicPreFlightChecker
 
                 checker = StrategicPreFlightChecker(str(actual_project_path), config_manager)
-                preflight_result = checker.run_preflight_check(
-                    force_recheck=force_strategic_recheck
-                )
+
+                # Enhanced analysis if requested
+                if enable_enhanced_analysis or quantify_debt or predict_outcomes or export_for_llm:
+                    print(f"\n{Fore.CYAN}🔬 Enhanced Strategic Analysis (Research-Based){Style.RESET_ALL}")
+                    preflight_result = checker.run_enhanced_preflight_check(
+                        force_recheck=force_strategic_recheck,
+                        enable_enhanced_analysis=enable_enhanced_analysis,
+                        quantify_debt=quantify_debt,
+                        predict_outcomes=predict_outcomes,
+                        export_for_llm=export_for_llm,
+                        chaos_dimensions=chaos_dimensions
+                    )
+                else:
+                    preflight_result = checker.run_preflight_check(
+                        force_recheck=force_strategic_recheck
+                    )
 
                 if not preflight_result.should_proceed:
                     if bypass_strategic_check:

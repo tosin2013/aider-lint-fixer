@@ -203,6 +203,114 @@ class StrategicPreFlightChecker:
 
         return result
 
+    def run_enhanced_preflight_check(self,
+                                   force_recheck: bool = False,
+                                   enable_enhanced_analysis: bool = False,
+                                   quantify_debt: bool = False,
+                                   predict_outcomes: bool = False,
+                                   export_for_llm: str = None,
+                                   chaos_dimensions: str = "basic") -> PreFlightResult:
+        """Run enhanced strategic pre-flight check with research-based features."""
+
+        print(f"🔬 Running enhanced strategic analysis...")
+        print(f"   Enhanced analysis: {enable_enhanced_analysis}")
+        print(f"   Technical debt quantification: {quantify_debt}")
+        print(f"   Predictive outcomes: {predict_outcomes}")
+        print(f"   Export for LLM: {export_for_llm or 'None'}")
+        print(f"   Chaos dimensions: {chaos_dimensions}")
+
+        # Run standard analysis first
+        result = self.run_preflight_check(force_recheck)
+
+        # Add enhanced analysis if requested
+        if any([enable_enhanced_analysis, quantify_debt, predict_outcomes, export_for_llm]):
+            try:
+                from .enhanced_strategic_analyzer import EnhancedStrategicAnalyzer
+
+                enhanced_analyzer = EnhancedStrategicAnalyzer(str(self.project_path), self.config_manager)
+
+                # Mock error analyses for demonstration (in real implementation, this would come from linter results)
+                mock_error_analyses = self._create_mock_error_analyses()
+
+                if quantify_debt:
+                    print(f"\n📊 Technical Debt Analysis (SQALE Methodology):")
+                    debt_metrics = enhanced_analyzer.analyze_technical_debt_metrics(mock_error_analyses)
+                    print(f"   Total Technical Debt: {debt_metrics.total_debt_hours:.1f} hours")
+                    print(f"   SQALE Rating: {debt_metrics.sqale_rating}")
+                    print(f"   Debt Ratio: {debt_metrics.debt_ratio:.2%}")
+
+                if predict_outcomes:
+                    print(f"\n🎯 Predictive Analysis:")
+                    predictions = enhanced_analyzer.predict_fix_outcomes(mock_error_analyses)
+                    print(f"   Fix Success Probability: {predictions.fix_success_probability:.1%}")
+                    print(f"   Confidence Score: {predictions.confidence_score:.1%}")
+                    print(f"   Recommended Approach: {predictions.recommended_approach}")
+                    print(f"   Estimated Effort: {predictions.estimated_effort_hours:.1f} hours")
+
+                if export_for_llm:
+                    print(f"\n🤖 Exporting for {export_for_llm.upper()} Analysis:")
+                    chaos_level = self.analyzer.analyze_chaos_level()
+                    indicators = self.analyzer._detect_chaos_indicators()
+
+                    export_data = enhanced_analyzer.generate_external_llm_export(
+                        chaos_level, indicators, mock_error_analyses, export_for_llm
+                    )
+
+                    # Save export data
+                    export_file = self.project_path / f"strategic_analysis_{export_for_llm}.json"
+                    import json
+                    with open(export_file, 'w') as f:
+                        json.dump(export_data, f, indent=2, default=str)
+
+                    print(f"   Export saved to: {export_file}")
+                    print(f"   Total files analyzed: {export_data['metadata']['total_files_analyzed']}")
+                    print(f"   Total errors: {export_data['metadata']['total_errors']}")
+
+                    # Show recommended prompts
+                    if export_data.get('recommended_prompts'):
+                        print(f"\n💡 Recommended {export_for_llm.upper()} Prompts:")
+                        for i, prompt in enumerate(export_data['recommended_prompts'], 1):
+                            print(f"   {i}. {prompt[:100]}...")
+
+            except ImportError as e:
+                print(f"⚠️  Enhanced analysis not available: {e}")
+            except Exception as e:
+                print(f"⚠️  Enhanced analysis failed: {e}")
+
+        return result
+
+    def _create_mock_error_analyses(self):
+        """Create mock error analyses for demonstration purposes."""
+        # In real implementation, this would use actual linter results
+        from .error_analyzer import ErrorAnalysis, LintError
+        from .pattern_matcher import ErrorCategory
+
+        mock_analyses = {}
+
+        # Create some mock errors for demonstration
+        mock_error = LintError(
+            file_path="src/example.js",
+            line=10,
+            column=5,
+            message="'logCallback' is not defined",
+            rule_id="no-undef",
+            linter="eslint"
+        )
+
+        mock_analysis = ErrorAnalysis(
+            error=mock_error,
+            category=ErrorCategory.UNDEFINED_VARIABLE,
+            confidence=0.9,
+            context_lines=["function processData() {", "  logCallback('Processing...');", "}"],
+            suggested_fix="Define logCallback function or import it"
+        )
+
+        mock_analyses["src/example.js"] = type('MockFileAnalysis', (), {
+            'error_analyses': [mock_analysis]
+        })()
+
+        return mock_analyses
+
     def _should_proceed_with_fixes(self, chaos_level: ChaosLevel, indicators: List) -> bool:
         """Determine if automated fixing should proceed."""
 

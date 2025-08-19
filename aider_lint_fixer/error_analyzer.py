@@ -128,7 +128,7 @@ class ErrorAnalyzer:
         # JavaScript/TypeScript rules
         "eslint": {
             ErrorCategory.SYNTAX: ["parsing-error"],
-            ErrorCategory.FORMATTING: ["indent", "quotes", "semi"],
+            ErrorCategory.FORMATTING: ["indent", "quotes", "semi", "max-len", "no-trailing-spaces"],
             ErrorCategory.STYLE: ["camelcase", "no-console"],
             ErrorCategory.UNUSED: ["no-unused-vars"],
             ErrorCategory.SECURITY: ["no-eval", "no-implied-eval"],

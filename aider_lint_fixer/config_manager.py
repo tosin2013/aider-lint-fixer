@@ -48,6 +48,15 @@ class LinterConfig:
             "clippy",
         ]
     )
+    # Environment-specific smart selection defaults
+    smart_selection_defaults: Dict[str, bool] = field(
+        default_factory=lambda: {
+            "development": True,    # Fast feedback in development
+            "ci": False,           # Comprehensive checking in CI
+            "tutorial": True,      # Always smart for tutorials
+            "production": False,   # Safety first in production
+        }
+    )
 
 
 @dataclass

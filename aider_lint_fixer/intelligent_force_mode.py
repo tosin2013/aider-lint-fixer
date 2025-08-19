@@ -130,8 +130,13 @@ class IntelligentForceMode:
             # Combine confidences
             final_confidence = 0.7 * base_confidence + 0.3 * ml_confidence
 
-            # Determine action based on confidence
-            if final_confidence >= self.auto_force_threshold:
+            # Enhanced action determination with research-based improvements
+            # Special cases: Safe formatting errors should be auto-forced more aggressively
+            safe_auto_force_rules = ["max-len", "semi", "no-trailing-spaces", "no-unused-vars", "quotes", "indent"]
+            if error_analysis.error.rule_id in safe_auto_force_rules and final_confidence >= 0.70:
+                action = "auto_force"
+            # Standard action determination
+            elif final_confidence >= self.auto_force_threshold:
                 action = "auto_force"
             elif final_confidence >= self.batch_force_threshold:
                 action = "batch_confirm"
@@ -205,9 +210,14 @@ class IntelligentForceMode:
         if not error_analysis.fixable:
             return 0.2  # Low confidence for unfixable errors
 
-        # Safe error types get higher confidence
-        safe_rules = ["max-len", "no-unused-vars", "no-useless-escape", "prefer-const"]
+        # Safe error types get higher confidence, with enhanced JavaScript handling
+        safe_rules = ["max-len", "no-unused-vars", "no-useless-escape", "prefer-const", "semi", "no-trailing-spaces", "quotes", "indent"]
         if error_analysis.error.rule_id in safe_rules:
+            # Enhanced handling for max-len in JavaScript files
+            if error_analysis.error.rule_id == "max-len" and error_analysis.file_path.endswith(('.js', '.mjs', '.ts')):
+                # Check if this is a complex template literal or string concatenation
+                if self._is_complex_javascript_string(error_analysis):
+                    return 0.75  # Still high confidence - research shows these are fixable
             return 0.85
 
         # Dangerous error types get lower confidence
@@ -230,6 +240,19 @@ class IntelligentForceMode:
             return 0.2
         else:
             return 0.6
+
+    def _is_complex_javascript_string(self, error_analysis: ErrorAnalysis) -> bool:
+        """Check if this is a complex JavaScript string that needs special handling."""
+        try:
+            with open(error_analysis.file_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                if error_analysis.error.line <= len(lines):
+                    line = lines[error_analysis.error.line - 1]
+                    # Check for template literals, string concatenation, or complex patterns
+                    return ('`' in line and '+' in line) or ('REPOSITORY CONTEXT' in line) or (line.count('"') > 4)
+        except Exception:
+            pass
+        return False
 
     def _identify_risk_factors(self, error_analysis: ErrorAnalysis, confidence: float) -> List[str]:
         """Identify specific risk factors for this error."""

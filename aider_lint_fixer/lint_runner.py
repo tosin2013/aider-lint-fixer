@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from .native_lint_detector import NativeLintDetector
 from .project_detector import ProjectInfo
+from .smart_linter_selector import SmartLinterSelector, LinterSelectionResult
 
 # Import modular linters - delay import to avoid circular dependencies
 MODULAR_LINTERS_AVAILABLE = False
@@ -246,6 +247,9 @@ class LintRunner:
         # Initialize native lint detector for project-specific commands
         self.native_detector = NativeLintDetector(str(project_info.root_path))
         self.native_commands = {}  # Cache for native commands
+
+        # Initialize smart linter selector
+        self.smart_selector = SmartLinterSelector(project_info)
 
     def _get_native_command(self, linter_name: str):
         """Get native command for a linter if available."""
@@ -578,10 +582,12 @@ class LintRunner:
         Returns:
             LintResult object containing the results
         """
+        # Initialize logger at the beginning of the method
+        logger = logging.getLogger(__name__)
+
         # First, try to use native project commands (highest priority)
         native_command = self._get_native_command(linter_name)
         if native_command:
-            logger = logging.getLogger(__name__)
             logger.info(f"Using native {linter_name} command: {' '.join(native_command.command)}")
 
             native_result = self._run_native_command(native_command, file_paths)
@@ -1284,31 +1290,73 @@ class LintRunner:
 
         return errors, warnings
 
-    def run_all_available_linters(
-        self, enabled_linters: Optional[List[str]] = None, **linter_options
-    ) -> Dict[str, LintResult]:
-        """Run all available linters on the project.
+    def run_smart_selected_linters(
+        self,
+        enabled_linters: Optional[List[str]] = None,
+        use_smart_selection: bool = True,
+        max_time_budget: Optional[float] = None,
+        **linter_options
+    ) -> Tuple[Dict[str, LintResult], LinterSelectionResult]:
+        """Run linters using smart selection to avoid unnecessary overhead.
 
         Args:
-            enabled_linters: Optional list of linters to run (runs all available if None)
+            enabled_linters: Optional list of linters to run
+            use_smart_selection: Whether to use smart selection (default: True)
+            max_time_budget: Maximum time budget in seconds
+            **linter_options: Additional linter-specific options
 
         Returns:
-            Dictionary mapping linter names to their results
+            Tuple of (lint results, selection result with reasoning)
         """
-        results = {}
+        # Detect all available linters first
+        self.available_linters = self._detect_available_linters()
 
-        # Determine which linters to check
-        linters_to_check = enabled_linters or list(self.LINTER_COMMANDS.keys())
+        if use_smart_selection and (not enabled_linters or enabled_linters == []):
+            # Use smart selection to determine which linters to run
+            logger.info("🧠 Using smart linter selection...")
+            selection_result = self.smart_selector.select_linters(
+                available_linters=self.available_linters,
+                user_specified_linters=None,  # Pass None to ensure smart selection works
+                max_time_budget=max_time_budget
+            )
+            linters_to_run = selection_result.recommended_linters
 
-        # Only check availability for the linters we want to run
-        if enabled_linters:
-            # Check only the requested linters
-            self.available_linters.update(self._detect_available_linters(enabled_linters))
+            # Log selection reasoning
+            logger.info(f"🎯 Smart selection chose {len(linters_to_run)} linters:")
+            for linter in linters_to_run:
+                confidence = selection_result.confidence_scores.get(linter, 0.0)
+                reasoning = selection_result.reasoning.get(linter, "No reason provided")
+                logger.info(f"   ✅ {linter} (confidence: {confidence:.0%}) - {reasoning}")
+
+            if selection_result.skipped_linters:
+                logger.info(f"⏭️ Skipped {len(selection_result.skipped_linters)} irrelevant linters:")
+                for linter in selection_result.skipped_linters[:5]:  # Show first 5
+                    logger.info(f"   ⏭️ {linter}")
+                if len(selection_result.skipped_linters) > 5:
+                    logger.info(f"   ... and {len(selection_result.skipped_linters) - 5} more")
+
+                logger.info(f"⏱️ Estimated time saved: {selection_result.estimated_time_saved:.1f} seconds")
         else:
-            # Check all linters if none specified
-            self.available_linters = self._detect_available_linters()
+            # Use traditional approach (all available or user-specified)
+            linters_to_run = enabled_linters or [
+                name for name, available in self.available_linters.items() if available
+            ]
+            selection_result = LinterSelectionResult(
+                recommended_linters=linters_to_run,
+                skipped_linters=[],
+                reasoning={linter: "User specified or traditional selection" for linter in linters_to_run},
+                confidence_scores={linter: 1.0 for linter in linters_to_run},
+                estimated_time_saved=0.0
+            )
 
-        for linter_name in linters_to_check:
+            if not use_smart_selection:
+                logger.info("🔧 Using traditional linter selection (smart selection disabled)")
+            else:
+                logger.info("🎯 Using user-specified linters (smart selection bypassed)")
+
+        # Run the selected linters
+        results = {}
+        for linter_name in linters_to_run:
             if self.available_linters.get(linter_name, False):
                 logger.info(f"Running linter: {linter_name}")
 
@@ -1332,6 +1380,25 @@ class LintRunner:
             else:
                 logger.warning(f"Skipping unavailable linter: {linter_name}")
 
+        return results, selection_result
+
+    def run_all_available_linters(
+        self, enabled_linters: Optional[List[str]] = None, **linter_options
+    ) -> Dict[str, LintResult]:
+        """Run all available linters on the project (legacy method).
+
+        Args:
+            enabled_linters: Optional list of linters to run (runs all available if None)
+
+        Returns:
+            Dictionary mapping linter names to their results
+        """
+        # Use the smart selection method but disable smart selection for backward compatibility
+        results, _ = self.run_smart_selected_linters(
+            enabled_linters=enabled_linters,
+            use_smart_selection=False,
+            **linter_options
+        )
         return results
 
     def get_error_summary(self, results: Dict[str, LintResult]) -> Dict[str, Any]:
