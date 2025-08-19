@@ -621,6 +621,12 @@ def main(
 
     def s(style_attr):
         return get_style(style_attr, no_color)
+    
+    # Define actual_project_path early for use in all command handlers
+    if target_dir:
+        actual_project_path = str(Path(project_path) / target_dir)
+    else:
+        actual_project_path = project_path
 
     # Validate loop mode parameters
     if loop and not force:
@@ -932,17 +938,12 @@ def main(
         if model:
             project_config.llm.model = model
 
-        # Handle target directory
+        # Print startup information with target directory if specified
+        print(f"{c('GREEN')}🚀 Starting Aider Lint Fixer{s('RESET_ALL')}")
+        print(f"   Project: {Path(project_path).resolve()}")
         if target_dir:
-            actual_project_path = str(Path(project_path) / target_dir)
-            print(f"{c('GREEN')}🚀 Starting Aider Lint Fixer{s('RESET_ALL')}")
-            print(f"   Project: {Path(project_path).resolve()}")
             print(f"   Target Directory: {target_dir}")
             print(f"   Actual Path: {Path(actual_project_path).resolve()}")
-        else:
-            actual_project_path = project_path
-            print(f"{c('GREEN')}🚀 Starting Aider Lint Fixer{s('RESET_ALL')}")
-            print(f"   Project: {Path(project_path).resolve()}")
 
         print(f"   LLM Provider: {project_config.llm.provider}")
         print(f"   Model: {project_config.llm.model}")
