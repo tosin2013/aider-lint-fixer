@@ -8,11 +8,26 @@
 
 Aider Lint Fixer is an intelligent tool that automatically detects lint errors in your codebase and fixes them using AI-powered code generation through [aider.chat](https://aider.chat).
 
-**🎉 v1.9.0 Release**: Community Issue Reporting & Collaborative Improvement!
+## 🎉 **v2.0.0 Release: AI-Powered Intelligence & Enterprise Infrastructure**
 
-## ✨ Features (v1.8.0)
+### 🚀 **New in v2.0.0 - Major Release**
+- 🧠 **AI-Powered Intelligence**: Native lint detection, pre-lint risk assessment, and ML-driven force mode
+- 🔗 **Deep Code Analysis**: AST-based dependency analysis, control flow tracking, and structural analysis
+- 🐳 **Enterprise Containers**: Production-ready Docker infrastructure with multi-architecture support
+- 💰 **Cost Management**: Built-in LLM API cost monitoring and budget controls
+- 📈 **Massive Scale**: Handle codebases with 1000+ files and complex architectural patterns
 
-### 🚀 **New in v1.8.0: Enhanced Interactive Mode & Progress Tracking**
+## ✨ **Features**
+
+### 🧠 **New AI-Powered Intelligence (v2.0.0)**
+- 🔍 **Native Lint Detection**: Automatically discovers and integrates with your project's existing lint configurations
+- ⚠️ **Pre-Lint Risk Assessment**: Analyzes codebase health before attempting automated fixes
+- 🤖 **Intelligent Force Mode**: ML-powered force mode with confidence-based auto-forcing and intelligent batching
+- 💰 **Cost Monitoring**: Real-time tracking and control of LLM API costs with budget limits
+- 🔗 **AST-Based Analysis**: Deep structural and dependency analysis for better fix quality
+- 📊 **Advanced Analytics**: Control flow tracking, convergence analysis, and comprehensive metrics
+
+### 📊 **Enhanced Interactive Mode & Progress Tracking (v1.8.0)**
 - 🎯 **Enhanced Interactive Mode**: Per-error review with override capabilities for "unfixable" errors
 - 📊 **Progress Tracking**: Visual progress bars and real-time metrics for 100+ error projects
 - ⚡ **Session Recovery**: Resume interrupted sessions with `--resume-session`
@@ -21,7 +36,7 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 - 📈 **Performance Metrics**: Files/min, errors/min, success rates, and ETA calculations
 - 💾 **Progress Persistence**: Automatic saving and recovery for long-running operations
 
-### 🧠 **Learning System (v1.7.0)**
+### 🧠 **Intelligent Learning System (v1.7.0+)**
 - 🧠 **Enhanced Learning**: 46.1% fixability rate (up from 0.0% in previous versions)
 - ⚡ **High-Performance**: Aho-Corasick pattern matching for sub-millisecond classification
 - 🎯 **TypeScript Projects**: Smart ESLint integration with project-specific configurations
@@ -40,6 +55,16 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 - 📊 **Enhanced Progress Tracking**: Visual progress bars for large projects (100+ errors)
 - 🎮 **Interactive Modes**: Standard and enhanced interactive error review
 - 💾 **Session Management**: Save, resume, and recover interrupted operations
+
+## 📅 **Version History**
+
+| Version | Release Date | Key Features |
+|---------|-------------|--------------|
+| **v2.0.0** | 2025-08 | AI-Powered Intelligence, Deep Code Analysis, Enterprise Infrastructure |
+| **v1.9.0** | 2025-08 | Community Issue Reporting, Docker Support, Pre-built Images |
+| **v1.8.0** | 2025-07 | Enhanced Interactive Mode, Progress Tracking, Session Recovery |
+| **v1.7.0** | 2025-06 | Learning System, Aho-Corasick Pattern Matching, TypeScript Support |
+| **v1.6.0** | 2025-05 | Multi-linter Support, Profile System, Performance Improvements |
 
 ## 📋 **Supported Linter Versions**
 
@@ -79,7 +104,7 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 #### Option 1: Docker (Recommended for CI/CD)
 ```bash
 # Use pre-built Docker image from quay.io
-docker run --rm -v $(pwd):/workspace:ro quay.io/takinosh/aider-lint-fixer:latest --help
+docker run --rm -v $(pwd):/workspace:ro quay.io/takinosh/aider-lint-fixer:2.0.0 --help
 
 # Or use with the convenience script
 ./scripts/containers/docker-run.sh --linters flake8,eslint
@@ -106,7 +131,7 @@ pip install "aider-lint-fixer[learning]"
 # Install from PyPI (recommended)
 pip install aider-lint-fixer
 
-# 🚀 NEW v1.9.0: Install with community issue reporting and enhanced workflows
+# Latest v1.9.0: Install with community issue reporting and enhanced workflows
 pip install aider-lint-fixer[community]
 
 # 📊 v1.8.0: Install with enhanced interactive and progress tracking
