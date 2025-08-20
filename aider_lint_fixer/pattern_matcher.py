@@ -367,9 +367,7 @@ class LanguagePatternMatcher:
                     0.9,
                     "Dead code detected",
                 ),
-                ErrorPattern(
-                    "print", "logic", "go", "govet", False, 0.8, "Printf format issue"
-                ),
+                ErrorPattern("print", "logic", "go", "govet", False, 0.8, "Printf format issue"),
             ],
             "rust": [
                 ErrorPattern(
@@ -416,9 +414,7 @@ class LanguagePatternMatcher:
         if AHOCORASICK_AVAILABLE:
             self._build_ahocorasick_automatons(patterns)
         else:
-            logger.warning(
-                "Aho-Corasick not available, using fallback pattern matching"
-            )
+            logger.warning("Aho-Corasick not available, using fallback pattern matching")
 
     def _build_ahocorasick_automatons(self, patterns: Dict[str, List[ErrorPattern]]):
         """Build Aho-Corasick automatons for each language."""
@@ -428,9 +424,7 @@ class LanguagePatternMatcher:
                 automaton.add_word(pattern.pattern.lower(), pattern)
             automaton.make_automaton()
             self.matchers[language] = automaton
-            logger.debug(
-                f"Built automaton for {language} with {len(error_patterns)} patterns"
-            )
+            logger.debug(f"Built automaton for {language} with {len(error_patterns)} patterns")
 
     def find_patterns(self, error_message: str, language: str) -> List[ErrorPattern]:
         """Find matching patterns for an error message."""
@@ -449,9 +443,7 @@ class LanguagePatternMatcher:
             # Fallback to simple string matching
             return self._fallback_pattern_matching(error_lower, language)
 
-    def _fallback_pattern_matching(
-        self, error_message: str, language: str
-    ) -> List[ErrorPattern]:
+    def _fallback_pattern_matching(self, error_message: str, language: str) -> List[ErrorPattern]:
         """Fallback pattern matching when Aho-Corasick is not available."""
         matches = []
         if language in self.patterns_by_language:
@@ -460,9 +452,7 @@ class LanguagePatternMatcher:
                     matches.append(pattern)
         return matches
 
-    def get_best_match(
-        self, error_message: str, language: str
-    ) -> Optional[ErrorPattern]:
+    def get_best_match(self, error_message: str, language: str) -> Optional[ErrorPattern]:
         """Get the best matching pattern for an error message."""
         patterns = self.find_patterns(error_message, language)
         if not patterns:
@@ -701,9 +691,7 @@ class RuleKnowledgeBase:
                     )
 
         except ImportError:
-            logger.debug(
-                "Web scraping dependencies not available, skipping auto-creation"
-            )
+            logger.debug("Web scraping dependencies not available, skipping auto-creation")
         except Exception as e:
             logger.debug(f"Could not auto-create scraped rules: {e}")
 
@@ -764,8 +752,7 @@ class SmartErrorClassifier:
 
         # Check for suggestions and examples
         features.contains_suggestion = any(
-            word in message_lower
-            for word in ["should", "try", "use", "consider", "->", "replace"]
+            word in message_lower for word in ["should", "try", "use", "consider", "->", "replace"]
         )
         features.has_before_after = "->" in error_message or "expected" in message_lower
         features.has_line_numbers = any(
@@ -781,37 +768,25 @@ class SmartErrorClassifier:
             "comment",
             "style",
         ]
-        features.mentions_formatting = any(
-            word in message_lower for word in formatting_keywords
-        )
+        features.mentions_formatting = any(word in message_lower for word in formatting_keywords)
 
         # Complexity analysis
         manual_keywords = ["logic", "business", "design", "architecture"]
         # For Ansible, "name" in naming rules is not domain knowledge - it's style
         if linter == "ansible-lint":
             # Don't treat Ansible naming rules as requiring domain knowledge
-            if not (
-                "should be named" in message_lower
-                or "tasks should be named" in message_lower
-            ):
+            if not ("should be named" in message_lower or "tasks should be named" in message_lower):
                 manual_keywords.append("name")
             # Module parameter errors require domain knowledge
-            if (
-                "unsupported parameters" in message_lower
-                or "args[module]" in message_lower
-            ):
+            if "unsupported parameters" in message_lower or "args[module]" in message_lower:
                 features.needs_domain_knowledge = True
                 return features
         else:
             manual_keywords.append("name")
-        features.needs_domain_knowledge = any(
-            word in message_lower for word in manual_keywords
-        )
+        features.needs_domain_knowledge = any(word in message_lower for word in manual_keywords)
 
         syntax_keywords = ["syntax", "parse", "invalid", "unexpected", "missing"]
-        features.requires_logic_change = any(
-            word in message_lower for word in syntax_keywords
-        )
+        features.requires_logic_change = any(word in message_lower for word in syntax_keywords)
 
         # Auto-fixable hints
         auto_fixable_hints = [
@@ -857,9 +832,7 @@ class SmartErrorClassifier:
         # Don't treat Ansible naming rules as manual-only
         if linter != "ansible-lint":
             manual_hints.extend(["should be named", "missing name"])
-        features.manual_only_keywords = [
-            hint for hint in manual_hints if hint in message_lower
-        ]
+        features.manual_only_keywords = [hint for hint in manual_hints if hint in message_lower]
 
         return features
 
@@ -1019,9 +992,7 @@ class SmartErrorClassifier:
             error_type=features.rule_category or "feature_based",
         )
 
-    def learn_from_fix(
-        self, error_message: str, language: str, linter: str, fix_successful: bool
-    ):
+    def learn_from_fix(self, error_message: str, language: str, linter: str, fix_successful: bool):
         """Learn from fix attempts to improve future predictions."""
         if not SKLEARN_AVAILABLE:
             return
@@ -1118,10 +1089,7 @@ class SmartErrorClassifier:
         # Find existing patterns that match this error
         if language in self.pattern_matcher.patterns_by_language:
             for pattern in self.pattern_matcher.patterns_by_language[language]:
-                if (
-                    pattern.linter == linter
-                    and pattern.pattern.lower() in error_message.lower()
-                ):
+                if pattern.linter == linter and pattern.pattern.lower() in error_message.lower():
                     # Adjust confidence based on fix success
                     if fix_successful:
                         pattern.confidence = min(1.0, pattern.confidence + 0.1)
@@ -1140,9 +1108,7 @@ class SmartErrorClassifier:
 
         try:
             messages = [item["message"] for item in training_data]
-            labels = [
-                "fixable" if item["fixable"] else "manual" for item in training_data
-            ]
+            labels = ["fixable" if item["fixable"] else "manual" for item in training_data]
 
             # Create or update vectorizer
             if language not in self.vectorizers:
@@ -1167,9 +1133,7 @@ class SmartErrorClassifier:
             # Save models
             self._save_models()
 
-            logger.info(
-                f"🧠 Retrained {language} model with {len(training_data)} examples"
-            )
+            logger.info(f"🧠 Retrained {language} model with {len(training_data)} examples")
 
             # Log learning progress
             fixable_count = sum(1 for item in training_data if item["fixable"])
@@ -1237,22 +1201,17 @@ class SmartErrorClassifier:
             "pattern_matcher": {
                 "languages": list(self.pattern_matcher.patterns_by_language.keys()),
                 "total_patterns": sum(
-                    len(patterns)
-                    for patterns in self.pattern_matcher.patterns_by_language.values()
+                    len(patterns) for patterns in self.pattern_matcher.patterns_by_language.values()
                 ),
                 "ahocorasick_available": AHOCORASICK_AVAILABLE,
             },
             "ml_classifier": {
                 "sklearn_available": SKLEARN_AVAILABLE,
                 "learning_enabled": SKLEARN_AVAILABLE,
-                "trained_languages": (
-                    list(self.classifiers.keys()) if SKLEARN_AVAILABLE else []
-                ),
+                "trained_languages": (list(self.classifiers.keys()) if SKLEARN_AVAILABLE else []),
                 "cache_dir": str(self.cache_dir),
                 "setup_command": (
-                    "pip install aider-lint-fixer[learning]"
-                    if not SKLEARN_AVAILABLE
-                    else None
+                    "pip install aider-lint-fixer[learning]" if not SKLEARN_AVAILABLE else None
                 ),
             },
         }
@@ -1272,16 +1231,14 @@ class SmartErrorClassifier:
                     try:
                         with open(training_file, "r", encoding="utf-8") as f:
                             training_data = json.load(f)
-                        stats["ml_classifier"][f"{language}_training_examples"] = len(
-                            training_data
-                        )
+                        stats["ml_classifier"][f"{language}_training_examples"] = len(training_data)
 
                         # Add learning progress info
                         if len(training_data) >= 5:
                             stats["ml_classifier"][f"{language}_model_trained"] = True
                         else:
-                            stats["ml_classifier"][f"{language}_needs_examples"] = (
-                                5 - len(training_data)
+                            stats["ml_classifier"][f"{language}_needs_examples"] = 5 - len(
+                                training_data
                             )
                     except Exception:
                         pass
@@ -1399,9 +1356,7 @@ class PatternCacheManager:
 
                 # Filter out old entries
                 fresh_data = [
-                    entry
-                    for entry in training_data
-                    if entry.get("timestamp", 0) > cutoff_time
+                    entry for entry in training_data if entry.get("timestamp", 0) > cutoff_time
                 ]
 
                 if len(fresh_data) != len(training_data):
@@ -1482,9 +1437,7 @@ class PatternCacheManager:
 
                 # Extract successful patterns
                 successful_patterns = [
-                    entry["message"]
-                    for entry in training_data
-                    if entry.get("fixable", False)
+                    entry["message"] for entry in training_data if entry.get("fixable", False)
                 ]
 
                 export_data["languages"][language] = {

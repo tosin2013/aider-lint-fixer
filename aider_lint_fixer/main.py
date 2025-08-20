@@ -58,9 +58,7 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
     """
     log_level = getattr(logging, level.upper(), logging.INFO)
     # Create formatter
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     # Set up root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(log_level)
@@ -129,25 +127,16 @@ def print_lint_summary(results, baseline_results=None, baseline_total=None):
             baseline_result = baseline_results[linter_name]
             baseline_error_count = len(baseline_result.errors)
             baseline_warning_count = len(baseline_result.warnings)
-            if (
-                baseline_error_count != error_count
-                or baseline_warning_count != warning_count
-            ):
+            if baseline_error_count != error_count or baseline_warning_count != warning_count:
                 print(
                     f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings (baseline: {baseline_error_count} errors, {baseline_warning_count} warnings)"
                 )
             else:
-                print(
-                    f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings"
-                )
+                print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
         else:
-            print(
-                f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings"
-            )
+            print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
     if baseline_total and baseline_total != total_errors:
-        print(
-            f"\n   Processing Total: {total_errors} errors, {total_warnings} warnings"
-        )
+        print(f"\n   Processing Total: {total_errors} errors, {total_warnings} warnings")
         print(
             f"   Baseline Total: {baseline_total} errors (showing {total_errors/baseline_total*100:.1f}% of all errors)"
         )
@@ -213,9 +202,7 @@ def create_progress_callback(verbose: bool = False):
             group_errors = progress_info.get("group_errors", 0)
             session_id = progress_info.get("session_id", "unknown")[:8]
             if verbose:
-                print(
-                    f"   🔧 Fixing {group_errors} {complexity} errors (session {session_id})..."
-                )
+                print(f"   🔧 Fixing {group_errors} {complexity} errors (session {session_id})...")
             else:
                 print(f"   🔧 Fixing {group_errors} {complexity} errors...")
         elif stage == "file_completed":
@@ -227,9 +214,7 @@ def create_progress_callback(verbose: bool = False):
             print(f"   ✅ File completed: {session_results} successful fixes")
             # Show overall progress
             file_progress = (completed / total * 100) if total > 0 else 0
-            error_progress = (
-                (processed_errors / total_errors * 100) if total_errors > 0 else 0
-            )
+            error_progress = (processed_errors / total_errors * 100) if total_errors > 0 else 0
             print(
                 f"   📊 Progress: {completed}/{total} files ({file_progress:.1f}%), {processed_errors}/{total_errors} errors ({error_progress:.1f}%)"
             )
@@ -255,9 +240,7 @@ def print_verification_summary(verification_results):
         # Show detailed information about what was fixed
         if result["fixed_errors"]:
             print("      ✅ Successfully Fixed:")
-            for i, error in enumerate(
-                result["fixed_errors"][:5]
-            ):  # Show first 5 fixed errors
+            for i, error in enumerate(result["fixed_errors"][:5]):  # Show first 5 fixed errors
                 print(
                     f"         {i+1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})"
                 )
@@ -292,9 +275,7 @@ def print_verification_summary(verification_results):
 @click.option("--linters", help="Comma-separated list of linters to run")
 @click.option("--max-files", type=int, help="Maximum number of files to process")
 @click.option("--max-errors", type=int, help="Maximum number of errors to fix per file")
-@click.option(
-    "--dry-run", is_flag=True, help="Show what would be fixed without making changes"
-)
+@click.option("--dry-run", is_flag=True, help="Show what would be fixed without making changes")
 @click.option("--interactive", is_flag=True, help="Confirm each fix before applying")
 @click.option(
     "--enhanced-interactive",
@@ -328,18 +309,14 @@ def print_verification_summary(verification_results):
 @click.option("--no-color", is_flag=True, help="Disable colored output")
 @click.option("--log-file", help="Path to log file")
 @click.option("--no-banner", is_flag=True, help="Disable banner output")
-@click.option(
-    "--check-only", is_flag=True, help="Only check for issues, don't fix them"
-)
+@click.option("--check-only", is_flag=True, help="Only check for issues, don't fix them")
 @click.option(
     "--output-format",
     type=click.Choice(["text", "json"]),
     default="text",
     help="Output format (text or json)",
 )
-@click.option(
-    "--list-linters", is_flag=True, help="List all available linters and exit"
-)
+@click.option("--list-linters", is_flag=True, help="List all available linters and exit")
 @click.option(
     "--ansible-profile",
     default="basic",
@@ -618,9 +595,7 @@ def main(
         return 1
     if loop:
         if max_iterations < 1:
-            print(
-                f"{Fore.RED}❌ Error: --max-iterations must be at least 1{Style.RESET_ALL}"
-            )
+            print(f"{Fore.RED}❌ Error: --max-iterations must be at least 1{Style.RESET_ALL}")
             return 1
         if improvement_threshold < 0:
             print(
@@ -682,19 +657,13 @@ def main(
             print(f"   Model files: {cache_sizes['model_files']:,} bytes")
             print(f"   Total size: {cache_sizes['total_files']:,} bytes")
             print(f"\n{c('CYAN')}🧠 Pattern Matching{s('RESET_ALL')}")
-            print(
-                f"   Languages: {', '.join(stats_data['pattern_matcher']['languages'])}"
-            )
-            print(
-                f"   Total patterns: {stats_data['pattern_matcher']['total_patterns']}"
-            )
+            print(f"   Languages: {', '.join(stats_data['pattern_matcher']['languages'])}")
+            print(f"   Total patterns: {stats_data['pattern_matcher']['total_patterns']}")
             print(
                 f"   Aho-Corasick available: {stats_data['pattern_matcher']['ahocorasick_available']}"
             )
             print(f"\n{c('CYAN')}🤖 Machine Learning{s('RESET_ALL')}")
-            print(
-                f"   scikit-learn available: {stats_data['ml_classifier']['sklearn_available']}"
-            )
+            print(f"   scikit-learn available: {stats_data['ml_classifier']['sklearn_available']}")
             print(
                 f"   Trained languages: {', '.join(stats_data['ml_classifier']['trained_languages'])}"
             )
@@ -708,9 +677,7 @@ def main(
     if list_sessions:
         sessions = EnhancedProgressTracker.list_recoverable_sessions(project_path)
         if not sessions:
-            print(
-                f"{Fore.YELLOW}No recoverable progress sessions found.{Style.RESET_ALL}"
-            )
+            print(f"{Fore.YELLOW}No recoverable progress sessions found.{Style.RESET_ALL}")
         else:
             print(f"\n{Fore.CYAN}📋 Recoverable Progress Sessions:{Style.RESET_ALL}")
             for session in sessions:
@@ -720,9 +687,7 @@ def main(
                     "%Y-%m-%d %H:%M:%S"
                 )
                 progress = f"{session['processed_errors']}/{session['total_errors']}"
-                size_indicator = (
-                    "🔥 Large" if session["is_large_project"] else "📁 Small"
-                )
+                size_indicator = "🔥 Large" if session["is_large_project"] else "📁 Small"
                 print(
                     f"   {session['session_id']}: {start_time} - {progress} errors ({size_indicator})"
                 )
@@ -743,33 +708,21 @@ def main(
                     {"message": "'app' is not defined", "line": 25},
                     {"message": "'mcpServer' is not defined", "line": 35},
                 ],
-                "src/controller/edit.js": [
-                    {"message": "'fieldName' is not defined", "line": 12}
-                ],
+                "src/controller/edit.js": [{"message": "'fieldName' is not defined", "line": 12}],
             }
             # Create mock file analyses
             mock_file_analyses = {
-                "src/mcp-server.mjs": type(
-                    "MockAnalysis", (), {"error_analyses": []}
-                )(),
-                "src/controller/edit.js": type(
-                    "MockAnalysis", (), {"error_analyses": []}
-                )(),
-                "src/controller/list.js": type(
-                    "MockAnalysis", (), {"error_analyses": []}
-                )(),
+                "src/mcp-server.mjs": type("MockAnalysis", (), {"error_analyses": []})(),
+                "src/controller/edit.js": type("MockAnalysis", (), {"error_analyses": []})(),
+                "src/controller/list.js": type("MockAnalysis", (), {"error_analyses": []})(),
                 "src/main.js": type("MockAnalysis", (), {"error_analyses": []})(),
             }
-            integration_framework = ExternalLLMIntegrationFramework(
-                str(actual_project_path)
-            )
+            integration_framework = ExternalLLMIntegrationFramework(str(actual_project_path))
             export_file = integration_framework.export_for_external_analysis(
                 mock_dangerous_errors, mock_file_analyses, export_cross_communication
             )
             print(f"   ✅ Export created: {export_file}")
-            print(
-                f"   📝 Prompt file created for {export_cross_communication.upper()} analysis"
-            )
+            print(f"   📝 Prompt file created for {export_cross_communication.upper()} analysis")
             print("   🔄 Send the export to external LLM for analysis")
             print("   📥 Use --import-llm-response to process the response")
         except Exception as e:
@@ -781,15 +734,9 @@ def main(
         try:
             from .external_llm_integration import ExternalLLMIntegrationFramework
 
-            integration_framework = ExternalLLMIntegrationFramework(
-                str(actual_project_path)
-            )
-            response = integration_framework.import_external_response(
-                import_llm_response
-            )
-            processing_result = integration_framework.process_external_feedback(
-                response
-            )
+            integration_framework = ExternalLLMIntegrationFramework(str(actual_project_path))
+            response = integration_framework.import_external_response(import_llm_response)
+            processing_result = integration_framework.process_external_feedback(response)
             print(f"   🤖 Analysis ID: {response.analysis_id}")
             print(f"   📊 Confidence Score: {response.confidence_score:.0%}")
             print(f"   🔧 LLM Model: {response.llm_model}")
@@ -851,9 +798,7 @@ def main(
                 print(
                     f"   ✅ Safe for automation: {len(auto_recs['safe_for_automation'])} variables"
                 )
-                print(
-                    f"   ⚠️  Review needed: {len(auto_recs['review_needed'])} variables"
-                )
+                print(f"   ⚠️  Review needed: {len(auto_recs['review_needed'])} variables")
                 print(f"   🔍 Manual only: {len(auto_recs['manual_only'])} variables")
                 if auto_recs["safe_for_automation"]:
                     print("\n✅ Safe Automation Candidates:")
@@ -880,9 +825,7 @@ def main(
                     f"   Low confidence: {len(export_data['low_confidence_variables'])} variables"
                 )
             else:
-                print(
-                    "\n💡 Use --update-cot-framework to enhance with framework capabilities"
-                )
+                print("\n💡 Use --update-cot-framework to enhance with framework capabilities")
                 # Show basic analysis
                 print("\n📋 Variables Found:")
                 for var in cot_analysis.variables:
@@ -940,16 +883,9 @@ def main(
             try:
                 from .strategic_preflight_check import StrategicPreFlightChecker
 
-                checker = StrategicPreFlightChecker(
-                    str(actual_project_path), config_manager
-                )
+                checker = StrategicPreFlightChecker(str(actual_project_path), config_manager)
                 # Enhanced analysis if requested
-                if (
-                    enable_enhanced_analysis
-                    or quantify_debt
-                    or predict_outcomes
-                    or export_for_llm
-                ):
+                if enable_enhanced_analysis or quantify_debt or predict_outcomes or export_for_llm:
                     print(
                         f"\n{Fore.CYAN}🔬 Enhanced Strategic Analysis (Research-Based){Style.RESET_ALL}"
                     )
@@ -985,13 +921,9 @@ def main(
                         )
                         return 1
             except ImportError:
-                print(
-                    f"{Fore.YELLOW}⚠️  Strategic pre-flight check not available{Style.RESET_ALL}"
-                )
+                print(f"{Fore.YELLOW}⚠️  Strategic pre-flight check not available{Style.RESET_ALL}")
             except Exception as e:
-                print(
-                    f"{Fore.YELLOW}⚠️  Strategic pre-flight check failed: {e}{Style.RESET_ALL}"
-                )
+                print(f"{Fore.YELLOW}⚠️  Strategic pre-flight check failed: {e}{Style.RESET_ALL}")
         # Initialize assessment variable for architect mode
         assessment = None
         # Pre-Lint Risk Assessment (unless bypassed, but run in force mode for tracing)
@@ -1024,27 +956,19 @@ def main(
                         return
                 else:
                     # In force mode, just collect the assessment data for tracing
-                    print(
-                        "   ✅ Assessment completed (force mode - proceeding regardless)"
-                    )
+                    print("   ✅ Assessment completed (force mode - proceeding regardless)")
             except Exception as e:
-                print(
-                    f"{Fore.YELLOW}⚠️  Pre-lint assessment failed: {e}{Style.RESET_ALL}"
-                )
+                print(f"{Fore.YELLOW}⚠️  Pre-lint assessment failed: {e}{Style.RESET_ALL}")
                 if not force:
                     print(f"{Fore.CYAN}💡 Proceeding with caution...{Style.RESET_ALL}")
                 assessment = None  # Ensure assessment is None if failed
         # Step 1: Detect project structure
         print(f"\n{Fore.CYAN}Step 1: Detecting project structure...{Style.RESET_ALL}")
-        detector = ProjectDetector(
-            exclude_patterns=project_config.project.exclude_patterns
-        )
+        detector = ProjectDetector(exclude_patterns=project_config.project.exclude_patterns)
         project_info = detector.detect_project(actual_project_path)
         print_project_info(project_info)
         if not project_info.languages:
-            print(
-                f"{Fore.RED}❌ No supported programming languages detected.{Style.RESET_ALL}"
-            )
+            print(f"{Fore.RED}❌ No supported programming languages detected.{Style.RESET_ALL}")
             return 1
         # Step 2: Run linters
         print(f"\n{Fore.CYAN}Step 2: Running linters...{Style.RESET_ALL}")
@@ -1054,9 +978,7 @@ def main(
             enabled_linters = [linter.strip() for linter in linters.split(",")]
         else:
             enabled_linters = (
-                project_config.linters.enabled
-                if project_config.linters.auto_detect
-                else None
+                project_config.linters.enabled if project_config.linters.auto_detect else None
             )
         # Prepare linter options
         linter_options = {"ansible_profile": ansible_profile, "profile": profile}
@@ -1066,9 +988,7 @@ def main(
         if exclude:
             linter_options["exclude"] = list(exclude)
         if extensions:
-            linter_options["extensions"] = [
-                ext.strip() for ext in extensions.split(",")
-            ]
+            linter_options["extensions"] = [ext.strip() for ext in extensions.split(",")]
         # Step 2a: Run baseline scan to get true error count
         print("   📊 Running baseline scan to establish error count...")
         baseline_options = linter_options.copy()
@@ -1079,14 +999,11 @@ def main(
             enabled_linters, **baseline_options
         )
         baseline_total_errors = sum(
-            len(result.errors) + len(result.warnings)
-            for result in baseline_results.values()
+            len(result.errors) + len(result.warnings) for result in baseline_results.values()
         )
         # Step 2b: Run processing scan (may be limited)
         print("   🔍 Running processing scan...")
-        results = lint_runner.run_all_available_linters(
-            enabled_linters, **linter_options
-        )
+        results = lint_runner.run_all_available_linters(enabled_linters, **linter_options)
         # Handle output format
         if output_format == "json":
             import json
@@ -1121,9 +1038,7 @@ def main(
                 baseline_total=baseline_total_errors,
             )
         # Check if there are any errors to fix
-        total_errors = sum(
-            len(result.errors) + len(result.warnings) for result in results.values()
-        )
+        total_errors = sum(len(result.errors) + len(result.warnings) for result in results.values())
         if total_errors == 0:
             if not quiet:
                 print(
@@ -1145,14 +1060,10 @@ def main(
         if analyzer.has_structural_problems():
             structural_analysis = analyzer.get_structural_analysis()
             print(f"\n{Fore.YELLOW}🏗️  STRUCTURAL ANALYSIS RESULTS{Style.RESET_ALL}")
-            print(
-                f"   Architectural Score: {structural_analysis.architectural_score:.1f}/100"
-            )
+            print(f"   Architectural Score: {structural_analysis.architectural_score:.1f}/100")
             print(f"   Structural Issues: {len(structural_analysis.structural_issues)}")
             print(f"   Hotspot Files: {len(structural_analysis.hotspot_files)}")
-            print(
-                f"   Refactoring Candidates: {len(structural_analysis.refactoring_candidates)}"
-            )
+            print(f"   Refactoring Candidates: {len(structural_analysis.refactoring_candidates)}")
             # Display key recommendations
             recommendations = analyzer.get_structural_recommendations()
             if recommendations:
@@ -1219,9 +1130,7 @@ def main(
         elif force:
             if loop:
                 # Iterative Intelligent Force Mode
-                print(
-                    f"\n{Fore.CYAN}🔄 ITERATIVE INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}"
-                )
+                print(f"\n{Fore.CYAN}🔄 ITERATIVE INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}")
                 print(
                     f"   {Fore.YELLOW}Running force mode in intelligent loops until convergence{Style.RESET_ALL}"
                 )
@@ -1242,14 +1151,11 @@ def main(
                     "claude-3-sonnet": CostModel.CLAUDE_3_SONNET,
                     "claude-3-haiku": CostModel.CLAUDE_3_HAIKU,
                 }
-                cost_monitor.set_model(
-                    model_mapping.get(ai_model, CostModel.GPT_4_TURBO)
-                )
+                cost_monitor.set_model(model_mapping.get(ai_model, CostModel.GPT_4_TURBO))
                 # Show cost prediction if requested
                 if show_cost_prediction:
                     total_errors = sum(
-                        len(analysis.error_analyses)
-                        for analysis in file_analyses.values()
+                        len(analysis.error_analyses) for analysis in file_analyses.values()
                     )
                     estimated_tokens_per_error = 500  # Conservative estimate
                     estimated_total_tokens = (
@@ -1258,9 +1164,7 @@ def main(
                     # Rough cost estimation
                     pricing = cost_monitor.MODEL_PRICING[cost_monitor.current_model]
                     estimated_cost = (
-                        (estimated_total_tokens / 1000)
-                        * (pricing["input"] + pricing["output"])
-                        / 2
+                        (estimated_total_tokens / 1000) * (pricing["input"] + pricing["output"]) / 2
                     )
                     print(f"\n{Fore.CYAN}💰 COST PREDICTION{Style.RESET_ALL}")
                     print(f"   Model: {ai_model}")
@@ -1268,9 +1172,7 @@ def main(
                     print(f"   Budget limit: ${max_cost:.2f}")
                     print(f"   Per-iteration limit: ${max_iteration_cost:.2f}")
                     if estimated_cost > max_cost:
-                        print(
-                            f"   {Fore.YELLOW}⚠️  Estimated cost exceeds budget!{Style.RESET_ALL}"
-                        )
+                        print(f"   {Fore.YELLOW}⚠️  Estimated cost exceeds budget!{Style.RESET_ALL}")
                 # Import iterative force mode
                 try:
                     from .iterative_force_mode import (
@@ -1303,9 +1205,7 @@ def main(
                     loop = False  # Disable loop mode
             if not loop:
                 # Single Intelligent Force Mode
-                print(
-                    f"\n{Fore.CYAN}🧠 INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}"
-                )
+                print(f"\n{Fore.CYAN}🧠 INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}")
                 print(
                     f"   {Fore.YELLOW}Using ML to safely manage force mode for chaotic codebases{Style.RESET_ALL}"
                 )
@@ -1325,9 +1225,7 @@ def main(
                 print(
                     f"\n{Fore.CYAN}🔍 Analyzing {len(all_error_analyses)} errors with ML...{Style.RESET_ALL}"
                 )
-                force_strategy = intelligent_force.analyze_force_strategy(
-                    all_error_analyses
-                )
+                force_strategy = intelligent_force.analyze_force_strategy(all_error_analyses)
                 # Display intelligent force strategy
                 print(f"\n{Fore.CYAN}🧠 INTELLIGENT FORCE STRATEGY{Style.RESET_ALL}")
                 print("=" * 60)
@@ -1341,22 +1239,14 @@ def main(
                 breakdown = force_strategy["action_breakdown"]
                 print("\n📊 ML-Powered Action Plan:")
                 if breakdown.get("auto_force", 0) > 0:
-                    print(
-                        f"   🤖 Auto-force (no confirmation): {breakdown['auto_force']} errors"
-                    )
+                    print(f"   🤖 Auto-force (no confirmation): {breakdown['auto_force']} errors")
                 if breakdown.get("batch_confirm", 0) > 0:
-                    print(
-                        f"   📦 Batch confirmation: {breakdown['batch_confirm']} errors"
-                    )
+                    print(f"   📦 Batch confirmation: {breakdown['batch_confirm']} errors")
                 if breakdown.get("manual_review", 0) > 0:
-                    print(
-                        f"   👤 Manual review required: {breakdown['manual_review']} errors"
-                    )
+                    print(f"   👤 Manual review required: {breakdown['manual_review']} errors")
                 if breakdown.get("skip", 0) > 0:
                     print(f"   ⏭️  Skip (too risky): {breakdown['skip']} errors")
-                print(
-                    f"\n⏱️  Estimated time: {force_strategy['estimated_time_minutes']} minutes"
-                )
+                print(f"\n⏱️  Estimated time: {force_strategy['estimated_time_minutes']} minutes")
                 # Show recommendations
                 if force_strategy["recommendations"]:
                     print("\n💡 ML Recommendations:")
@@ -1392,18 +1282,12 @@ def main(
                 prioritized_errors = []
                 # Add auto-force errors (these will be processed without individual confirmation)
                 auto_force_decisions = [
-                    d
-                    for d in force_strategy["force_decisions"]
-                    if d.action == "auto_force"
+                    d for d in force_strategy["force_decisions"] if d.action == "auto_force"
                 ]
-                prioritized_errors.extend(
-                    [d.error_analysis for d in auto_force_decisions]
-                )
+                prioritized_errors.extend([d.error_analysis for d in auto_force_decisions])
                 # Add batch-confirm errors (these will be processed in batches)
                 batch_decisions = [
-                    d
-                    for d in force_strategy["force_decisions"]
-                    if d.action == "batch_confirm"
+                    d for d in force_strategy["force_decisions"] if d.action == "batch_confirm"
                 ]
                 prioritized_errors.extend([d.error_analysis for d in batch_decisions])
                 # Apply max_errors limit if specified
@@ -1421,9 +1305,7 @@ def main(
                         )()
                     force_file_analyses[file_path].error_analyses.append(error_analysis)
                 file_analyses = force_file_analyses
-                print(
-                    f"\n{Fore.GREEN}✅ Intelligent force strategy activated{Style.RESET_ALL}"
-                )
+                print(f"\n{Fore.GREEN}✅ Intelligent force strategy activated{Style.RESET_ALL}")
                 print(f"   Processing {len(prioritized_errors)} prioritized errors")
                 # Store force strategy for later use during fixing
                 globals()["_intelligent_force_strategy"] = force_strategy
@@ -1433,9 +1315,7 @@ def main(
                 )
                 # Fall back to original force mode logic
                 prioritized_errors = (
-                    all_error_analyses[:max_errors]
-                    if max_errors
-                    else all_error_analyses
+                    all_error_analyses[:max_errors] if max_errors else all_error_analyses
                 )
                 # Basic confirmation
                 warning_msg = f"\n{Fore.RED}Are you sure you want to force-fix {len(prioritized_errors)} errors? This may cause issues.{Style.RESET_ALL}"
@@ -1444,26 +1324,16 @@ def main(
                     print("Aborted by user.")
                     return 0
         elif not prioritized_errors:
-            print(
-                f"\n{Fore.YELLOW}⚠️  No automatically fixable errors found.{Style.RESET_ALL}"
-            )
-            print(
-                "   💡 Try --enhanced-interactive to review and override classifications"
-            )
+            print(f"\n{Fore.YELLOW}⚠️  No automatically fixable errors found.{Style.RESET_ALL}")
+            print("   💡 Try --enhanced-interactive to review and override classifications")
             print("   💡 Or use --force to attempt fixing all errors (risky)")
             return 0
         # Show what would be fixed in dry-run mode
         if dry_run:
-            print(
-                f"\n{Fore.YELLOW}🔍 Dry Run - Errors that would be fixed:{Style.RESET_ALL}"
-            )
-            for i, error_analysis in enumerate(
-                prioritized_errors[:10], 1
-            ):  # Show first 10
+            print(f"\n{Fore.YELLOW}🔍 Dry Run - Errors that would be fixed:{Style.RESET_ALL}")
+            for i, error_analysis in enumerate(prioritized_errors[:10], 1):  # Show first 10
                 error = error_analysis.error
-                print(
-                    f"   {i}. {error.file_path}:{error.line} - {error.linter} {error.rule_id}"
-                )
+                print(f"   {i}. {error.file_path}:{error.line} - {error.linter} {error.rule_id}")
                 print(f"      {error.message}")
                 print(
                     f"      Category: {error_analysis.category.value}, Complexity: {error_analysis.complexity.value}"
@@ -1474,9 +1344,7 @@ def main(
         # Step 4: Fix errors with hybrid workflow (safe automation + architect mode)
         print(f"\n{Fore.CYAN}Step 4: Fixing errors with aider.chat...{Style.RESET_ALL}")
         try:
-            aider_integration = AiderIntegration(
-                project_config, project_path, config_manager
-            )
+            aider_integration = AiderIntegration(project_config, project_path, config_manager)
         except RuntimeError as e:
             print(f"{Fore.RED}❌ {e}{Style.RESET_ALL}")
             print("   Please install aider-chat: pip install aider-chat")
@@ -1491,9 +1359,7 @@ def main(
             guidance = assessment.architect_guidance
             if guidance.get("has_dangerous_errors"):
                 print(f"\n{Fore.CYAN}🏗️  Architect Mode Phase:{Style.RESET_ALL}")
-                print(
-                    "   Dangerous errors detected - using architect mode for manual review"
-                )
+                print("   Dangerous errors detected - using architect mode for manual review")
                 # Execute architect mode for dangerous errors
                 architect_results = aider_integration.execute_architect_guidance(
                     guidance, architect_model=architect_model, editor_model=editor_model
@@ -1504,9 +1370,7 @@ def main(
                         f"\n{Fore.CYAN}🏗️  Architect-only mode: Skipping safe automation{Style.RESET_ALL}"
                     )
                     # Show architect mode summary
-                    successful_architect = sum(
-                        1 for r in architect_results if r.success
-                    )
+                    successful_architect = sum(1 for r in architect_results if r.success)
                     print(f"\n{Fore.GREEN}🎉 Architect Mode Complete!{Style.RESET_ALL}")
                     print(f"   Files processed: {len(architect_results)}")
                     print(f"   Successful fixes: {successful_architect}")
@@ -1532,9 +1396,7 @@ def main(
                 safe_plan = guidance.get("safe_automation_plan", {})
                 if safe_plan:
                     safe_count = safe_plan.get("safe_errors_count", 0)
-                    print(
-                        f"   Focusing on {safe_count} safe errors (excluding dangerous types)"
-                    )
+                    print(f"   Focusing on {safe_count} safe errors (excluding dangerous types)")
                 else:
                     print("   Processing all errors with standard automation")
         # Interactive confirmation
@@ -1545,9 +1407,7 @@ def main(
             print(f"\n   Files to process: {len(files_to_fix)}")
             for file_path in files_to_fix:
                 print(f"     - {file_path}")
-            if not click.confirm(
-                f"\nProceed with fixing {len(prioritized_errors)} errors?"
-            ):
+            if not click.confirm(f"\nProceed with fixing {len(prioritized_errors)} errors?"):
                 print("Aborted by user.")
                 return 0
         # Create enhanced progress tracker for long-running operations
@@ -1580,9 +1440,7 @@ def main(
         total_attempted = 0
         verification_results = {}
         for session in sessions:
-            verification = aider_integration.verify_fixes(
-                session, lint_runner, analyzer
-            )
+            verification = aider_integration.verify_fixes(session, lint_runner, analyzer)
             verification_results[session.session_id] = verification
             total_fixed += verification["errors_fixed"]
             total_attempted += verification["total_original_errors"]
@@ -1595,7 +1453,9 @@ def main(
             for session in sessions:
                 verification = verification_results[session.session_id]
                 for result in session.results:
-                    error_key = f"{result.error.file_path}:{result.error.line}:{result.error.rule_id}"
+                    error_key = (
+                        f"{result.error.file_path}:{result.error.line}:{result.error.rule_id}"
+                    )
                     fix_results[error_key] = result.success
             # Update community learning with actual results
             community_learning.update_fix_results(fix_results)
@@ -1615,9 +1475,7 @@ def main(
                 community_learning, community_learning.manual_attempts
             )
         # Final summary
-        overall_success_rate = (
-            (total_fixed / total_attempted * 100) if total_attempted > 0 else 0
-        )
+        overall_success_rate = (total_fixed / total_attempted * 100) if total_attempted > 0 else 0
         print(f"\n{Fore.GREEN}✅ Fixing Complete!{Style.RESET_ALL}")
         print(f"   Total errors fixed: {total_fixed}/{total_attempted}")
         print(f"   Overall success rate: {overall_success_rate:.1f}%")
@@ -1630,9 +1488,7 @@ def main(
                 f"\n{Fore.YELLOW}👍 Good progress! Some errors may need manual attention.{Style.RESET_ALL}"
             )
         else:
-            print(
-                f"\n{Fore.RED}⚠️  Many errors may require manual fixing.{Style.RESET_ALL}"
-            )
+            print(f"\n{Fore.RED}⚠️  Many errors may require manual fixing.{Style.RESET_ALL}")
         return 0
     except KeyboardInterrupt:
         print(f"\n{c('YELLOW')}⚠️  Interrupted by user{s('RESET_ALL')}")

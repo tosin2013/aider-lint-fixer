@@ -179,9 +179,7 @@ class EnhancedProgressTracker:
                 if total_processed > 0
                 else 0
             )
-            self.error_progress_bar.set_description(
-                f"🔧 Errors (Success: {success_rate:.1f}%)"
-            )
+            self.error_progress_bar.set_description(f"🔧 Errors (Success: {success_rate:.1f}%)")
 
     def update_time_estimate(self):
         """Update estimated completion time."""
@@ -190,9 +188,7 @@ class EnhancedProgressTracker:
 
         elapsed = time.time() - self.session.metrics.start_time
         rate = self.session.metrics.processed_errors / elapsed
-        remaining_errors = (
-            self.session.metrics.total_errors - self.session.metrics.processed_errors
-        )
+        remaining_errors = self.session.metrics.total_errors - self.session.metrics.processed_errors
 
         if rate > 0:
             estimated_seconds = remaining_errors / rate
@@ -214,11 +210,7 @@ class EnhancedProgressTracker:
             "fixed_errors": self.session.metrics.fixed_errors,
             "failed_errors": self.session.metrics.failed_errors,
             "success_rate": (
-                (
-                    self.session.metrics.fixed_errors
-                    / self.session.metrics.processed_errors
-                    * 100
-                )
+                (self.session.metrics.fixed_errors / self.session.metrics.processed_errors * 100)
                 if self.session.metrics.processed_errors > 0
                 else 0
             ),
@@ -262,23 +254,15 @@ class EnhancedProgressTracker:
         # Calculate rates
         elapsed = current_time - self.session.metrics.start_time
         if elapsed > 0:
-            file_rate = (
-                self.session.metrics.processed_files / elapsed * 60
-            )  # files per minute
-            error_rate = (
-                self.session.metrics.processed_errors / elapsed * 60
-            )  # errors per minute
+            file_rate = self.session.metrics.processed_files / elapsed * 60  # files per minute
+            error_rate = self.session.metrics.processed_errors / elapsed * 60  # errors per minute
 
             print(f"\n{Fore.GREEN}⚡ Real-time Status:{Style.RESET_ALL}")
-            print(
-                f"   Processing rate: {file_rate:.1f} files/min, {error_rate:.1f} errors/min"
-            )
+            print(f"   Processing rate: {file_rate:.1f} files/min, {error_rate:.1f} errors/min")
 
             if self.session.metrics.processed_errors > 0:
                 success_rate = (
-                    self.session.metrics.fixed_errors
-                    / self.session.metrics.processed_errors
-                    * 100
+                    self.session.metrics.fixed_errors / self.session.metrics.processed_errors * 100
                 )
                 print(
                     f"   Success rate: {success_rate:.1f}% ({self.session.metrics.fixed_errors}/{self.session.metrics.processed_errors})"
@@ -299,11 +283,7 @@ class EnhancedProgressTracker:
             "files_per_minute": self.session.metrics.processed_files / elapsed * 60,
             "errors_per_minute": self.session.metrics.processed_errors / elapsed * 60,
             "success_rate": (
-                (
-                    self.session.metrics.fixed_errors
-                    / self.session.metrics.processed_errors
-                    * 100
-                )
+                (self.session.metrics.fixed_errors / self.session.metrics.processed_errors * 100)
                 if self.session.metrics.processed_errors > 0
                 else 0.0
             ),
@@ -364,19 +344,13 @@ class EnhancedProgressTracker:
                 tracker._init_progress_bars()
                 # Update progress bars to current state
                 if tracker.file_progress_bar:
-                    tracker.file_progress_bar.n = (
-                        tracker.session.metrics.processed_files
-                    )
+                    tracker.file_progress_bar.n = tracker.session.metrics.processed_files
                     tracker.file_progress_bar.refresh()
                 if tracker.error_progress_bar:
-                    tracker.error_progress_bar.n = (
-                        tracker.session.metrics.processed_errors
-                    )
+                    tracker.error_progress_bar.n = tracker.session.metrics.processed_errors
                     tracker.error_progress_bar.refresh()
 
-            print(
-                f"\n{Fore.GREEN}🔄 Resumed progress session: {session_id}{Style.RESET_ALL}"
-            )
+            print(f"\n{Fore.GREEN}🔄 Resumed progress session: {session_id}{Style.RESET_ALL}")
             tracker.print_progress_summary()
 
             return tracker
@@ -419,9 +393,7 @@ class EnhancedProgressTracker:
 
         return sorted(sessions, key=lambda x: x["start_time"], reverse=True)
 
-    def cleanup_old_sessions(
-        self, max_age_days: int = 7, cache_dir: Optional[Path] = None
-    ):
+    def cleanup_old_sessions(self, max_age_days: int = 7, cache_dir: Optional[Path] = None):
         """Clean up old progress sessions."""
         if not cache_dir:
             cache_dir = Path(self.project_path) / ".aider-lint-cache"
@@ -457,9 +429,7 @@ class EnhancedProgressTracker:
             self.print_progress_summary()
 
 
-def create_enhanced_progress_callback(
-    tracker: EnhancedProgressTracker, verbose: bool = False
-):
+def create_enhanced_progress_callback(tracker: EnhancedProgressTracker, verbose: bool = False):
     """Create an enhanced progress callback that works with the existing system."""
 
     def enhanced_progress_callback(progress_info: dict):
@@ -506,9 +476,7 @@ def create_enhanced_progress_callback(
             print(f"   ✅ File completed: {session_results} successful fixes")
 
             file_progress = (completed / total * 100) if total > 0 else 0
-            error_progress = (
-                (processed_errors / total_errors * 100) if total_errors > 0 else 0
-            )
+            error_progress = (processed_errors / total_errors * 100) if total_errors > 0 else 0
 
             print(
                 f"   📊 Progress: {completed}/{total} files ({file_progress:.1f}%), {processed_errors}/{total_errors} errors ({error_progress:.1f}%)"
