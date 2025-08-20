@@ -20,6 +20,8 @@ class LinterSelectionResult:
     recommended_linters: List[str] = field(default_factory=list)
     skipped_linters: List[str] = field(default_factory=list)
     reasoning: Dict[str, str] = field(default_factory=dict)
+    confidence_scores: Dict[str, float] = field(default_factory=dict)
+    estimated_time_saved: float = 0.0
 
 
 class SmartLinterSelector:
