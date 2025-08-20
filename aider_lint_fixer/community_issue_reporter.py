@@ -69,13 +69,17 @@ class CommunityIssueReporter:
 
         for pattern, attempts in pattern_groups.items():
             # Only consider patterns with successful overrides
-            successful_overrides = [a for a in attempts if a.user_attempted and a.fix_successful]
+            successful_overrides = [
+                a for a in attempts if a.user_attempted and a.fix_successful
+            ]
 
             if len(successful_overrides) >= self.MIN_SAMPLES_FOR_ISSUE:
                 success_rate = len(successful_overrides) / len(attempts)
 
                 if success_rate >= self.MIN_SUCCESS_RATE:
-                    issue = self._create_community_issue(pattern, attempts, successful_overrides)
+                    issue = self._create_community_issue(
+                        pattern, attempts, successful_overrides
+                    )
                     potential_issues.append(issue)
 
         return potential_issues
@@ -94,7 +98,9 @@ class CommunityIssueReporter:
         title = f"Enhancement: Improve {linter} {rule_id} fixability classification"
 
         # Generate issue body
-        body = self._generate_issue_body(linter, rule_id, all_attempts, successful_attempts)
+        body = self._generate_issue_body(
+            linter, rule_id, all_attempts, successful_attempts
+        )
 
         # Determine labels
         labels = ["enhancement", "community-learning", f"linter-{linter.lower()}"]
@@ -144,7 +150,9 @@ Users have successfully fixed errors of type `{rule_id}` that were originally cl
 """
 
         # Add sample attempts
-        for i, attempt in enumerate(successful_attempts[:3], 1):  # Show up to 3 examples
+        for i, attempt in enumerate(
+            successful_attempts[:3], 1
+        ):  # Show up to 3 examples
             body += """
 **Attempt {i}:**
 - File: `{attempt.error.file_path}:{attempt.error.line}`
@@ -196,7 +204,9 @@ This enhancement request was automatically generated from user feedback in the e
 
         # Add new issues (avoid duplicates)
         existing_patterns = {issue.error_pattern for issue in existing_issues}
-        new_issues = [issue for issue in issues if issue.error_pattern not in existing_patterns]
+        new_issues = [
+            issue for issue in issues if issue.error_pattern not in existing_patterns
+        ]
 
         if new_issues:
             all_issues = existing_issues + new_issues
@@ -226,7 +236,9 @@ This enhancement request was automatically generated from user feedback in the e
         issues = self.list_potential_issues()
 
         if not issues:
-            print(f"\n{Fore.YELLOW}No potential community issues found.{Style.RESET_ALL}")
+            print(
+                f"\n{Fore.YELLOW}No potential community issues found.{Style.RESET_ALL}"
+            )
             return False
 
         print(f"\n{Fore.CYAN}🌍 Community Issue Reporter{Style.RESET_ALL}")
@@ -235,10 +247,14 @@ This enhancement request was automatically generated from user feedback in the e
         for i, issue in enumerate(issues, 1):
             print(f"\n{i}. {issue.title}")
             print(f"   Pattern: {issue.error_pattern}")
-            print(f"   Success Rate: {issue.success_rate:.1f}% ({issue.sample_count} samples)")
+            print(
+                f"   Success Rate: {issue.success_rate:.1f}% ({issue.sample_count} samples)"
+            )
             print(f"   Labels: {', '.join(issue.labels)}")
 
-        if click.confirm("\nWould you like to create GitHub issues for these improvements?"):
+        if click.confirm(
+            "\nWould you like to create GitHub issues for these improvements?"
+        ):
             return self._create_github_issues(issues)
 
         return False
@@ -260,7 +276,9 @@ This enhancement request was automatically generated from user feedback in the e
                 print("   ✅ Browser opened for issue creation")
 
                 # Wait for user confirmation
-                if not click.confirm("   Did you successfully create the issue?", default=True):
+                if not click.confirm(
+                    "   Did you successfully create the issue?", default=True
+                ):
                     print("   ⏭️  Skipping this issue")
                     continue
 
@@ -271,7 +289,9 @@ This enhancement request was automatically generated from user feedback in the e
         # Mark issues as processed
         self._mark_issues_processed(issues)
 
-        print(f"\n{Fore.GREEN}🎉 Community issue creation process completed!{Style.RESET_ALL}")
+        print(
+            f"\n{Fore.GREEN}🎉 Community issue creation process completed!{Style.RESET_ALL}"
+        )
         return True
 
     def _generate_github_issue_url(self, issue: CommunityIssue) -> str:
@@ -306,7 +326,9 @@ def integrate_community_issue_reporting(
         return
 
     # Check if there are any successful overrides worth reporting
-    successful_overrides = [a for a in manual_attempts if a.user_attempted and a.fix_successful]
+    successful_overrides = [
+        a for a in manual_attempts if a.user_attempted and a.fix_successful
+    ]
 
     if not successful_overrides:
         return
@@ -320,7 +342,9 @@ def integrate_community_issue_reporting(
     potential_issues = reporter.analyze_for_community_issues(manual_attempts)
 
     if potential_issues:
-        print(f"   Found {len(potential_issues)} patterns that could benefit the community")
+        print(
+            f"   Found {len(potential_issues)} patterns that could benefit the community"
+        )
 
         # Save potential issues
         reporter.save_potential_issues(potential_issues)

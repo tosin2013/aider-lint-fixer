@@ -71,7 +71,9 @@ class ESLintLinter(BaseLinter):
             pass
         return None
 
-    def build_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
+    def build_command(
+        self, file_paths: Optional[List[str]] = None, **kwargs
+    ) -> List[str]:
         """Build ESLint command with project-specific configuration detection."""
         # Try to use npm script first if available
         if self._should_use_npm_script():
@@ -134,7 +136,9 @@ class ESLintLinter(BaseLinter):
         except Exception:
             return False
 
-    def _build_npm_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
+    def _build_npm_command(
+        self, file_paths: Optional[List[str]] = None, **kwargs
+    ) -> List[str]:
         """Build npm run lint command."""
         command = ["npm", "run", "lint", "--", "--format=json"]
 

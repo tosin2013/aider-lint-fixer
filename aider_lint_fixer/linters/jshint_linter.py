@@ -64,7 +64,9 @@ class JSHintLinter(BaseLinter):
             pass
         return None
 
-    def build_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
+    def build_command(
+        self, file_paths: Optional[List[str]] = None, **kwargs
+    ) -> List[str]:
         """Build JSHint command."""
         # Use npx if available, otherwise global jshint
         command = ["npx", "jshint"] if self._has_npx() else ["jshint"]

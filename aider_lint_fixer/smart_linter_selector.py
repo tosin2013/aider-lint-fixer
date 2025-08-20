@@ -56,7 +56,10 @@ class SmartLinterSelector:
         self.project_info = project_info
 
     def select_linters(
-        self, available_linters: Dict[str, bool], max_linters: int = 5, prefer_fast: bool = False
+        self,
+        available_linters: Dict[str, bool],
+        max_linters: int = 5,
+        prefer_fast: bool = False,
     ) -> LinterSelectionResult:
         """Select the most appropriate linters for the project.
 
@@ -81,7 +84,9 @@ class SmartLinterSelector:
         for linter in prioritized_linters:
             if len(recommended) >= max_linters:
                 skipped.append(linter)
-                reasoning[linter] = f"Skipped: reached max limit of {max_linters} linters"
+                reasoning[linter] = (
+                    f"Skipped: reached max limit of {max_linters} linters"
+                )
                 continue
 
             if linter not in available_linters:
@@ -107,7 +112,9 @@ class SmartLinterSelector:
                     break
 
         return LinterSelectionResult(
-            recommended_linters=recommended, skipped_linters=skipped, reasoning=reasoning
+            recommended_linters=recommended,
+            skipped_linters=skipped,
+            reasoning=reasoning,
         )
 
     def _get_relevant_linters(self) -> Set[str]:
@@ -134,7 +141,9 @@ class SmartLinterSelector:
 
         return relevant
 
-    def _prioritize_linters(self, linters: Set[str], prefer_fast: bool = False) -> List[str]:
+    def _prioritize_linters(
+        self, linters: Set[str], prefer_fast: bool = False
+    ) -> List[str]:
         """Prioritize linters based on project characteristics and preferences."""
         prioritized = []
         remaining = set(linters)
