@@ -92,6 +92,9 @@ RUN npm install -g \
 # Create cache directory for learning features
 RUN mkdir -p /app/.aider-lint-cache && chown aider:aider /app/.aider-lint-cache
 
+# Create ansible directories for non-root user
+RUN mkdir -p /app/.ansible /app/.ansible/tmp && chown -R aider:aider /app/.ansible
+
 # Switch to non-root user
 USER aider
 

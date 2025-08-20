@@ -670,7 +670,8 @@ class LintRunner:
             # Create ansible-lint linter instance
             ansible_linter = AnsibleLintLinter(self.project_info.root_path)
             # Extract profile from kwargs, default to 'basic'
-            profile = kwargs.get("profile", "basic")
+            # Check for ansible_profile first, then profile, then default to 'basic'
+            profile = kwargs.get("ansible_profile") or kwargs.get("profile", "basic")
             logger.debug(f"ansible-lint profile from kwargs: {profile}, all kwargs: {kwargs}")
             # Run the linter with all kwargs
             modular_result = ansible_linter.run(file_paths, **kwargs)
@@ -813,13 +814,12 @@ class LintRunner:
     ) -> LintResult:
         """Fallback to legacy ansible-lint implementation."""
         logger.info("Using legacy ansible-lint implementation")
-        return self._run_legacy_linter("ansible-lint", file_paths)
+        return self._run_legacy_linter("ansible-lint", file_paths, **kwargs)
 
     def _run_legacy_linter(
-        self, linter_name: str, file_paths: Optional[List[str]] = None
+        self, linter_name: str, file_paths: Optional[List[str]] = None, **kwargs
     ) -> LintResult:
         """Run linter using the original legacy implementation."""
-        linter_name = "ansible-lint"
         if linter_name not in self.LINTER_COMMANDS:
             raise ValueError(f"Unknown linter: {linter_name}")
         # Check availability if not already checked
@@ -850,6 +850,17 @@ class LintRunner:
                 command.extend(filtered_files)
         else:
             command.append(".")
+        
+        # Handle ansible-lint specific profile option
+        if linter_name == "ansible-lint":
+            ansible_profile = kwargs.get("ansible_profile") or kwargs.get("profile", "basic")
+            # Replace the default profile in the command
+            for i, arg in enumerate(command):
+                if arg.startswith("--profile="):
+                    command[i] = f"--profile={ansible_profile}"
+                    break
+            logger.info(f"Using ansible-lint profile: {ansible_profile}")
+        
         # Run the command
         return self._execute_linter_command(
             linter_name, command, config.get("output_format", "text")
