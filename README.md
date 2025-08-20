@@ -104,7 +104,7 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 #### Option 1: Docker (Recommended for CI/CD)
 ```bash
 # Use pre-built Docker image from quay.io
-docker run --rm -v $(pwd):/workspace:ro quay.io/takinosh/aider-lint-fixer:2.0.0 --help
+docker run --rm -v $(pwd):/workspace:ro quay.io/takinosh/aider-lint-fixer:latest --help
 
 # Or use with the convenience script
 ./scripts/containers/docker-run.sh --linters flake8,eslint
