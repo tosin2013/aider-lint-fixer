@@ -263,9 +263,7 @@ class AnsibleLintLinter(BaseLinter):
                                 message=f"Rule violation: {rule_name}",
                                 severity=ErrorSeverity.ERROR,
                                 linter=self.name,
-                                fix_suggestion=self._generate_fix_suggestion(
-                                    rule_name, ""
-                                ),
+                                fix_suggestion=self._generate_fix_suggestion(rule_name, ""),
                             )
                             errors.append(error)
                     except (ValueError, IndexError):

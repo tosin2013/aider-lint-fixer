@@ -171,12 +171,8 @@ def main():
         ],
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    parser.add_argument(
-        "--coverage", "-c", action="store_true", help="Run with coverage analysis"
-    )
-    parser.add_argument(
-        "--check-deps", action="store_true", help="Check test dependencies only"
-    )
+    parser.add_argument("--coverage", "-c", action="store_true", help="Run with coverage analysis")
+    parser.add_argument("--check-deps", action="store_true", help="Check test dependencies only")
 
     args = parser.parse_args()
 

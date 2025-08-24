@@ -23,9 +23,7 @@ from .pattern_matcher import SmartErrorClassifier
 )
 @click.option("--file", "file_path", help="File path for export/import operations")
 @click.option("--max-age-days", default=30, help="Maximum age in days for cleanup")
-def cache_manager(
-    project_path: str, action: str, file_path: Optional[str], max_age_days: int
-):
+def cache_manager(project_path: str, action: str, file_path: Optional[str], max_age_days: int):
     """Manage pattern matching cache.
 
     Examples:
@@ -57,17 +55,11 @@ def cache_manager(
         print(f"\n{Fore.CYAN}🧠 Pattern Matching{Style.RESET_ALL}")
         print(f"   Languages: {', '.join(stats['pattern_matcher']['languages'])}")
         print(f"   Total patterns: {stats['pattern_matcher']['total_patterns']}")
-        print(
-            f"   Aho-Corasick available: {stats['pattern_matcher']['ahocorasick_available']}"
-        )
+        print(f"   Aho-Corasick available: {stats['pattern_matcher']['ahocorasick_available']}")
 
         print(f"\n{Fore.CYAN}🤖 Machine Learning{Style.RESET_ALL}")
-        print(
-            f"   scikit-learn available: {stats['ml_classifier']['sklearn_available']}"
-        )
-        print(
-            f"   Trained languages: {', '.join(stats['ml_classifier']['trained_languages'])}"
-        )
+        print(f"   scikit-learn available: {stats['ml_classifier']['sklearn_available']}")
+        print(f"   Trained languages: {', '.join(stats['ml_classifier']['trained_languages'])}")
 
         # Show training data counts
         for key, value in stats["ml_classifier"].items():
@@ -96,9 +88,7 @@ def cache_manager(
             print(f"{Fore.RED}❌ Import requires --file parameter{Style.RESET_ALL}")
             return
 
-        print(
-            f"\n{Fore.BLUE}📥 Importing patterns from {file_path}...{Style.RESET_ALL}"
-        )
+        print(f"\n{Fore.BLUE}📥 Importing patterns from {file_path}...{Style.RESET_ALL}")
         classifier.import_learned_patterns(file_path)
         print(f"{Fore.GREEN}✅ Import complete{Style.RESET_ALL}")
 

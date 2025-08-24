@@ -165,9 +165,7 @@ class TestCostMonitor:
         monitor.start_iteration(1)
 
         with pytest.raises(BudgetExceededException):
-            monitor.record_token_usage(
-                10000, 5000
-            )  # About $0.25, way over $0.01 budget
+            monitor.record_token_usage(10000, 5000)  # About $0.25, way over $0.01 budget
 
     def test_cost_prediction(self):
         """Test cost prediction functionality."""
@@ -271,9 +269,7 @@ class TestCostMonitorIntegration:
     def test_create_cost_monitor_function(self):
         """Test the create_cost_monitor convenience function."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            monitor = create_cost_monitor(
-                temp_dir, max_total_cost=50.0, max_iteration_cost=10.0
-            )
+            monitor = create_cost_monitor(temp_dir, max_total_cost=50.0, max_iteration_cost=10.0)
 
             assert monitor.project_path == temp_dir
             assert monitor.budget_limits.max_total_cost == 50.0

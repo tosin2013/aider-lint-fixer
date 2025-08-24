@@ -175,9 +175,7 @@ class TestContextManager:
         # Critical items should appear first
         assert "Critical item" in context
         lines = context.split("\n")
-        critical_line = next(
-            i for i, line in enumerate(lines) if "Critical item" in line
-        )
+        critical_line = next(i for i, line in enumerate(lines) if "Critical item" in line)
         low_line = next(i for i, line in enumerate(lines) if "Low item" in line)
 
         assert critical_line < low_line
@@ -188,8 +186,7 @@ class TestContextManager:
         initial_tokens = self.manager.current_tokens
         for i in range(20):
             self.manager.add_context(
-                content=f"Long content item {i} "
-                * 50,  # Make it long to consume tokens
+                content=f"Long content item {i} " * 50,  # Make it long to consume tokens
                 priority=ContextPriority.MEDIUM,
                 category="test",
             )
@@ -296,12 +293,8 @@ class TestContextManager:
     def test_pattern_hash_extraction(self):
         """Test pattern hash extraction for tracking."""
         # Test that similar patterns get same hash
-        hash1 = self.manager._extract_pattern_hash(
-            "variable x is undefined", "undefined-var"
-        )
-        hash2 = self.manager._extract_pattern_hash(
-            "variable y is undefined", "undefined-var"
-        )
+        hash1 = self.manager._extract_pattern_hash("variable x is undefined", "undefined-var")
+        hash2 = self.manager._extract_pattern_hash("variable y is undefined", "undefined-var")
 
         # Should be similar (variables normalized)
         assert len(hash1) == 8  # MD5 hash truncated to 8 chars

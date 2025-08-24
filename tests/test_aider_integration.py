@@ -39,9 +39,7 @@ class TestAiderIntegration(unittest.TestCase):
 
         # Create a mock config manager with proper return value
         self.mock_config_manager = Mock(spec=ConfigManager)
-        self.mock_config_manager.get_api_key_for_provider.return_value = (
-            "sk-test123456789"
-        )
+        self.mock_config_manager.get_api_key_for_provider.return_value = "sk-test123456789"
 
         # Create test files
         self.test_file = self.project_root / "test_file.py"
@@ -223,9 +221,7 @@ class TestAiderIntegration(unittest.TestCase):
             linter="flake8",
         )
 
-        result = integration._run_aider_fix(
-            "test_file.py", "test prompt", "test-session-id"
-        )
+        result = integration._run_aider_fix("test_file.py", "test prompt", "test-session-id")
 
         self.assertTrue(result["success"])
         self.assertIn("Successfully fixed", result["output"])
@@ -262,9 +258,7 @@ class TestAiderIntegration(unittest.TestCase):
             linter="flake8",
         )
 
-        result = integration._run_aider_fix(
-            "test_file.py", "test prompt", "test-session-id"
-        )
+        result = integration._run_aider_fix("test_file.py", "test prompt", "test-session-id")
 
         self.assertFalse(result["success"])
         self.assertIn("Authentication error", result["error"])
@@ -335,9 +329,7 @@ class TestConfigManagerIntegration(unittest.TestCase):
             print(f"API key value: {api_key[:10]}...")
 
         # Test with the actual project path
-        project_path = (
-            "/Users/tosinakinosho/workspaces/aider-lint-fixer/test/autotrain-repo"
-        )
+        project_path = "/Users/tosinakinosho/workspaces/aider-lint-fixer/test/autotrain-repo"
         project_config = config_manager.load_config(project_path)
         print(f"Project config loaded: {bool(project_config)}")
         print(f"LLM provider: {project_config.llm.provider}")

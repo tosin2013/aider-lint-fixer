@@ -80,9 +80,7 @@ class NativeLintDetector:
 
                 # Special handling for scripts that call make
                 if not linter_type and "make lint" in script_command:
-                    linter_type = (
-                        "eslint"  # Assume make lint is for ESLint in JS projects
-                    )
+                    linter_type = "eslint"  # Assume make lint is for ESLint in JS projects
 
                 if linter_type:
                     # Build the npm command
@@ -187,9 +185,7 @@ class NativeLintDetector:
 
             # Look for lint environments
             for section_name in config.sections():
-                if "lint" in section_name.lower() and section_name.startswith(
-                    "testenv:"
-                ):
+                if "lint" in section_name.lower() and section_name.startswith("testenv:"):
                     env_name = section_name.replace("testenv:", "")
                     commands_str = config.get(section_name, "commands", fallback="")
 
@@ -285,9 +281,7 @@ class NativeLintDetector:
 
             # Add a quick test (just version or help)
             if command.linter_type == "eslint":
-                test_command = command.command[:2] + [
-                    "--version"
-                ]  # npm run lint --version
+                test_command = command.command[:2] + ["--version"]  # npm run lint --version
 
             result = subprocess.run(
                 test_command,

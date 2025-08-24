@@ -182,9 +182,7 @@ class TestAnsibleLintIntegration(unittest.TestCase):
         basic_result = linter.run_with_profile("basic", [str(self.playbook_path)])
 
         # Test production profile
-        production_result = linter.run_with_profile(
-            "production", [str(self.playbook_path)]
-        )
+        production_result = linter.run_with_profile("production", [str(self.playbook_path)])
 
         # Both should succeed (even with errors found)
         self.assertTrue(basic_result.success)
@@ -237,9 +235,7 @@ class TestAnsibleLintIntegration(unittest.TestCase):
 
     @patch("aider_lint_fixer.aider_integration.AiderIntegration._find_aider_executable")
     @patch("subprocess.run")
-    def test_ansible_lint_with_aider_integration(
-        self, mock_subprocess, mock_find_aider
-    ):
+    def test_ansible_lint_with_aider_integration(self, mock_subprocess, mock_find_aider):
         """Test that ansible-lint errors can be processed by aider integration."""
         # Skip test if ansible-lint is not installed
         lint_runner = LintRunner(self.project_info)
@@ -269,9 +265,7 @@ class TestAnsibleLintIntegration(unittest.TestCase):
         mock_config_manager = Mock()
         mock_config_manager.get_api_key_for_provider.return_value = "test-api-key"
 
-        integration = AiderIntegration(
-            config, str(self.project_root), mock_config_manager
-        )
+        integration = AiderIntegration(config, str(self.project_root), mock_config_manager)
 
         # Run lint and get errors
         lint_result = lint_runner.run_linter("ansible-lint")

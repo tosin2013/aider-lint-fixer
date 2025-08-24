@@ -67,7 +67,7 @@ install-dev: ## Install development dependencies
 lint: ## Run all linters
 	@echo "$(BLUE)Running linters...$(NC)"
 	@echo "$(YELLOW)Running flake8...$(NC)"
-	flake8 $(PACKAGE_NAME) *.py tests/ --max-line-length=88 --extend-ignore=E203,W503
+	flake8 $(PACKAGE_NAME) *.py tests/ --max-line-length=100 --extend-ignore=E203,W503,E501
 	@echo "$(YELLOW)Running pylint...$(NC)"
 	pylint $(PACKAGE_NAME) --disable=C0114,C0115,C0116
 	@echo "$(GREEN)Linting complete!$(NC)"
@@ -75,14 +75,14 @@ lint: ## Run all linters
 format: ## Format code with black and isort
 	@echo "$(BLUE)Formatting code...$(NC)"
 	@echo "$(YELLOW)Running black...$(NC)"
-	black $(PACKAGE_NAME) *.py tests/ --line-length=88
+	black $(PACKAGE_NAME) *.py tests/ --line-length=100
 	@echo "$(YELLOW)Running isort...$(NC)"
 	isort $(PACKAGE_NAME) *.py tests/ --profile=black
 	@echo "$(GREEN)Code formatting complete!$(NC)"
 
 format-check: ## Check if code is properly formatted
 	@echo "$(BLUE)Checking code formatting...$(NC)"
-	black $(PACKAGE_NAME) *.py tests/ --check --line-length=88
+	black $(PACKAGE_NAME) *.py tests/ --check --line-length=100
 	isort $(PACKAGE_NAME) *.py tests/ --check-only --profile=black
 	@echo "$(GREEN)Format check complete!$(NC)"
 

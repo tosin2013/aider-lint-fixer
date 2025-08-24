@@ -96,7 +96,7 @@ aider_lint_fixer = ["config/*.yaml", "templates/*.j2"]
 
 # Black configuration
 [tool.black]
-line-length = 88
+line-length = 100
 target-version = ['py311']
 include = '\.pyi?$'
 extend-exclude = '''
@@ -120,7 +120,7 @@ extend-exclude = '''
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-line_length = 88
+line_length = 100
 include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
@@ -137,7 +137,7 @@ sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 
 # Flake8 configuration
 [tool.flake8]
-max-line-length = 88
+max-line-length = 100
 extend-ignore = ["E203", "W503", "E501"]
 exclude = [
     ".git",

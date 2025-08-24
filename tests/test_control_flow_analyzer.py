@@ -235,9 +235,7 @@ function processArray(arr) {
         """Test control flow node creation."""
         self.analyzer.current_analysis = ControlFlowAnalysis(file_path="test.py")
 
-        node = self.analyzer._create_node(
-            ControlFlowNodeType.CONDITION, 10, "if x > 0:"
-        )
+        node = self.analyzer._create_node(ControlFlowNodeType.CONDITION, 10, "if x > 0:")
 
         assert node.node_id == "node_1"
         assert node.node_type == ControlFlowNodeType.CONDITION
@@ -439,12 +437,8 @@ def nested_function():
 
             # Should detect high complexity due to nesting
             if analysis.control_structures:
-                max_complexity = max(
-                    s.complexity_score for s in analysis.control_structures
-                )
-                assert (
-                    max_complexity > 1.0
-                )  # Should have complexity penalty for nesting
+                max_complexity = max(s.complexity_score for s in analysis.control_structures)
+                assert max_complexity > 1.0  # Should have complexity penalty for nesting
 
     def test_error_line_filtering(self):
         """Test analyzing file with focus on specific error lines."""

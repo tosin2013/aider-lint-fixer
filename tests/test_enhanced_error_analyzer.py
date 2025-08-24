@@ -115,9 +115,7 @@ class TestEnhancedErrorAnalyzer:
             )
         }
 
-        with patch.object(
-            self.analyzer.control_flow_analyzer, "analyze_file"
-        ) as mock_cf_analyze:
+        with patch.object(self.analyzer.control_flow_analyzer, "analyze_file") as mock_cf_analyze:
             mock_cf_analyze.return_value = MagicMock(
                 control_structures=[],
                 unreachable_code=[],
@@ -173,9 +171,7 @@ class TestEnhancedErrorAnalyzer:
                 "complexity_context": "high",
             }
 
-            error_analysis = self.analyzer._analyze_error(
-                error, "test content", mock_cf_analysis
-            )
+            error_analysis = self.analyzer._analyze_error(error, "test content", mock_cf_analysis)
 
             # Should have enhanced the analysis with control flow context
             assert hasattr(error_analysis, "control_flow_context")
@@ -208,9 +204,7 @@ class TestEnhancedErrorAnalyzer:
                 "complexity_context": "low",
             }
 
-            error_analysis = self.analyzer._analyze_error(
-                error, "test content", mock_cf_analysis
-            )
+            error_analysis = self.analyzer._analyze_error(error, "test content", mock_cf_analysis)
 
             # Should mark as unfixable due to unreachable code
             assert error_analysis.fixable is False
@@ -221,9 +215,7 @@ class TestEnhancedErrorAnalyzer:
         file_path = "test_file.py"
         error_lines = {10, 15, 20}
 
-        with patch.object(
-            self.analyzer.control_flow_analyzer, "analyze_file"
-        ) as mock_analyze:
+        with patch.object(self.analyzer.control_flow_analyzer, "analyze_file") as mock_analyze:
             mock_analyze.return_value = MagicMock()
 
             # First call should trigger analysis
@@ -243,9 +235,7 @@ class TestEnhancedErrorAnalyzer:
         file_path = "problematic_file.py"
         error_lines = {5}
 
-        with patch.object(
-            self.analyzer.control_flow_analyzer, "analyze_file"
-        ) as mock_analyze:
+        with patch.object(self.analyzer.control_flow_analyzer, "analyze_file") as mock_analyze:
             mock_analyze.side_effect = Exception("Analysis failed")
 
             result = self.analyzer._get_control_flow_analysis(file_path, error_lines)
@@ -277,9 +267,7 @@ class TestEnhancedErrorAnalyzer:
                 "reachable": True,
             }
 
-            error_analysis = self.analyzer._analyze_error(
-                error, "test content", mock_cf_analysis
-            )
+            error_analysis = self.analyzer._analyze_error(error, "test content", mock_cf_analysis)
 
             # Should have increased complexity due to high complexity context
             # The exact complexity depends on the original categorization
@@ -329,9 +317,7 @@ class TestEnhancedErrorAnalyzer:
         # Create mock file analyses
         mock_file_analyses = {
             "hotspot.py": MagicMock(
-                error_analyses=[
-                    MagicMock(error=MagicMock(rule_id="test-rule")) for _ in range(10)
-                ]
+                error_analyses=[MagicMock(error=MagicMock(rule_id="test-rule")) for _ in range(10)]
             )
         }
 
@@ -444,9 +430,7 @@ class TestEnhancedErrorAnalyzer:
         with patch.object(
             self.analyzer.structural_detector, "analyze_structural_problems"
         ) as mock_structural:
-            with patch.object(
-                self.analyzer.control_flow_analyzer, "analyze_file"
-            ) as mock_cf:
+            with patch.object(self.analyzer.control_flow_analyzer, "analyze_file") as mock_cf:
                 # Setup mocks
                 mock_structural.return_value = MagicMock(
                     architectural_score=65.0,

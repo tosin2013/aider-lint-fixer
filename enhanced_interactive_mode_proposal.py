@@ -92,9 +92,7 @@ def enhanced_interactive_mode(
 
     # Process unfixable errors with warnings
     if unfixable_errors and (not max_errors or len(choices) < max_errors):
-        print(
-            f"\n{Fore.YELLOW}⚠️  Unfixable Errors (Manual Review Recommended):{Style.RESET_ALL}"
-        )
+        print(f"\n{Fore.YELLOW}⚠️  Unfixable Errors (Manual Review Recommended):{Style.RESET_ALL}")
 
         for i, error_analysis in enumerate(unfixable_errors, 1):
             if max_errors and len(choices) >= max_errors:

@@ -64,9 +64,7 @@ class BaseLinter(ABC):
         pass
 
     @abstractmethod
-    def build_command(
-        self, file_paths: Optional[List[str]] = None, **kwargs
-    ) -> List[str]:
+    def build_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
         """Build the command to run the linter."""
         pass
 
@@ -92,9 +90,7 @@ class BaseLinter(ABC):
         # Filter files by supported extensions
         if file_paths:
             filtered_files = [
-                f
-                for f in file_paths
-                if any(f.endswith(ext) for ext in self.supported_extensions)
+                f for f in file_paths if any(f.endswith(ext) for ext in self.supported_extensions)
             ]
             if not filtered_files:
                 return LinterResult(
@@ -119,9 +115,7 @@ class BaseLinter(ABC):
             )
             execution_time = time.time() - start_time
             # Parse output
-            errors, warnings = self.parse_output(
-                result.stdout, result.stderr, result.returncode
-            )
+            errors, warnings = self.parse_output(result.stdout, result.stderr, result.returncode)
             # Determine success
             success = self.is_success(result.returncode, errors, warnings)
             return LinterResult(
@@ -166,9 +160,7 @@ class BaseLinter(ABC):
         # Simple version check - can be overridden for more complex logic
         return any(version.startswith(v) for v in self.supported_versions)
 
-    def run_command(
-        self, command: List[str], timeout: int = 30
-    ) -> subprocess.CompletedProcess:
+    def run_command(self, command: List[str], timeout: int = 30) -> subprocess.CompletedProcess:
         """Helper method to run a command."""
         return subprocess.run(
             command,

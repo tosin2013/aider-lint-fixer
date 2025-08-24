@@ -58,9 +58,7 @@ class CommunityLearningSystem:
         self.project_root = Path(project_root)
         self.learning_cache = self.project_root / ".aider-lint-cache"
         self.manual_fixes_file = self.learning_cache / "manual_fixes.json"
-        self.community_contributions = (
-            self.learning_cache / "community_contributions.json"
-        )
+        self.community_contributions = self.learning_cache / "community_contributions.json"
 
         # Ensure cache directory exists
         self.learning_cache.mkdir(exist_ok=True)
@@ -104,19 +102,13 @@ class CommunityLearningSystem:
     def _update_local_learning(self, attempt: ManualFixAttempt):
         """Update local learning system with manual fix results."""
         # This would integrate with the existing SmartErrorClassifier
-        print(
-            f"🧠 Local Learning: Recording {attempt.error.rule_id} -> {attempt.fix_successful}"
-        )
+        print(f"🧠 Local Learning: Recording {attempt.error.rule_id} -> {attempt.fix_successful}")
 
         # Example: Update pattern matching for similar errors
         if attempt.fix_successful and not attempt.original_classification:
-            print(
-                f"   📈 Upgrading classification for pattern: {attempt.error.message[:50]}..."
-            )
+            print(f"   📈 Upgrading classification for pattern: {attempt.error.message[:50]}...")
         elif not attempt.fix_successful and attempt.original_classification:
-            print(
-                f"   📉 Downgrading classification for pattern: {attempt.error.message[:50]}..."
-            )
+            print(f"   📉 Downgrading classification for pattern: {attempt.error.message[:50]}...")
 
     def _evaluate_community_contribution(self, attempt: ManualFixAttempt):
         """Evaluate if this fix could benefit the community."""
@@ -124,18 +116,14 @@ class CommunityLearningSystem:
         similar_attempts = self._find_similar_attempts(attempt)
 
         if len(similar_attempts) >= 2:  # Need multiple successful fixes
-            success_rate = sum(
-                1 for a in similar_attempts if a["fix_successful"]
-            ) / len(similar_attempts)
+            success_rate = sum(1 for a in similar_attempts if a["fix_successful"]) / len(
+                similar_attempts
+            )
 
             if success_rate >= 0.8:  # 80% success rate threshold
-                contribution = self._create_community_contribution(
-                    attempt, similar_attempts
-                )
+                contribution = self._create_community_contribution(attempt, similar_attempts)
                 self._save_community_contribution(contribution)
-                print(
-                    f"🌟 Community Contribution Identified: {contribution.github_issue_title}"
-                )
+                print(f"🌟 Community Contribution Identified: {contribution.github_issue_title}")
 
     def _find_similar_attempts(self, attempt: ManualFixAttempt) -> List[Dict[str, Any]]:
         """Find similar manual fix attempts."""
@@ -224,9 +212,7 @@ This enhancement request was automatically generated from user feedback in the c
         with open(self.community_contributions, "w") as f:
             json.dump(contributions, f, indent=2)
 
-    def generate_github_issues(
-        self, auto_create: bool = False
-    ) -> List[CommunityContribution]:
+    def generate_github_issues(self, auto_create: bool = False) -> List[CommunityContribution]:
         """Generate GitHub issues for community contributions."""
         if not self.community_contributions.exists():
             return []
@@ -241,9 +227,7 @@ This enhancement request was automatically generated from user feedback in the c
         for i, contrib in enumerate(contributions, 1):
             print(f"\n{i}. {contrib.github_issue_title}")
             print(f"   Pattern: {contrib.error_pattern}")
-            print(
-                f"   Success Rate: {contrib.success_rate:.1f}% ({contrib.sample_count} samples)"
-            )
+            print(f"   Success Rate: {contrib.success_rate:.1f}% ({contrib.sample_count} samples)")
 
             if auto_create:
                 # This would integrate with GitHub API

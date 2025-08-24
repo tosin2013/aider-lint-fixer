@@ -35,9 +35,7 @@ try:
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
-    logging.warning(
-        "scikit-learn not available, using simplified convergence detection"
-    )
+    logging.warning("scikit-learn not available, using simplified convergence detection")
 
 logger = logging.getLogger(__name__)
 
@@ -176,9 +174,7 @@ class AdvancedConvergenceAnalyzer:
                 current_state=ConvergenceState.IMPROVING,
                 confidence=0.1,
                 predicted_final_errors=(
-                    self.current_patterns[-1].errors_after
-                    if self.current_patterns
-                    else 0
+                    self.current_patterns[-1].errors_after if self.current_patterns else 0
                 ),
                 predicted_iterations_remaining=5,
                 improvement_potential=0.5,
@@ -192,9 +188,7 @@ class AdvancedConvergenceAnalyzer:
         predictions = self._predict_future_performance()
 
         # Generate recommendations
-        recommendation = self._generate_stopping_recommendation(
-            current_state, predictions
-        )
+        recommendation = self._generate_stopping_recommendation(current_state, predictions)
 
         # Calculate confidence based on pattern consistency and historical data
         confidence = self._calculate_confidence(current_state, predictions)
@@ -261,9 +255,7 @@ class AdvancedConvergenceAnalyzer:
             if self.improvement_predictor and len(features) > 0:
                 # Predict improvement potential
                 scaled_features = self.scaler.transform([features])
-                improvement_pred = self.improvement_predictor.predict(scaled_features)[
-                    0
-                ]
+                improvement_pred = self.improvement_predictor.predict(scaled_features)[0]
                 predictions["improvement_potential"] = max(0, min(1, improvement_pred))
 
                 # Estimate iterations remaining based on improvement rate
@@ -289,9 +281,7 @@ class AdvancedConvergenceAnalyzer:
         if len(self.current_patterns) < 2:
             return {
                 "final_errors": (
-                    self.current_patterns[-1].errors_after
-                    if self.current_patterns
-                    else 0
+                    self.current_patterns[-1].errors_after if self.current_patterns else 0
                 ),
                 "iterations_remaining": 5,
                 "improvement_potential": 0.3,
@@ -305,9 +295,7 @@ class AdvancedConvergenceAnalyzer:
 
         if avg_improvement > 0.05:
             # Good improvement trend
-            iterations_remaining = min(
-                8, max(2, int(current_errors * 0.1 / avg_improvement))
-            )
+            iterations_remaining = min(8, max(2, int(current_errors * 0.1 / avg_improvement)))
             final_errors = max(
                 0, int(current_errors * (1 - avg_improvement * iterations_remaining))
             )
@@ -334,16 +322,12 @@ class AdvancedConvergenceAnalyzer:
 
         if state == ConvergenceState.CONVERGED:
             action = "STOP - Convergence achieved"
-            risk_factors.append(
-                "Further iterations unlikely to yield significant improvement"
-            )
+            risk_factors.append("Further iterations unlikely to yield significant improvement")
 
         elif state == ConvergenceState.PLATEAUING:
             if predictions["improvement_potential"] < 0.2:
                 action = "STOP - Plateau reached with low improvement potential"
-                optimizations.append(
-                    "Consider switching to architect mode for remaining errors"
-                )
+                optimizations.append("Consider switching to architect mode for remaining errors")
             else:
                 action = "CONTINUE - Potential for breakthrough"
                 optimizations.append("Try different error prioritization strategy")
@@ -373,9 +357,7 @@ class AdvancedConvergenceAnalyzer:
             "optimizations": optimizations,
         }
 
-    def _calculate_confidence(
-        self, state: ConvergenceState, predictions: Dict
-    ) -> float:
+    def _calculate_confidence(self, state: ConvergenceState, predictions: Dict) -> float:
         """Calculate confidence in the convergence analysis."""
 
         base_confidence = 0.5
@@ -385,9 +367,7 @@ class AdvancedConvergenceAnalyzer:
 
         # Increase confidence with consistent patterns
         if len(self.current_patterns) >= 3:
-            recent_improvements = [
-                p.improvement_rate for p in self.current_patterns[-3:]
-            ]
+            recent_improvements = [p.improvement_rate for p in self.current_patterns[-3:]]
             consistency = 1.0 - np.std(recent_improvements)
             pattern_confidence = max(0, min(0.3, consistency))
         else:
@@ -397,10 +377,7 @@ class AdvancedConvergenceAnalyzer:
         historical_confidence = min(0.2, len(self.historical_sessions) * 0.02)
 
         total_confidence = (
-            base_confidence
-            + data_confidence
-            + pattern_confidence
-            + historical_confidence
+            base_confidence + data_confidence + pattern_confidence + historical_confidence
         )
 
         return min(1.0, total_confidence)
@@ -485,9 +462,7 @@ class AdvancedConvergenceAnalyzer:
 
         try:
             # Train improvement predictor
-            self.improvement_predictor = RandomForestRegressor(
-                n_estimators=50, random_state=42
-            )
+            self.improvement_predictor = RandomForestRegressor(n_estimators=50, random_state=42)
             X_scaled = self.scaler.fit_transform(X)
             self.improvement_predictor.fit(X_scaled, y_improvement)
 
@@ -527,9 +502,7 @@ class AdvancedConvergenceAnalyzer:
                 improvement = next_pattern.improvement_rate
 
                 # Target: convergence state
-                convergence_state = (
-                    1 if session.final_state == ConvergenceState.CONVERGED else 0
-                )
+                convergence_state = 1 if session.final_state == ConvergenceState.CONVERGED else 0
 
                 X.append(features)
                 y_improvement.append(improvement)
@@ -537,9 +510,7 @@ class AdvancedConvergenceAnalyzer:
 
         return X, y_improvement, y_convergence
 
-    def _extract_session_features(
-        self, patterns: List[IterationPattern]
-    ) -> List[float]:
+    def _extract_session_features(self, patterns: List[IterationPattern]) -> List[float]:
         """Extract features from session patterns."""
 
         if len(patterns) < 2:
@@ -579,16 +550,12 @@ class AdvancedConvergenceAnalyzer:
                         final_state=ConvergenceState(session_data["final_state"]),
                         total_iterations=session_data["total_iterations"],
                         final_improvement=session_data["final_improvement"],
-                        project_characteristics=session_data.get(
-                            "project_characteristics", {}
-                        ),
+                        project_characteristics=session_data.get("project_characteristics", {}),
                     )
 
                     self.historical_sessions.append(session)
 
-                logger.info(
-                    f"Loaded {len(self.historical_sessions)} historical sessions"
-                )
+                logger.info(f"Loaded {len(self.historical_sessions)} historical sessions")
 
             except Exception as e:
                 logger.warning(f"Failed to load convergence history: {e}")
@@ -600,10 +567,7 @@ class AdvancedConvergenceAnalyzer:
             return
 
         total_improvement = (
-            (
-                self.current_patterns[0].errors_before
-                - self.current_patterns[-1].errors_after
-            )
+            (self.current_patterns[0].errors_before - self.current_patterns[-1].errors_after)
             / self.current_patterns[0].errors_before
             if self.current_patterns[0].errors_before > 0
             else 0

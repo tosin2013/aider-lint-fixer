@@ -53,9 +53,7 @@ def test_progress_tracker_basic_functionality():
 
         # Test with large project (should use progress bars if tqdm available)
         large_tracker = EnhancedProgressTracker(".", total_errors=150, verbose=False)
-        assert (
-            large_tracker.is_large_project
-        ), "150 errors should be considered large project"
+        assert large_tracker.is_large_project, "150 errors should be considered large project"
         print("   ✅ Large project detection works")
 
         # Test stage updates
@@ -114,9 +112,7 @@ def test_progress_callback_integration():
             }
         )
 
-        callback(
-            {"stage": "fixing_error_group", "complexity": "trivial", "group_errors": 5}
-        )
+        callback({"stage": "fixing_error_group", "complexity": "trivial", "group_errors": 5})
 
         callback({"stage": "file_completed", "session_results": 8, "file_errors": 10})
 

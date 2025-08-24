@@ -31,9 +31,7 @@ class TestFunctionDependency:
 
     def test_function_dependency_initialization(self):
         """Test FunctionDependency initialization."""
-        func_dep = FunctionDependency(
-            name="test_function", file_path="test.py", line_number=10
-        )
+        func_dep = FunctionDependency(name="test_function", file_path="test.py", line_number=10)
 
         assert func_dep.name == "test_function"
         assert func_dep.file_path == "test.py"

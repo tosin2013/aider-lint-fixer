@@ -119,9 +119,7 @@ class PythonASTAnalyzer:
         func_name = node.name
         func_key = f"{file_path}:{func_name}"
 
-        func_dep = FunctionDependency(
-            name=func_name, file_path=file_path, line_number=node.lineno
-        )
+        func_dep = FunctionDependency(name=func_name, file_path=file_path, line_number=node.lineno)
 
         # Analyze function body
         for child in ast.walk(node):
@@ -276,9 +274,7 @@ class JavaScriptASTAnalyzer:
             matches = re.finditer(pattern, content, re.MULTILINE)
             for match in matches:
                 if len(match.groups()) == 2:
-                    imported_names = {
-                        name.strip() for name in match.group(1).split(",")
-                    }
+                    imported_names = {name.strip() for name in match.group(1).split(",")}
                     module = match.group(2)
                 else:
                     imported_names = set()
@@ -355,9 +351,7 @@ class EnhancedDependencyAnalyzer:
             self.dependency_graph.add_node(import_dep.from_file, type="file")
 
             # Try to resolve module to file path
-            resolved_path = self._resolve_module_path(
-                import_dep.to_module, import_dep.from_file
-            )
+            resolved_path = self._resolve_module_path(import_dep.to_module, import_dep.from_file)
             if resolved_path:
                 self.dependency_graph.add_node(resolved_path, type="file")
                 self.dependency_graph.add_edge(
@@ -367,9 +361,7 @@ class EnhancedDependencyAnalyzer:
                     imported_names=import_dep.imported_names,
                 )
 
-    def _build_function_dependency_graph(
-        self, functions: Dict[str, FunctionDependency]
-    ):
+    def _build_function_dependency_graph(self, functions: Dict[str, FunctionDependency]):
         """Build function-level dependency graph."""
         for func_key, func_dep in functions.items():
             self.function_graph.add_node(func_key, **func_dep.__dict__)
@@ -381,9 +373,7 @@ class EnhancedDependencyAnalyzer:
                     if other_func.name == called_func:
                         self.function_graph.add_edge(func_key, other_key, type="calls")
 
-    def _build_variable_dependency_graph(
-        self, variables: Dict[str, VariableDependency]
-    ):
+    def _build_variable_dependency_graph(self, variables: Dict[str, VariableDependency]):
         """Build variable-level dependency graph."""
         for var_key, var_dep in variables.items():
             self.variable_graph.add_node(var_key, **var_dep.__dict__)

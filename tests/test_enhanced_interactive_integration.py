@@ -66,9 +66,7 @@ def test_enhanced_interactive_import():
 
     # Test enum values
     choices = [UserChoice.FIX, UserChoice.SKIP, UserChoice.ABORT]
-    print(
-        f"   ✅ UserChoice enum has {len(choices)} options: {[c.value for c in choices]}"
-    )
+    print(f"   ✅ UserChoice enum has {len(choices)} options: {[c.value for c in choices]}")
 
     assert len(choices) == 3, "UserChoice enum should have 3 options"
     assert all(
@@ -101,15 +99,11 @@ def test_community_learning_integration():
     assert all(
         key in feedback for key in expected_keys
     ), f"Missing feedback keys: {set(expected_keys) - set(feedback.keys())}"
-    assert isinstance(
-        feedback["total_attempts"], int
-    ), "total_attempts should be an integer"
+    assert isinstance(feedback["total_attempts"], int), "total_attempts should be an integer"
     assert isinstance(
         feedback["successful_overrides"], int
     ), "successful_overrides should be an integer"
-    assert isinstance(
-        feedback["failed_overrides"], int
-    ), "failed_overrides should be an integer"
+    assert isinstance(feedback["failed_overrides"], int), "failed_overrides should be an integer"
     assert isinstance(
         feedback["classification_improvements"], list
     ), "classification_improvements should be a list"

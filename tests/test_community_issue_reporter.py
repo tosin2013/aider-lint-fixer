@@ -81,9 +81,7 @@ def test_community_issue_creation():
             # Analyze for community issues
             potential_issues = reporter.analyze_for_community_issues(manual_attempts)
 
-            print(
-                f"   ✅ Analyzed attempts and found {len(potential_issues)} potential issues"
-            )
+            print(f"   ✅ Analyzed attempts and found {len(potential_issues)} potential issues")
 
             if potential_issues:
                 issue = potential_issues[0]
@@ -97,9 +95,7 @@ def test_community_issue_creation():
 
                 # Test loading issues
                 loaded_issues = reporter.list_potential_issues()
-                assert len(loaded_issues) == len(
-                    potential_issues
-                ), "Issue count mismatch"
+                assert len(loaded_issues) == len(potential_issues), "Issue count mismatch"
                 print(f"   ✅ Successfully loaded {len(loaded_issues)} issues")
 
                 assert True  # Test passed
@@ -224,9 +220,7 @@ def test_integration_with_enhanced_interactive():
             potential_issues = reporter.analyze_for_community_issues(manual_attempts)
 
             if potential_issues:
-                print(
-                    f"   ✅ Integration would create {len(potential_issues)} community issues"
-                )
+                print(f"   ✅ Integration would create {len(potential_issues)} community issues")
                 assert True  # Test passed
             else:
                 print(f"   ⚠️  No issues would be created (may need more samples)")
@@ -264,9 +258,7 @@ def demonstrate_community_issue_workflow():
     print("      # Override 'unfixable' trailing spaces error")
     print("      # Choose 'try-fix' when prompted")
     print("      # After successful fixes, system will prompt:")
-    print(
-        "      # 'Would you like to help improve the system by creating community issues?'"
-    )
+    print("      # 'Would you like to help improve the system by creating community issues?'")
 
 
 def main():

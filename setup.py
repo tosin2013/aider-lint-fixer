@@ -9,15 +9,11 @@ try:
     with open(os.path.join(here, "README.md"), "r", encoding="utf-8") as fh:
         long_description = fh.read()
 except FileNotFoundError:
-    long_description = (
-        "Automated lint error detection and fixing powered by aider.chat and AI"
-    )
+    long_description = "Automated lint error detection and fixing powered by aider.chat and AI"
 
 try:
     with open(os.path.join(here, "requirements.txt"), "r", encoding="utf-8") as fh:
-        requirements = [
-            line.strip() for line in fh if line.strip() and not line.startswith("#")
-        ]
+        requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 except FileNotFoundError:
     requirements = [
         "aider-chat>=0.85.0",
