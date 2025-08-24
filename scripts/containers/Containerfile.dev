@@ -76,6 +76,9 @@ RUN pip install --no-cache-dir -e ".[all]"
 # Create cache directory for learning features (as root)
 RUN mkdir -p .aider-lint-cache && chown 1001:0 .aider-lint-cache && chmod 755 .aider-lint-cache
 
+# Create ansible directories for non-root user (as root)
+RUN mkdir -p /home/default/.ansible /home/default/.ansible/tmp && chown -R 1001:0 /home/default/.ansible && chmod -R 755 /home/default/.ansible
+
 # Switch back to non-root user
 USER 1001
 
@@ -96,6 +99,10 @@ RUN echo "=== Python Version ===" && python --version && \
 ENV PYTHONPATH=/workspace
 ENV PATH="/home/default/.local/bin:$PATH"
 ENV TERM=xterm-256color
+
+# Ansible configuration for non-root user
+ENV ANSIBLE_LOCAL_TEMP=/home/default/.ansible/tmp
+ENV ANSIBLE_REMOTE_TEMP=/home/default/.ansible/tmp
 
 # Development convenience aliases (via .bashrc)
 RUN echo 'alias ll="ls -la"' >> ~/.bashrc && \
