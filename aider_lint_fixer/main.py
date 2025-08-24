@@ -148,10 +148,8 @@ def print_lint_summary(results, baseline_results=None, baseline_total=None):
     if baseline_total and baseline_total != total_errors:
         print(f"\n   Processing Total: {total_errors} errors, {total_warnings} warnings")
         print(
-            f"   Baseline Total: {baseline_total} errors (showing {
-                total_errors /
-                baseline_total *
-                100:.1f}% of all errors)"
+            f"   Baseline Total: {baseline_total} errors (showing "
+            f"{total_errors / baseline_total * 100:.1f}% of all errors)"
         )
     else:
         print(f"\n   Total: {total_errors} errors, {total_warnings} warnings")
