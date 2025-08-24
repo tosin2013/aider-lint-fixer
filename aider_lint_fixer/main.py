@@ -619,22 +619,24 @@ def main(
         # Get project info for availability detection
         project_detector = LocalProjectDetector()
         project_info = project_detector.detect_project(project_path)
-        
+
         # Create lint runner to check actual availability
         lint_runner = LintRunner(project_info)
-        
+
         # Get static list of supported linters
         static_linters_list = get_supported_linters()
-        
+
         # Check actual availability
         available_linters = lint_runner._detect_available_linters(static_linters_list)
-        
+
         # Separate available and unavailable linters
-        actually_available = [linter for linter, available in available_linters.items() if available]
+        actually_available = [
+            linter for linter, available in available_linters.items() if available
+        ]
         unavailable = [linter for linter, available in available_linters.items() if not available]
-        
+
         compatibility_info = get_platform_compatibility_info()
-        
+
         if output_format == "json":
             import json
 
@@ -649,18 +651,20 @@ def main(
             print(f"Available linters on {platform.system()}:")
             for linter in actually_available:
                 print(f"  ✅ {linter}")
-            
+
             if unavailable:
                 print(f"\nUnavailable linters (not installed):")
                 for linter in unavailable:
                     print(f"  ❌ {linter}")
-            
+
             # Show platform compatibility notes if any
             if compatibility_info:
                 print("\nPlatform compatibility notes:")
                 for linter, note in compatibility_info.items():
                     print(f"  ⚠️  {linter}: {note}")
-            print(f"\nTotal: {len(actually_available)} linters available, {len(unavailable)} unavailable")
+            print(
+                f"\nTotal: {len(actually_available)} linters available, {len(unavailable)} unavailable"
+            )
             print("Use --linters <name1,name2> to specify which linters to run")
         return
     # Handle stats flag

@@ -472,16 +472,16 @@ class LintRunner:
 
     def _check_modular_linter_availability(self, linter_name: str) -> Optional[bool]:
         """Check availability using modular linter implementation if available.
-        
+
         Args:
             linter_name: Name of the linter to check
-            
+
         Returns:
             True if available, False if not available, None if no modular implementation
         """
         # Import modular linters
         _import_modular_linters()
-        
+
         # Map linter names to their modular classes
         modular_linters = {
             "ansible-lint": AnsibleLintLinter,
@@ -491,11 +491,11 @@ class LintRunner:
             "jshint": JSHintLinter,
             "prettier": PrettierLinter,
         }
-        
+
         linter_class = modular_linters.get(linter_name)
         if linter_class is None:
             return None  # No modular implementation
-            
+
         try:
             # Create linter instance and check availability
             linter_instance = linter_class(str(self.project_info.root_path))
@@ -530,7 +530,7 @@ class LintRunner:
                 logger.debug(f"Skipping {linter_name} on Windows (platform incompatibility)")
                 available[linter_name] = False
                 continue
-                
+
             # First try modular linter availability check
             modular_availability = self._check_modular_linter_availability(linter_name)
             if modular_availability is not None:
@@ -540,7 +540,7 @@ class LintRunner:
                 else:
                     logger.debug(f"Linter {linter_name} not available (modular check)")
                 continue
-                
+
             # Fallback to legacy availability check
             config = self.LINTER_COMMANDS[linter_name]
             try:
