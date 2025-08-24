@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""
+Mock ansible-lint for testing the environment fix.
+This script simulates the permission issues that ansible-lint has.
+"""
+
+import os
+import sys
+
+def main():
+    """Simulate ansible-lint behavior with temp directory access."""
+    
+    if "--version" in sys.argv:
+        print("ansible-lint 25.6.1 using ansible-core:2.16.11 ansible-compat:25.8.1 ruamel.yaml:0.18.6 ruamel.yaml.clib:0.2.8")
+        return 0
+    
+    # Check for environment variables
+    local_temp = os.environ.get("ANSIBLE_LOCAL_TEMP", "/app/.ansible/tmp")
+    remote_temp = os.environ.get("ANSIBLE_REMOTE_TEMP", "/app/.ansible/tmp")
+    galaxy_cache = os.environ.get("ANSIBLE_GALAXY_CACHE_DIR", "/app/.ansible/galaxy_cache")
+    
+    print(f"Using ANSIBLE_LOCAL_TEMP: {local_temp}", file=sys.stderr)
+    print(f"Using ANSIBLE_REMOTE_TEMP: {remote_temp}", file=sys.stderr)
+    print(f"Using ANSIBLE_GALAXY_CACHE_DIR: {galaxy_cache}", file=sys.stderr)
+    
+    # Try to access the temp directory
+    try:
+        # Create a test file in the temp directory
+        test_file = os.path.join(local_temp, "ansible-test-file")
+        with open(test_file, "w") as f:
+            f.write("test")
+        os.remove(test_file)
+        print(f"Successfully accessed temp directory: {local_temp}", file=sys.stderr)
+    except PermissionError:
+        print(f"CRITICAL:root:Unhandled exception when retrieving 'DEFAULT_LOCAL_TMP': [Errno 13] Permission denied: '{local_temp}/ansible-local-*'", file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(f"Error accessing temp directory {local_temp}: {e}", file=sys.stderr)
+        return 1
+    
+    # If we get here, simulate running normally
+    if len(sys.argv) > 1 and not any(arg.startswith("-") for arg in sys.argv[1:]):
+        # Simulate linting output
+        print('[]')  # Empty JSON output (no lint errors)
+    else:
+        print("ansible-lint mock running successfully")
+    
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

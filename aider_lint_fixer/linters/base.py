@@ -78,6 +78,7 @@ class BaseLinter(ABC):
     def run(self, file_paths: Optional[List[str]] = None, **kwargs) -> LinterResult:
         """Run the linter and return results."""
         import time
+        import os
 
         if not self.is_available():
             return LinterResult(
@@ -103,6 +104,12 @@ class BaseLinter(ABC):
             file_paths = filtered_files
         # Build command
         command = self.build_command(file_paths, **kwargs)
+        # Prepare environment for subprocess
+        env = os.environ.copy()
+        # Ensure ansible-specific environment variables are passed through
+        if self.name == "ansible-lint":
+            self._setup_ansible_environment(env)
+        
         # Run linter
         start_time = time.time()
         try:
@@ -112,6 +119,7 @@ class BaseLinter(ABC):
                 text=True,
                 timeout=300,  # 5 minute timeout
                 cwd=str(self.project_root),
+                env=env,
             )
             execution_time = time.time() - start_time
             # Parse output
@@ -162,10 +170,51 @@ class BaseLinter(ABC):
 
     def run_command(self, command: List[str], timeout: int = 30) -> subprocess.CompletedProcess:
         """Helper method to run a command."""
+        import os
+        env = os.environ.copy()
+        # Ensure ansible-specific environment variables are passed through for ansible-lint
+        if self.name == "ansible-lint":
+            self._setup_ansible_environment(env)
         return subprocess.run(
             command,
             capture_output=True,
             text=True,
             timeout=timeout,
             cwd=str(self.project_root),
+            env=env,
         )
+
+    def _setup_ansible_environment(self, env: dict) -> None:
+        """Set up ansible environment variables for proper temp directory handling."""
+        import os
+        from pathlib import Path
+        
+        # Set ansible temp directories to writable locations
+        if "ANSIBLE_LOCAL_TEMP" not in env:
+            env["ANSIBLE_LOCAL_TEMP"] = "/tmp/ansible-local"
+        if "ANSIBLE_REMOTE_TEMP" not in env:
+            env["ANSIBLE_REMOTE_TEMP"] = "/tmp/ansible-local"
+        if "ANSIBLE_GALAXY_CACHE_DIR" not in env:
+            env["ANSIBLE_GALAXY_CACHE_DIR"] = "/tmp/ansible-galaxy-cache"
+        if "ANSIBLE_LOG_PATH" not in env:
+            env["ANSIBLE_LOG_PATH"] = "/tmp/ansible.log"
+            
+        # Ensure temp directories exist
+        for temp_dir_var in ["ANSIBLE_LOCAL_TEMP", "ANSIBLE_REMOTE_TEMP", "ANSIBLE_GALAXY_CACHE_DIR"]:
+            temp_dir = env.get(temp_dir_var)
+            if temp_dir:
+                try:
+                    Path(temp_dir).mkdir(parents=True, exist_ok=True)
+                    self.logger.debug(f"Created ansible temp directory: {temp_dir}")
+                except Exception as e:
+                    self.logger.warning(f"Failed to create ansible temp directory {temp_dir}: {e}")
+                    # Fallback to current working directory relative path
+                    fallback_dir = str(self.project_root / f".ansible-{temp_dir_var.lower().split('_')[-1]}")
+                    env[temp_dir_var] = fallback_dir
+                    try:
+                        Path(fallback_dir).mkdir(parents=True, exist_ok=True)
+                        self.logger.debug(f"Using fallback ansible temp directory: {fallback_dir}")
+                    except Exception as e2:
+                        self.logger.error(f"Failed to create fallback ansible temp directory {fallback_dir}: {e2}")
+        
+        self.logger.debug(f"Ansible environment setup: ANSIBLE_LOCAL_TEMP={env.get('ANSIBLE_LOCAL_TEMP')}")
