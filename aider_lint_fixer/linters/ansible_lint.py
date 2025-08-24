@@ -125,13 +125,16 @@ class AnsibleLintLinter(BaseLinter):
         return command
 
     def _find_ansible_files(self) -> List[str]:
-        """Find ansible files in the project directory."""
+        """Find ansible files in the project directory recursively."""
         ansible_files = []
 
         for ext in self.supported_extensions:
-            for file_path in self.project_root.glob(f"*{ext}"):
+            # Use recursive glob to find files in subdirectories
+            for file_path in self.project_root.glob(f"**/*{ext}"):
                 if file_path.is_file():
-                    ansible_files.append(str(file_path.name))
+                    # Use relative path from project root
+                    relative_path = file_path.relative_to(self.project_root)
+                    ansible_files.append(str(relative_path))
 
         return ansible_files
 
