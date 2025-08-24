@@ -74,10 +74,12 @@ class AnsibleLintLinter(BaseLinter):
         self, file_paths: Optional[List[str]] = None, profile: str = "basic", **kwargs
     ) -> List[str]:
         """Build ansible-lint command."""
+        # Check for ansible_profile in kwargs (used by modular implementation)
+        actual_profile = kwargs.get("ansible_profile", profile)
         self.logger.debug(
-            f"Building ansible-lint command with profile: {profile}, kwargs: {kwargs}"
+            f"Building ansible-lint command with profile: {actual_profile}, kwargs: {kwargs}"
         )
-        command = ["ansible-lint", "--format=json", "--strict", f"--profile={profile}"]
+        command = ["ansible-lint", "--format=json", "--strict", f"--profile={actual_profile}"]
 
         # Add exclude patterns if provided
         exclude_patterns = kwargs.get("exclude", [])
