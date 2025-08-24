@@ -8,11 +8,7 @@ import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Set
-from urllib.parse import urljoin, urlparse
-
-if TYPE_CHECKING:
-    from bs4 import BeautifulSoup
+from typing import Dict, List, Optional
 
 try:
     import requests
@@ -481,8 +477,6 @@ if __name__ == "__main__":
                 print(f"    {fixable} {rule_id}: {rule_info.description[:60]}...")
     print(f"\n🎯 Total: {total_rules} rules scraped")
     if args.output:
-        import json
-
         with open(args.output, "w") as f:
             # Convert RuleInfo objects to dicts for JSON serialization
             serializable_rules = {}

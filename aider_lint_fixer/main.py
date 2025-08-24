@@ -140,9 +140,7 @@ def print_lint_summary(results, baseline_results=None, baseline_total=None):
                     f"(baseline: {baseline_error_count} errors, {baseline_warning_count} warnings)"
                 )
             else:
-                print(
-                    f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings"
-                )
+                print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
         else:
             print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
     if baseline_total and baseline_total != total_errors:
@@ -213,9 +211,7 @@ def create_progress_callback(verbose: bool = False):
             group_errors = progress_info.get("group_errors", 0)
             session_id = progress_info.get("session_id", "unknown")[:8]
             if verbose:
-                print(
-                    f"   🔧 Fixing {group_errors} {complexity} errors (session {session_id})..."
-                )
+                print(f"   🔧 Fixing {group_errors} {complexity} errors (session {session_id})...")
             else:
                 print(f"   🔧 Fixing {group_errors} {complexity} errors...")
         elif stage == "file_completed":
@@ -679,9 +675,7 @@ def main(
                 for linter, note in compatibility_info.items():
                     print(f"  ⚠️  {linter}: {note}")
             print(
-                f"\nTotal: {
-                    len(actually_available)} linters available, {
-                    len(unavailable)} unavailable"
+                f"\nTotal: {len(actually_available)} linters available, {len(unavailable)} unavailable"
             )
             print("Use --linters <name1,name2> to specify which linters to run")
         return
@@ -710,13 +704,9 @@ def main(
                 f"   Aho-Corasick available: {stats_data['pattern_matcher']['ahocorasick_available']}"
             )
             print(f"\n{c('CYAN')}🤖 Machine Learning{s('RESET_ALL')}")
+            print(f"   scikit-learn available: {stats_data['ml_classifier']['sklearn_available']}")
             print(
-                f"   scikit-learn available: {stats_data['ml_classifier']['sklearn_available']}"
-            )
-            print(
-                f"   Trained languages: {
-                    ', '.join(
-                        stats_data['ml_classifier']['trained_languages'])}"
+                f"   Trained languages: {', '.join(stats_data['ml_classifier']['trained_languages'])}"
             )
             # Show training data counts
             for key, value in stats_data["ml_classifier"].items():
@@ -740,18 +730,14 @@ def main(
                 progress = f"{session['processed_errors']}/{session['total_errors']}"
                 size_indicator = "🔥 Large" if session["is_large_project"] else "📁 Small"
                 print(
-                    f"   {
-                        session['session_id']}: {start_time} - {progress} errors ({size_indicator})"
+                    f"   {session['session_id']}: {start_time} - {progress} errors ({size_indicator})"
                 )
             print("\n💡 Resume with: --resume-session <session_id>")
         return 0
     # Handle cross-communication export
     if export_cross_communication:
         print(
-            f"\n{
-                Fore.CYAN}🔄 Cross-Communication Export for {
-                export_cross_communication.upper()}{
-                Style.RESET_ALL}"
+            f"\n{Fore.CYAN}🔄 Cross-Communication Export for {export_cross_communication.upper()}{Style.RESET_ALL}"
         )
         try:
             from .external_llm_integration import ExternalLLMIntegrationFramework
@@ -809,14 +795,7 @@ def main(
                 print("\n🚀 Automated Fixes Applied:")
                 for fix in processing_result["automated_fixes_ready"]:
                     print(
-                        f"   ✅ {
-                            fix.get(
-                                'fix_type',
-                                'Fix')}: {
-                            fix.get(
-                                'fix_content',
-                                'Applied')[
-                                :60]}..."
+                        f"   ✅ {fix.get('fix_type', 'Fix')}: {fix.get('fix_content', 'Applied')[:60]}..."
                     )
             if processing_result["manual_review_required"]:
                 print("\n🔍 Manual Review Required:")
@@ -947,12 +926,7 @@ def main(
 
                 checker = StrategicPreFlightChecker(str(actual_project_path), config_manager)
                 # Enhanced analysis if requested
-                if (
-                    enable_enhanced_analysis
-                    or quantify_debt
-                    or predict_outcomes
-                    or export_for_llm
-                ):
+                if enable_enhanced_analysis or quantify_debt or predict_outcomes or export_for_llm:
                     print(
                         f"\n{Fore.CYAN}🔬 Enhanced Strategic Analysis (Research-Based){Style.RESET_ALL}"
                     )
@@ -988,9 +962,7 @@ def main(
                         )
                         return 1
             except ImportError:
-                print(
-                    f"{Fore.YELLOW}⚠️  Strategic pre-flight check not available{Style.RESET_ALL}"
-                )
+                print(f"{Fore.YELLOW}⚠️  Strategic pre-flight check not available{Style.RESET_ALL}")
             except Exception as e:
                 print(f"{Fore.YELLOW}⚠️  Strategic pre-flight check failed: {e}{Style.RESET_ALL}")
         # Initialize assessment variable for architect mode
@@ -1017,9 +989,7 @@ def main(
                     should_proceed = display_risk_assessment(assessment)
                     if not should_proceed:
                         print(
-                            f"\n{
-                                Fore.YELLOW}⚠️  Lint fixing cancelled by user based on risk assessment.{
-                                Style.RESET_ALL}"
+                            f"\n{Fore.YELLOW}⚠️  Lint fixing cancelled by user based on risk assessment.{Style.RESET_ALL}"
                         )
                         print(
                             f"{Fore.CYAN}💡 Consider using --check-only to preview changes first.{Style.RESET_ALL}"
@@ -1109,9 +1079,7 @@ def main(
                 baseline_total=baseline_total_errors,
             )
         # Check if there are any errors to fix
-        total_errors = sum(
-            len(result.errors) + len(result.warnings) for result in results.values()
-        )
+        total_errors = sum(len(result.errors) + len(result.warnings) for result in results.values())
         if total_errors == 0:
             if not quiet:
                 print(
@@ -1151,9 +1119,7 @@ def main(
         if baseline_total_errors > 0:
             fixable_rate = len(prioritized_errors) / baseline_total_errors * 100
             print(
-                f"   Found {
-                    len(prioritized_errors)} fixable errors ({
-                    fixable_rate:.1f}% of {baseline_total_errors} total baseline errors)"
+                f"   Found {len(prioritized_errors)} fixable errors ({fixable_rate:.1f}% of {baseline_total_errors} total baseline errors)"
             )
         else:
             print(f"   Found {len(prioritized_errors)} fixable errors")
@@ -1205,13 +1171,9 @@ def main(
         elif force:
             if loop:
                 # Iterative Intelligent Force Mode
+                print(f"\n{Fore.CYAN}🔄 ITERATIVE INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}")
                 print(
-                    f"\n{Fore.CYAN}🔄 ITERATIVE INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}"
-                )
-                print(
-                    f"   {
-                        Fore.YELLOW}Running force mode in intelligent loops until convergence{
-                        Style.RESET_ALL}"
+                    f"   {Fore.YELLOW}Running force mode in intelligent loops until convergence{Style.RESET_ALL}"
                 )
                 print(f"   Max iterations: {max_iterations}")
                 print(f"   Improvement threshold: {improvement_threshold}%")
@@ -1243,9 +1205,7 @@ def main(
                     # Rough cost estimation
                     pricing = cost_monitor.MODEL_PRICING[cost_monitor.current_model]
                     estimated_cost = (
-                        (estimated_total_tokens / 1000)
-                        * (pricing["input"] + pricing["output"])
-                        / 2
+                        (estimated_total_tokens / 1000) * (pricing["input"] + pricing["output"]) / 2
                     )
                     print(f"\n{Fore.CYAN}💰 COST PREDICTION{Style.RESET_ALL}")
                     print(f"   Model: {ai_model}")
@@ -1253,11 +1213,7 @@ def main(
                     print(f"   Budget limit: ${max_cost:.2f}")
                     print(f"   Per-iteration limit: ${max_iteration_cost:.2f}")
                     if estimated_cost > max_cost:
-                        print(
-                            f"   {
-                                Fore.YELLOW}⚠️  Estimated cost exceeds budget!{
-                                Style.RESET_ALL}"
-                        )
+                        print(f"   {Fore.YELLOW}⚠️  Estimated cost exceeds budget!{Style.RESET_ALL}")
                 # Import iterative force mode
                 try:
                     from .iterative_force_mode import (
@@ -1282,18 +1238,14 @@ def main(
                         break  # Exit to run existing force mode logic once
                 except ImportError:
                     print(
-                        f"\n{
-                            Fore.YELLOW}⚠️  Iterative mode not available, falling back to single force mode{
-                            Style.RESET_ALL}"
+                        f"\n{Fore.YELLOW}⚠️  Iterative mode not available, falling back to single force mode{Style.RESET_ALL}"
                     )
                     loop = False  # Disable loop mode
             if not loop:
                 # Single Intelligent Force Mode
                 print(f"\n{Fore.CYAN}🧠 INTELLIGENT FORCE MODE ENABLED{Style.RESET_ALL}")
                 print(
-                    f"   {
-                        Fore.YELLOW}Using ML to safely manage force mode for chaotic codebases{
-                        Style.RESET_ALL}"
+                    f"   {Fore.YELLOW}Using ML to safely manage force mode for chaotic codebases{Style.RESET_ALL}"
                 )
             # Get ALL errors for force mode analysis
             all_error_analyses = []
@@ -1309,10 +1261,7 @@ def main(
                 intelligent_force = IntelligentForceMode(actual_project_path)
                 # Analyze force strategy using ML
                 print(
-                    f"\n{
-                        Fore.CYAN}🔍 Analyzing {
-                        len(all_error_analyses)} errors with ML...{
-                        Style.RESET_ALL}"
+                    f"\n{Fore.CYAN}🔍 Analyzing {len(all_error_analyses)} errors with ML...{Style.RESET_ALL}"
                 )
                 force_strategy = intelligent_force.analyze_force_strategy(all_error_analyses)
                 # Display intelligent force strategy
@@ -1400,19 +1349,14 @@ def main(
                 globals()["_intelligent_force_strategy"] = force_strategy
             except ImportError:
                 print(
-                    f"\n{
-                        Fore.YELLOW}⚠️  Intelligent force mode not available, falling back to basic force mode{
-                        Style.RESET_ALL}"
+                    f"\n{Fore.YELLOW}⚠️  Intelligent force mode not available, falling back to basic force mode{Style.RESET_ALL}"
                 )
                 # Fall back to original force mode logic
                 prioritized_errors = (
                     all_error_analyses[:max_errors] if max_errors else all_error_analyses
                 )
                 # Basic confirmation
-                warning_msg = f"\n{
-                    Fore.RED}Are you sure you want to force-fix {
-                    len(prioritized_errors)} errors? This may cause issues.{
-                    Style.RESET_ALL}"
+                warning_msg = f"\n{Fore.RED}Are you sure you want to force-fix {len(prioritized_errors)} errors? This may cause issues.{Style.RESET_ALL}"
                 print(warning_msg)
                 if not click.confirm("Proceed with basic force mode?"):
                     print("Aborted by user.")
@@ -1430,9 +1374,7 @@ def main(
                 print(f"   {i}. {error.file_path}:{error.line} - {error.linter} {error.rule_id}")
                 print(f"      {error.message}")
                 print(
-                    f"      Category: {
-                        error_analysis.category.value}, Complexity: {
-                        error_analysis.complexity.value}"
+                    f"      Category: {error_analysis.category.value}, Complexity: {error_analysis.complexity.value}"
                 )
             if len(prioritized_errors) > 10:
                 print(f"   ... and {len(prioritized_errors) - 10} more errors")
@@ -1477,9 +1419,7 @@ def main(
                 )
         elif use_architect_mode:
             print(
-                f"\n{
-                    Fore.YELLOW}⚠️  Architect mode requested but no risk assessment available{
-                    Style.RESET_ALL}"
+                f"\n{Fore.YELLOW}⚠️  Architect mode requested but no risk assessment available{Style.RESET_ALL}"
             )
             print("   Run without --skip-pre-lint-assessment to enable architect mode")
         # Continue with standard/safe automation (unless architect-only mode)
@@ -1583,9 +1523,7 @@ def main(
             )
         elif overall_success_rate >= 50:
             print(
-                f"\n{
-                    Fore.YELLOW}👍 Good progress! Some errors may need manual attention.{
-                    Style.RESET_ALL}"
+                f"\n{Fore.YELLOW}👍 Good progress! Some errors may need manual attention.{Style.RESET_ALL}"
             )
         else:
             print(f"\n{Fore.RED}⚠️  Many errors may require manual fixing.{Style.RESET_ALL}")
