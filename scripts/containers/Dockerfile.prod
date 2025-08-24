@@ -3,7 +3,7 @@
 # Usage: docker build -f scripts/containers/Dockerfile.prod -t aider-lint-fixer:latest .
 
 # Build stage
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -30,13 +30,15 @@ RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted
     pylint==3.3.7
 
 # Install multiple ansible-lint versions in separate virtual environments
-# Latest version (Technology Preview - compatible versions)
+# Each venv is completely isolated with its own ansible stack
+# Latest version (Technology Preview - ansible-core 2.19.0)
 RUN python3 -m venv /opt/venv-latest && \
     /opt/venv-latest/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir --upgrade pip && \
     /opt/venv-latest/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
         ansible-lint==25.6.1 \
-        ansible-core>=2.16.11 \
-        ansible>=10.0.0
+        ansible-core==2.19.0 && \
+    /opt/venv-latest/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
+        ansible
 
 # Enterprise/RHEL 9 compatible version
 RUN python3 -m venv /opt/venv-enterprise && \
@@ -46,13 +48,14 @@ RUN python3 -m venv /opt/venv-enterprise && \
         ansible-core==2.15.13 \
         ansible==8.7.0
 
-# RHEL 10 compatible version (latest ansible-core supported on RHEL 10)
+# RHEL 10 compatible version (ansible-core 2.18.x series)
 RUN python3 -m venv /opt/venv-rhel10 && \
     /opt/venv-rhel10/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir --upgrade pip && \
     /opt/venv-rhel10/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
         ansible-lint==24.12.2 \
-        ansible-core==2.16.14 \
-        ansible==9.13.0
+        ansible-core==2.18.0 && \
+    /opt/venv-rhel10/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
+        ansible
 
 # Install aider-chat
 RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir "aider-chat>=0.85.0"
