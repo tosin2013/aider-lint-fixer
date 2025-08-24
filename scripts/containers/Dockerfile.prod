@@ -95,6 +95,10 @@ RUN mkdir -p /app/.aider-lint-cache && chown aider:aider /app/.aider-lint-cache
 # Create ansible directories for non-root user
 RUN mkdir -p /app/.ansible /app/.ansible/tmp && chown -R aider:aider /app/.ansible
 
+# Create writable temp directories for ansible
+RUN mkdir -p /tmp/ansible-local /tmp/ansible-galaxy-cache && \
+    chown aider:aider /tmp/ansible-local /tmp/ansible-galaxy-cache
+
 # Switch to non-root user
 USER aider
 
@@ -111,8 +115,10 @@ ENV AIDER_LINT_FIXER_MAX_FILES=10
 ENV AIDER_LINT_FIXER_MAX_ERRORS=5
 
 # Ansible configuration for non-root user
-ENV ANSIBLE_LOCAL_TEMP=/app/.ansible/tmp
-ENV ANSIBLE_REMOTE_TEMP=/app/.ansible/tmp
+ENV ANSIBLE_LOCAL_TEMP=/tmp/ansible-local
+ENV ANSIBLE_REMOTE_TEMP=/tmp/ansible-local
+ENV ANSIBLE_GALAXY_CACHE_DIR=/tmp/ansible-galaxy-cache
+ENV ANSIBLE_LOG_PATH=/tmp/ansible.log
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

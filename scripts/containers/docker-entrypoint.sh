@@ -64,19 +64,46 @@ fi
 mkdir -p "${AIDER_LINT_CACHE_DIR}"
 
 # Set up ansible temp directories and ensure they're writable
-if [[ -n "${ANSIBLE_LOCAL_TEMP}" ]]; then
-    # Ensure ansible temp directory exists and is writable
-    mkdir -p "${ANSIBLE_LOCAL_TEMP}"
-    if [[ ! -w "${ANSIBLE_LOCAL_TEMP}" ]]; then
-        warn "Ansible temp directory ${ANSIBLE_LOCAL_TEMP} is not writable"
-        # Fallback to user's home directory or /tmp
-        if [[ -w "/tmp" ]]; then
-            export ANSIBLE_LOCAL_TEMP="/tmp/ansible-local"
-            mkdir -p "${ANSIBLE_LOCAL_TEMP}"
-            log "Using fallback ansible temp directory: ${ANSIBLE_LOCAL_TEMP}"
+# Set default ansible environment variables if not already set
+if [[ -z "${ANSIBLE_LOCAL_TEMP}" ]]; then
+    export ANSIBLE_LOCAL_TEMP="/tmp/ansible-local"
+fi
+if [[ -z "${ANSIBLE_REMOTE_TEMP}" ]]; then
+    export ANSIBLE_REMOTE_TEMP="/tmp/ansible-local"  
+fi
+if [[ -z "${ANSIBLE_GALAXY_CACHE_DIR}" ]]; then
+    export ANSIBLE_GALAXY_CACHE_DIR="/tmp/ansible-galaxy-cache"
+fi
+if [[ -z "${ANSIBLE_LOG_PATH}" ]]; then
+    export ANSIBLE_LOG_PATH="/tmp/ansible.log"
+fi
+
+# Ensure ansible temp directories exist and are writable
+for ansible_dir in "${ANSIBLE_LOCAL_TEMP}" "${ANSIBLE_REMOTE_TEMP}" "${ANSIBLE_GALAXY_CACHE_DIR}"; do
+    if [[ -n "${ansible_dir}" ]]; then
+        mkdir -p "${ansible_dir}" 2>/dev/null || true
+        if [[ ! -w "${ansible_dir}" ]]; then
+            warn "Ansible temp directory ${ansible_dir} is not writable"
+            # Try to create in /tmp as fallback
+            fallback_dir="/tmp/$(basename "${ansible_dir}")"
+            mkdir -p "${fallback_dir}" 2>/dev/null || true
+            if [[ -w "${fallback_dir}" ]]; then
+                log "Using fallback ansible temp directory: ${fallback_dir}"
+                case "${ansible_dir}" in
+                    "${ANSIBLE_LOCAL_TEMP}")
+                        export ANSIBLE_LOCAL_TEMP="${fallback_dir}"
+                        ;;
+                    "${ANSIBLE_REMOTE_TEMP}")
+                        export ANSIBLE_REMOTE_TEMP="${fallback_dir}"
+                        ;;
+                    "${ANSIBLE_GALAXY_CACHE_DIR}")
+                        export ANSIBLE_GALAXY_CACHE_DIR="${fallback_dir}"
+                        ;;
+                esac
+            fi
         fi
     fi
-fi
+done
 
 # Version info logging
 if [[ "${AIDER_LINT_FIXER_DEBUG}" == "true" ]]; then
@@ -86,8 +113,12 @@ if [[ "${AIDER_LINT_FIXER_DEBUG}" == "true" ]]; then
     echo "  aider-lint-fixer: $(python -m aider_lint_fixer --version)"
     echo "  Working directory: $(pwd)"
     echo "  Cache directory: ${AIDER_LINT_CACHE_DIR}"
-    echo "  Ansible temp directory: ${ANSIBLE_LOCAL_TEMP:-'Not set'}"
+    echo "  Ansible Local Temp: ${ANSIBLE_LOCAL_TEMP:-'Not set'}"
+    echo "  Ansible Remote Temp: ${ANSIBLE_REMOTE_TEMP:-'Not set'}"
+    echo "  Ansible Galaxy Cache: ${ANSIBLE_GALAXY_CACHE_DIR:-'Not set'}"
+    echo "  Ansible Log Path: ${ANSIBLE_LOG_PATH:-'Not set'}"
     echo "  Mounted files: $(ls -la /workspace 2>/dev/null | wc -l) entries"
+    echo "  Ansible-lint availability: $(ansible-lint --version 2>&1 | head -1 || echo 'Not available')"
 fi
 
 # Handle special commands
