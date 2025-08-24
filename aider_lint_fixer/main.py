@@ -183,13 +183,7 @@ def print_fix_summary(sessions):
             ):  # Show first 5 attempted errors
                 error = error_analysis.error
                 print(
-                    f"         {
-                        i +
-                        1}. {
-                        error.linter} {
-                        error.rule_id}: {
-                        error.message} (line {
-                        error.line})"
+                    f"         {i + 1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})"
                 )
             if len(session.errors_to_fix) > 5:
                 print(f"         ... and {len(session.errors_to_fix) - 5} more")
@@ -212,10 +206,7 @@ def create_progress_callback(verbose: bool = False):
             file_path = progress_info.get("current_file_path", "unknown")
             file_errors = progress_info.get("file_errors", 0)
             print(
-                f"\n{
-                    Fore.CYAN}📁 Processing file {current}/{total}: {
-                    Path(file_path).name} ({file_errors} errors){
-                    Style.RESET_ALL}"
+                f"\n{Fore.CYAN}📁 Processing file {current}/{total}: {Path(file_path).name} ({file_errors} errors){Style.RESET_ALL}"
             )
         elif stage == "fixing_error_group":
             complexity = progress_info.get("complexity", "unknown")
@@ -238,9 +229,7 @@ def create_progress_callback(verbose: bool = False):
             file_progress = (completed / total * 100) if total > 0 else 0
             error_progress = (processed_errors / total_errors * 100) if total_errors > 0 else 0
             print(
-                f"   📊 Progress: {completed}/{total} files ({
-                    file_progress:.1f}%), {processed_errors}/{total_errors} errors ({
-                    error_progress:.1f}%)"
+                f"   📊 Progress: {completed}/{total} files ({file_progress:.1f}%), {processed_errors}/{total_errors} errors ({error_progress:.1f}%)"
             )
 
     return progress_callback
@@ -269,13 +258,7 @@ def print_verification_summary(verification_results):
             print("      ✅ Successfully Fixed:")
             for i, error in enumerate(result["fixed_errors"][:5]):  # Show first 5 fixed errors
                 print(
-                    f"         {
-                        i +
-                        1}. {
-                        error.linter} {
-                        error.rule_id}: {
-                        error.message} (line {
-                        error.line})"
+                    f"         {i + 1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})"
                 )
             if len(result["fixed_errors"]) > 5:
                 print(f"         ... and {len(result['fixed_errors']) - 5} more")
@@ -286,13 +269,7 @@ def print_verification_summary(verification_results):
                 result["remaining_errors"][:3]
             ):  # Show first 3 remaining errors
                 print(
-                    f"         {
-                        i +
-                        1}. {
-                        error.linter} {
-                        error.rule_id}: {
-                        error.message} (line {
-                        error.line})"
+                    f"         {i + 1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})"
                 )
             if len(result["remaining_errors"]) > 3:
                 print(f"         ... and {len(result['remaining_errors']) - 3} more")
