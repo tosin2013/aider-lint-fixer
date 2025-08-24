@@ -380,6 +380,27 @@ docker run --rm python:3.11-slim python --version
 docker run --rm -e http_proxy=$http_proxy python:3.11-slim curl -I http://google.com
 ```
 
+#### 7. ansible-lint Permission Issues
+```bash
+# If you see "ansible-lint unavailable" or permission denied errors:
+
+# Check if ansible-lint is working in the container:
+docker run --rm --entrypoint=/bin/bash quay.io/takinosh/aider-lint-fixer -c "ansible-lint --version"
+
+# If you get permission denied errors for /app/.ansible/tmp/:
+# This is fixed in v2.0.0+ with proper environment variables and directory setup
+
+# For older versions, you can work around it by:
+docker run --rm -v $(pwd):/workspace \
+  -e ANSIBLE_LOCAL_TEMP=/tmp/ansible-local \
+  quay.io/takinosh/aider-lint-fixer \
+  --linters ansible-lint --target-dir your-ansible-dir
+
+# Verify the fix is working:
+docker run --rm --entrypoint=/bin/bash quay.io/takinosh/aider-lint-fixer -c \
+  "echo \$ANSIBLE_LOCAL_TEMP && ls -la /app/.ansible/ && ansible-lint --version"
+```
+
 ### Debug Mode
 ```bash
 # Enable debug output
