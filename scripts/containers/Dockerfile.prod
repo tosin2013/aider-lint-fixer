@@ -31,8 +31,32 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
 # Install Python linters
 RUN pip install --no-cache-dir \
     flake8==7.3.0 \
-    pylint==3.3.7 \
-    ansible-lint==25.6.1
+    pylint==3.3.7
+
+# Install multiple ansible-lint versions in separate virtual environments
+# Latest version (Technology Preview - ansible-core 2.19 not supported on RHEL 10)
+RUN python3 -m venv /opt/venv-latest && \
+    /opt/venv-latest/bin/pip install --no-cache-dir --upgrade pip && \
+    /opt/venv-latest/bin/pip install --no-cache-dir \
+        ansible-lint==25.6.1 \
+        ansible-core==2.19.0 \
+        ansible==10.6.0
+
+# Enterprise/RHEL 9 compatible version
+RUN python3 -m venv /opt/venv-enterprise && \
+    /opt/venv-enterprise/bin/pip install --no-cache-dir --upgrade pip && \
+    /opt/venv-enterprise/bin/pip install --no-cache-dir \
+        ansible-lint==6.22.2 \
+        ansible-core==2.15.13 \
+        ansible==8.7.0
+
+# RHEL 10 compatible version (latest ansible-core supported on RHEL 10)
+RUN python3 -m venv /opt/venv-rhel10 && \
+    /opt/venv-rhel10/bin/pip install --no-cache-dir --upgrade pip && \
+    /opt/venv-rhel10/bin/pip install --no-cache-dir \
+        ansible-lint==24.12.2 \
+        ansible-core==2.18.8 \
+        ansible==9.15.0
 
 # Install Node.js linters globally
 RUN npm install -g \
@@ -130,9 +154,10 @@ VOLUME ["/workspace"]
 # Working directory for mounted code
 WORKDIR /workspace
 
-# Entry point script
+# Entry point script and ansible version selector
 COPY --chown=aider:aider scripts/containers/docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY --chown=aider:aider scripts/containers/select-ansible-version.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/select-ansible-version.sh
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["--help"]

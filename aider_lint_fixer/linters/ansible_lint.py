@@ -17,9 +17,19 @@ class AnsibleLintLinter(BaseLinter):
 
     # Version compatibility matrix
     SUPPORTED_VERSIONS = [
-        "25.6.1",  # Tested version
+        # Latest versions (Technology Preview)
+        "25.6.1",  # Tested latest version
         "25.6",  # Minor version compatibility
         "25.",  # Major version compatibility
+        # Enterprise/RHEL 9 compatible versions
+        "6.22.2",  # Enterprise standard
+        "6.22",  # Minor version compatibility
+        "6.2",  # Patch version compatibility
+        "6.",  # Major version compatibility
+        # RHEL 10 compatible versions (ansible-core 2.18.x)
+        "24.12.2",  # RHEL 10 compatible
+        "24.12",  # Minor version compatibility
+        "24.",  # Major version compatibility
     ]
 
     # Profile configurations

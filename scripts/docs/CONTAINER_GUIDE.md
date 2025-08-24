@@ -198,6 +198,49 @@ export ANTHROPIC_API_KEY=your_key_here
 export AIDER_LINT_FIXER_LOG_LEVEL=INFO
 export AIDER_LINT_FIXER_MAX_FILES=10
 export AIDER_LINT_FIXER_MAX_ERRORS=5
+
+# Ansible-lint Version Selection (NEW)
+export ANSIBLE_LINT_VERSION=enterprise  # or 'latest', 'rhel10'
+```
+
+### 🏢 Ansible-lint Version Selection
+
+The container supports multiple ansible-lint versions to ensure compatibility with enterprise environments:
+
+| Version | ansible-lint | ansible-core | Target Environment |
+|---------|--------------|--------------|-------------------|
+| `latest` (default) | 25.6.1 | 2.19.0 | Technology Preview only |
+| `enterprise` | 6.22.2 | 2.15.13 | RHEL 9 / Enterprise |
+| `rhel10` | 24.12.2 | 2.18.8 | RHEL 10 Compatible |
+
+**Usage Examples:**
+
+```bash
+# Enterprise/RHEL 9 compatible (recommended for production)
+podman run -e ANSIBLE_LINT_VERSION=enterprise \
+  -v $(pwd):/workspace:Z \
+  quay.io/takinosh/aider-lint-fixer
+
+# RHEL 10 compatible  
+podman run -e ANSIBLE_LINT_VERSION=rhel10 \
+  -v $(pwd):/workspace:Z \
+  quay.io/takinosh/aider-lint-fixer
+
+# Latest version (Technology Preview - not supported on RHEL 10)
+podman run -e ANSIBLE_LINT_VERSION=latest \
+  -v $(pwd):/workspace:Z \
+  quay.io/takinosh/aider-lint-fixer
+
+# Alternative version specifications
+podman run -e ANSIBLE_LINT_VERSION=6.22.2 \
+  -v $(pwd):/workspace:Z \
+  quay.io/takinosh/aider-lint-fixer
+```
+
+**Why This Matters:**
+- **RHEL 10**: Does NOT support ansible-core 2.19 (only 2.16, 2.17, 2.18)
+- **Enterprise Consistency**: Match your local ansible-lint version for consistent results
+- **Air-gapped Systems**: Use specific versions required by your organization
 export AIDER_LINT_FIXER_NO_BANNER=false
 ```
 
