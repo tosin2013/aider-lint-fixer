@@ -8,6 +8,7 @@ This script demonstrates the new progress tracking features for long-running lin
 import tempfile
 import time
 from pathlib import Path
+
 import pytest
 
 
@@ -38,7 +39,10 @@ def test_progress_tracker_basic_functionality():
     print("\n2. Testing basic functionality...")
 
     try:
-        from aider_lint_fixer.progress_tracker import EnhancedProgressTracker, ProgressStage
+        from aider_lint_fixer.progress_tracker import (
+            EnhancedProgressTracker,
+            ProgressStage,
+        )
 
         # Test with small project (should not use progress bars)
         small_tracker = EnhancedProgressTracker(".", total_errors=50, verbose=False)
@@ -49,7 +53,9 @@ def test_progress_tracker_basic_functionality():
 
         # Test with large project (should use progress bars if tqdm available)
         large_tracker = EnhancedProgressTracker(".", total_errors=150, verbose=False)
-        assert large_tracker.is_large_project, "150 errors should be considered large project"
+        assert (
+            large_tracker.is_large_project
+        ), "150 errors should be considered large project"
         print("   ✅ Large project detection works")
 
         # Test stage updates
@@ -108,7 +114,9 @@ def test_progress_callback_integration():
             }
         )
 
-        callback({"stage": "fixing_error_group", "complexity": "trivial", "group_errors": 5})
+        callback(
+            {"stage": "fixing_error_group", "complexity": "trivial", "group_errors": 5}
+        )
 
         callback({"stage": "file_completed", "session_results": 8, "file_errors": 10})
 

@@ -170,7 +170,9 @@ def get_platform_compatibility_info() -> Dict[str, str]:
     compatibility_info = {}
 
     if platform.system() == "Windows":
-        compatibility_info["ansible-lint"] = "Not available on Windows (Unix-only dependencies)"
+        compatibility_info["ansible-lint"] = (
+            "Not available on Windows (Unix-only dependencies)"
+        )
 
     return compatibility_info
 
@@ -243,9 +245,7 @@ def generate_version_table() -> str:
     for linter_name, info in ALL_LINTERS.items():
         profile_support = "✅" if info.profile_support else "❌"
         supported_str = ", ".join(f"`{v}`" for v in info.supported_versions)
-        table += (
-            f"| **{info.name}** | `{info.tested_version}` | {supported_str} | {profile_support} |\n"
-        )
+        table += f"| **{info.name}** | `{info.tested_version}` | {supported_str} | {profile_support} |\n"
 
     return table
 

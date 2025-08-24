@@ -46,8 +46,18 @@ def generate_yaml_test_cases(rule_id, expected_fixable):
     if "line-length" in rule_id:
         test_cases.extend(
             [
-                ("Line too long (130 > 120 characters)", "ansible-lint", rule_id, expected_fixable),
-                ("Line too long (125 > 120 characters)", "ansible-lint", rule_id, expected_fixable),
+                (
+                    "Line too long (130 > 120 characters)",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
+                (
+                    "Line too long (125 > 120 characters)",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
                 (
                     "yaml[line-length] Line exceeds maximum",
                     "ansible-lint",
@@ -59,8 +69,18 @@ def generate_yaml_test_cases(rule_id, expected_fixable):
     elif "comments" in rule_id:
         test_cases.extend(
             [
-                ("Missing starting space in comment", "ansible-lint", rule_id, expected_fixable),
-                ("Too few spaces before comment", "ansible-lint", rule_id, expected_fixable),
+                (
+                    "Missing starting space in comment",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
+                (
+                    "Too few spaces before comment",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
                 (
                     "yaml[comments] Comment formatting issue",
                     "ansible-lint",
@@ -72,8 +92,18 @@ def generate_yaml_test_cases(rule_id, expected_fixable):
     elif "document-start" in rule_id:
         test_cases.extend(
             [
-                ('missing document start "---"', "ansible-lint", rule_id, expected_fixable),
-                ('found forbidden document start "---"', "ansible-lint", rule_id, expected_fixable),
+                (
+                    'missing document start "---"',
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
+                (
+                    'found forbidden document start "---"',
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
                 (
                     "yaml[document-start] Document start issue",
                     "ansible-lint",
@@ -85,7 +115,12 @@ def generate_yaml_test_cases(rule_id, expected_fixable):
     elif "trailing-spaces" in rule_id:
         test_cases.extend(
             [
-                ("Spaces are found at the end of lines", "ansible-lint", rule_id, expected_fixable),
+                (
+                    "Spaces are found at the end of lines",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
                 (
                     "yaml[trailing-spaces] Trailing whitespace",
                     "ansible-lint",
@@ -103,7 +138,12 @@ def generate_yaml_test_cases(rule_id, expected_fixable):
                     rule_id,
                     expected_fixable,
                 ),
-                ("yaml[indentation] Indentation error", "ansible-lint", rule_id, expected_fixable),
+                (
+                    "yaml[indentation] Indentation error",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
             ]
         )
     else:
@@ -137,7 +177,12 @@ def generate_comprehensive_test_data(scraped_rules):
         elif rule_id.startswith("jinja"):
             test_cases.extend(
                 [
-                    ("Jinja2 spacing could be improved", "ansible-lint", rule_id, expected_fixable),
+                    (
+                        "Jinja2 spacing could be improved",
+                        "ansible-lint",
+                        rule_id,
+                        expected_fixable,
+                    ),
                     (
                         "jinja[spacing] Template spacing issue",
                         "ansible-lint",
@@ -149,7 +194,12 @@ def generate_comprehensive_test_data(scraped_rules):
         else:
             # General test case
             test_cases.append(
-                (description or f"{rule_id} error", "ansible-lint", rule_id, expected_fixable)
+                (
+                    description or f"{rule_id} error",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                )
             )
 
     return test_cases
@@ -178,10 +228,30 @@ class TestEnhancedPatternMatching:
     def test_yaml_rule_classification(self, smart_classifier, scraped_rules):
         """Test classification of YAML rules with high accuracy."""
         yaml_test_cases = [
-            ("Line too long (130 > 120 characters)", "ansible-lint", "yaml[line-length]", True),
-            ("Missing starting space in comment", "ansible-lint", "yaml[comments]", True),
-            ('missing document start "---"', "ansible-lint", "yaml[document-start]", True),
-            ("Spaces are found at the end of lines", "ansible-lint", "yaml[trailing-spaces]", True),
+            (
+                "Line too long (130 > 120 characters)",
+                "ansible-lint",
+                "yaml[line-length]",
+                True,
+            ),
+            (
+                "Missing starting space in comment",
+                "ansible-lint",
+                "yaml[comments]",
+                True,
+            ),
+            (
+                'missing document start "---"',
+                "ansible-lint",
+                "yaml[document-start]",
+                True,
+            ),
+            (
+                "Spaces are found at the end of lines",
+                "ansible-lint",
+                "yaml[trailing-spaces]",
+                True,
+            ),
             (
                 "Wrong indentation: expected 4 but found 2",
                 "ansible-lint",
@@ -192,7 +262,9 @@ class TestEnhancedPatternMatching:
 
         correct_predictions = 0
         for message, linter, rule_id, expected_fixable in yaml_test_cases:
-            result = smart_classifier.classify_error(message, "ansible", linter, rule_id)
+            result = smart_classifier.classify_error(
+                message, "ansible", linter, rule_id
+            )
 
             if result.fixable == expected_fixable:
                 correct_predictions += 1
@@ -204,13 +276,17 @@ class TestEnhancedPatternMatching:
         accuracy = correct_predictions / len(yaml_test_cases) * 100
         assert accuracy >= 90, f"YAML rule accuracy should be ≥90%, got {accuracy:.1f}%"
 
-    def test_comprehensive_classification_accuracy(self, smart_classifier, scraped_rules):
+    def test_comprehensive_classification_accuracy(
+        self, smart_classifier, scraped_rules
+    ):
         """Test classification accuracy on comprehensive test data."""
         test_cases = generate_comprehensive_test_data(scraped_rules)
 
         # Filter to valid test cases
         valid_test_cases = [
-            case for case in test_cases if not case[2].startswith(("javascript:", ".", "#"))
+            case
+            for case in test_cases
+            if not case[2].startswith(("javascript:", ".", "#"))
         ]
 
         assert len(valid_test_cases) > 20, "Should have substantial test data"
@@ -219,7 +295,9 @@ class TestEnhancedPatternMatching:
         high_confidence_count = 0
 
         for message, linter, rule_id, expected_fixable in valid_test_cases:
-            result = smart_classifier.classify_error(message, "ansible", linter, rule_id)
+            result = smart_classifier.classify_error(
+                message, "ansible", linter, rule_id
+            )
 
             if result.fixable == expected_fixable:
                 correct_predictions += 1
@@ -232,7 +310,9 @@ class TestEnhancedPatternMatching:
 
         print(f"\n📊 Classification Results:")
         print(f"   Test cases: {len(valid_test_cases)}")
-        print(f"   Accuracy: {correct_predictions}/{len(valid_test_cases)} = {accuracy:.1f}%")
+        print(
+            f"   Accuracy: {correct_predictions}/{len(valid_test_cases)} = {accuracy:.1f}%"
+        )
         print(
             f"   High confidence: {high_confidence_count}/{len(valid_test_cases)} = {high_confidence_rate:.1f}%"
         )
@@ -249,7 +329,9 @@ class TestEnhancedPatternMatching:
 
         # Filter to valid test cases
         valid_test_cases = [
-            case for case in test_cases if not case[2].startswith(("javascript:", ".", "#"))
+            case
+            for case in test_cases
+            if not case[2].startswith(("javascript:", ".", "#"))
         ][
             :20
         ]  # Limit for testing
@@ -264,15 +346,21 @@ class TestEnhancedPatternMatching:
 
         # Generate training data
         for message, linter, rule_id, expected_fixable in valid_test_cases:
-            smart_classifier.learn_from_fix(message, "ansible", linter, expected_fixable)
+            smart_classifier.learn_from_fix(
+                message, "ansible", linter, expected_fixable
+            )
 
         # Check if training data was saved
         if training_file.exists():
             with open(training_file, "r") as f:
                 final_training_count = len(json.load(f))
 
-            assert final_training_count > initial_training_count, "Training data should increase"
-            print(f"\n🧠 Training data: {initial_training_count} → {final_training_count} examples")
+            assert (
+                final_training_count > initial_training_count
+            ), "Training data should increase"
+            print(
+                f"\n🧠 Training data: {initial_training_count} → {final_training_count} examples"
+            )
 
     def test_performance_benchmark(self, smart_classifier, scraped_rules):
         """Test classification performance with scraped rules."""
@@ -280,7 +368,9 @@ class TestEnhancedPatternMatching:
 
         # Filter to valid test cases
         valid_test_cases = [
-            case for case in test_cases if not case[2].startswith(("javascript:", ".", "#"))
+            case
+            for case in test_cases
+            if not case[2].startswith(("javascript:", ".", "#"))
         ][
             :50
         ]  # Limit for performance testing
@@ -302,7 +392,9 @@ class TestEnhancedPatternMatching:
         print(f"\n⚡ Performance Results:")
         print(f"   Total time: {total_time:.3f}s")
         print(f"   Average time: {avg_time:.3f}ms per classification")
-        print(f"   Throughput: {len(valid_test_cases)/total_time:.1f} classifications/second")
+        print(
+            f"   Throughput: {len(valid_test_cases)/total_time:.1f} classifications/second"
+        )
 
         # Should be fast
         assert avg_time < 10, f"Classification should be <10ms, got {avg_time:.3f}ms"
@@ -313,7 +405,9 @@ class TestEnhancedPatternMatching:
 
         # Filter to valid test cases
         valid_test_cases = [
-            case for case in test_cases if not case[2].startswith(("javascript:", ".", "#"))
+            case
+            for case in test_cases
+            if not case[2].startswith(("javascript:", ".", "#"))
         ][
             :30
         ]  # Sample for method testing
@@ -321,7 +415,9 @@ class TestEnhancedPatternMatching:
         method_counts = {}
 
         for message, linter, rule_id, _ in valid_test_cases:
-            result = smart_classifier.classify_error(message, "ansible", linter, rule_id)
+            result = smart_classifier.classify_error(
+                message, "ansible", linter, rule_id
+            )
             method = result.method
             method_counts[method] = method_counts.get(method, 0) + 1
 
@@ -332,7 +428,9 @@ class TestEnhancedPatternMatching:
 
         # Should primarily use rule_knowledge for scraped rules
         assert "rule_knowledge" in method_counts, "Should use rule_knowledge method"
-        rule_knowledge_rate = method_counts.get("rule_knowledge", 0) / len(valid_test_cases) * 100
+        rule_knowledge_rate = (
+            method_counts.get("rule_knowledge", 0) / len(valid_test_cases) * 100
+        )
         assert (
             rule_knowledge_rate >= 50
         ), f"Rule knowledge usage should be ≥50%, got {rule_knowledge_rate:.1f}%"
@@ -379,7 +477,9 @@ class TestMLLearningSystem:
         with open(training_file, "r") as f:
             training_data = json.load(f)
 
-        assert len(training_data) >= len(training_examples), "All training examples should be saved"
+        assert len(training_data) >= len(
+            training_examples
+        ), "All training examples should be saved"
 
         # Verify data structure
         for entry in training_data[-len(training_examples) :]:  # Check last entries
@@ -398,7 +498,9 @@ class TestMLLearningSystem:
 
         # Ensure we have some training data
         if not training_file.exists():
-            smart_classifier.learn_from_fix("test message", "ansible", "ansible-lint", True)
+            smart_classifier.learn_from_fix(
+                "test message", "ansible", "ansible-lint", True
+            )
 
         # Create a new classifier instance to test loading
         new_classifier = SmartErrorClassifier()
@@ -427,7 +529,9 @@ class TestMLLearningSystem:
 
         # Train the classifier with this example
         smart_classifier.learn_from_fix(test_message, "ansible", "ansible-lint", True)
-        smart_classifier.learn_from_fix(test_message, "ansible", "ansible-lint", True)  # Reinforce
+        smart_classifier.learn_from_fix(
+            test_message, "ansible", "ansible-lint", True
+        )  # Reinforce
 
         # Get classification after training
         trained_result = smart_classifier.classify_error(
@@ -467,7 +571,9 @@ class TestMLLearningSystem:
 
         # Should have training data but not unlimited growth
         assert len(training_data) > 0, "Should have training data"
-        assert len(training_data) <= 1000, "Should respect size limits (max 1000 per language)"
+        assert (
+            len(training_data) <= 1000
+        ), "Should respect size limits (max 1000 per language)"
 
         print(f"\n🧹 Cache management: {len(training_data)} examples (within limits)")
 
@@ -478,7 +584,9 @@ class TestMLLearningSystem:
 
         # Train on different languages
         for lang in languages:
-            smart_classifier.learn_from_fix(f"Test error for {lang}", lang, f"{lang}-linter", True)
+            smart_classifier.learn_from_fix(
+                f"Test error for {lang}", lang, f"{lang}-linter", True
+            )
 
         # Check that separate training files are created for each language
         for lang in languages:
@@ -516,7 +624,9 @@ class TestMLLearningSystem:
                 assert field in entry, f"Training entry should have '{field}' field"
 
             assert isinstance(entry["fixable"], bool), "fixable should be boolean"
-            assert isinstance(entry["timestamp"], (int, float)), "timestamp should be numeric"
+            assert isinstance(
+                entry["timestamp"], (int, float)
+            ), "timestamp should be numeric"
 
         print(f"\n✅ Cache file format validation passed")
 
@@ -529,7 +639,10 @@ class TestMLLearningSystem:
             """Worker function for concurrent testing."""
             for i in range(5):
                 smart_classifier.learn_from_fix(
-                    f"Worker {worker_id} message {i}", "ansible", "ansible-lint", i % 2 == 0
+                    f"Worker {worker_id} message {i}",
+                    "ansible",
+                    "ansible-lint",
+                    i % 2 == 0,
                 )
                 time.sleep(0.01)  # Small delay to increase chance of concurrent access
 
@@ -548,15 +661,21 @@ class TestMLLearningSystem:
         cache_dir = Path(".aider-lint-cache")
         training_file = cache_dir / "ansible_training.json"
 
-        assert training_file.exists(), "Training file should exist after concurrent access"
+        assert (
+            training_file.exists()
+        ), "Training file should exist after concurrent access"
 
         try:
             with open(training_file, "r") as f:
                 training_data = json.load(f)
 
             # Should have some data from workers (race conditions may cause data loss, but file should be valid)
-            assert len(training_data) >= 1, "Should have at least some data from workers"
-            print(f"\n🔄 Concurrent access test: {len(training_data)} examples saved safely")
+            assert (
+                len(training_data) >= 1
+            ), "Should have at least some data from workers"
+            print(
+                f"\n🔄 Concurrent access test: {len(training_data)} examples saved safely"
+            )
 
         except json.JSONDecodeError:
             pytest.fail("Training file should not be corrupted by concurrent access")

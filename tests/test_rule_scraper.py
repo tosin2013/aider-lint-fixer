@@ -12,7 +12,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from bs4 import BeautifulSoup
 
-from aider_lint_fixer.rule_scraper import RuleInfo, RuleScraper, scrape_and_update_knowledge_base
+from aider_lint_fixer.rule_scraper import (
+    RuleInfo,
+    RuleScraper,
+    scrape_and_update_knowledge_base,
+)
 
 
 class TestRuleScraper:
@@ -115,7 +119,9 @@ class TestRuleScraper:
             cache_dir = Path(temp_dir)
             scraper = RuleScraper(cache_dir)
 
-            rules = scraper._scrape_url("https://eslint.org/docs/latest/rules/", "eslint")
+            rules = scraper._scrape_url(
+                "https://eslint.org/docs/latest/rules/", "eslint"
+            )
 
             assert len(rules) >= 3
             assert "semi" in rules
@@ -188,7 +194,9 @@ class TestRuleScraper:
             scraper = RuleScraper(cache_dir)
 
             # Test ansible rule categorization
-            category = scraper._categorize_ansible_rule("yaml[line-length]", "Line too long")
+            category = scraper._categorize_ansible_rule(
+                "yaml[line-length]", "Line too long"
+            )
             assert category == "formatting"
 
             category = scraper._categorize_ansible_rule("name[missing]", "Missing name")
@@ -198,7 +206,9 @@ class TestRuleScraper:
             category = scraper._categorize_eslint_rule("semi", "Missing semicolon")
             assert category == "style"
 
-            category = scraper._categorize_eslint_rule("no-unused-vars", "Unused variable")
+            category = scraper._categorize_eslint_rule(
+                "no-unused-vars", "Unused variable"
+            )
             assert category == "unused"
 
     def test_fixability_detection(self):
@@ -209,11 +219,19 @@ class TestRuleScraper:
 
             # Test YAML rules (should be fixable)
             assert scraper._is_yaml_rule_fixable("line-length", "Line too long") is True
-            assert scraper._is_yaml_rule_fixable("trailing-spaces", "Trailing spaces") is True
-            assert scraper._is_yaml_rule_fixable("indentation", "Wrong indentation") is True
+            assert (
+                scraper._is_yaml_rule_fixable("trailing-spaces", "Trailing spaces")
+                is True
+            )
+            assert (
+                scraper._is_yaml_rule_fixable("indentation", "Wrong indentation")
+                is True
+            )
 
             # Test non-fixable rules
-            assert scraper._is_yaml_rule_fixable("unknown-rule", "Unknown issue") is False
+            assert (
+                scraper._is_yaml_rule_fixable("unknown-rule", "Unknown issue") is False
+            )
 
 
 class TestScrapingIntegration:

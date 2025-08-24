@@ -208,7 +208,10 @@ class TestAdvancedConvergenceAnalyzer:
         analysis = self.analyzer.analyze_convergence()
 
         # Should detect convergence due to very small improvements
-        assert analysis.current_state in [ConvergenceState.CONVERGED, ConvergenceState.PLATEAUING]
+        assert analysis.current_state in [
+            ConvergenceState.CONVERGED,
+            ConvergenceState.PLATEAUING,
+        ]
 
     def test_convergence_detection_diverging(self):
         """Test detection of non-improving convergence state."""
@@ -267,7 +270,8 @@ class TestAdvancedConvergenceAnalyzer:
         """Test generation of stopping recommendations."""
         # Test converged state recommendation
         recommendation = self.analyzer._generate_stopping_recommendation(
-            ConvergenceState.CONVERGED, {"improvement_potential": 0.1, "iterations_remaining": 1}
+            ConvergenceState.CONVERGED,
+            {"improvement_potential": 0.1, "iterations_remaining": 1},
         )
 
         assert "STOP" in recommendation["action"]
@@ -275,7 +279,8 @@ class TestAdvancedConvergenceAnalyzer:
 
         # Test improving state recommendation
         recommendation = self.analyzer._generate_stopping_recommendation(
-            ConvergenceState.IMPROVING, {"improvement_potential": 0.7, "iterations_remaining": 3}
+            ConvergenceState.IMPROVING,
+            {"improvement_potential": 0.7, "iterations_remaining": 3},
         )
 
         assert "CONTINUE" in recommendation["action"]

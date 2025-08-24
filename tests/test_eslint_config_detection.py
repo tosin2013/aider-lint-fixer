@@ -54,7 +54,10 @@ module.exports = {
 
             # Create .eslintrc.json
             eslintrc = project_root / ".eslintrc.json"
-            config = {"extends": ["eslint:recommended"], "rules": {"no-unused-vars": "error"}}
+            config = {
+                "extends": ["eslint:recommended"],
+                "rules": {"no-unused-vars": "error"},
+            }
             eslintrc.write_text(json.dumps(config, indent=2))
 
             linter = ESLintLinter(project_root=str(project_root))

@@ -94,7 +94,10 @@ class TestWebScrapingInfrastructure:
 
             # Should have loaded the scraped rule
             assert "ansible-lint" in classifier.rule_knowledge.rule_database
-            assert "yaml[line-length]" in classifier.rule_knowledge.rule_database["ansible-lint"]
+            assert (
+                "yaml[line-length]"
+                in classifier.rule_knowledge.rule_database["ansible-lint"]
+            )
 
 
 class TestEnhancedPatternMatching:
@@ -116,7 +119,11 @@ class TestEnhancedPatternMatching:
 
             assert result.fixable is True
             assert result.confidence > 0.5
-            assert result.method in ["rule_knowledge", "pattern_matching", "ml_classification"]
+            assert result.method in [
+                "rule_knowledge",
+                "pattern_matching",
+                "ml_classification",
+            ]
 
     def test_multi_language_support(self):
         """Test that classifier supports multiple languages."""
@@ -129,7 +136,10 @@ class TestEnhancedPatternMatching:
 
             for language in languages:
                 result = classifier.classify_error(
-                    f"Test error for {language}", language, f"{language}-linter", "test-rule"
+                    f"Test error for {language}",
+                    language,
+                    f"{language}-linter",
+                    "test-rule",
                 )
 
                 assert result is not None
@@ -213,7 +223,9 @@ class TestCLIStatsFlag:
 
         with tempfile.TemporaryDirectory() as temp_dir:
             runner = CliRunner()
-            result = runner.invoke(main, ["--stats", "--output-format", "json", temp_dir])
+            result = runner.invoke(
+                main, ["--stats", "--output-format", "json", temp_dir]
+            )
 
             assert result.exit_code == 0
 
@@ -256,7 +268,9 @@ class TestPerformanceImprovements:
             avg_time = total_time / len(test_cases)
 
             # Should be very fast (less than 10ms per classification)
-            assert avg_time < 0.01, f"Classification too slow: {avg_time:.3f}s per error"
+            assert (
+                avg_time < 0.01
+            ), f"Classification too slow: {avg_time:.3f}s per error"
 
     def test_cache_efficiency(self):
         """Test that caching improves performance."""
@@ -308,7 +322,9 @@ class TestRegressionPrevention:
 
             # Should not raise exceptions
             try:
-                classifier.learn_from_fix("test", "invalid-language", "invalid-linter", True)
+                classifier.learn_from_fix(
+                    "test", "invalid-language", "invalid-linter", True
+                )
             except Exception as e:
                 pytest.fail(f"Learning should handle invalid inputs gracefully: {e}")
 

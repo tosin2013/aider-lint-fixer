@@ -135,7 +135,9 @@ class CostMonitor:
         self.current_iteration = iteration
         if iteration not in self.iteration_usage:
             self.iteration_usage[iteration] = TokenUsage()
-            self.iteration_costs[iteration] = CostBreakdown(model=self.current_model.value)
+            self.iteration_costs[iteration] = CostBreakdown(
+                model=self.current_model.value
+            )
 
         logger.debug(f"Started cost tracking for iteration {iteration}")
 
@@ -148,7 +150,9 @@ class CostMonitor:
 
         # Update iteration usage
         if self.current_iteration in self.iteration_usage:
-            self.iteration_usage[self.current_iteration].add_usage(input_tokens, output_tokens)
+            self.iteration_usage[self.current_iteration].add_usage(
+                input_tokens, output_tokens
+            )
 
         # Calculate costs
         cost_breakdown = self._calculate_cost(input_tokens, output_tokens)
@@ -163,7 +167,9 @@ class CostMonitor:
         # Update file costs if specified
         if file_path:
             if file_path not in self.file_costs:
-                self.file_costs[file_path] = CostBreakdown(model=self.current_model.value)
+                self.file_costs[file_path] = CostBreakdown(
+                    model=self.current_model.value
+                )
 
             file_cost = self.file_costs[file_path]
             file_cost.input_cost += cost_breakdown.input_cost
@@ -228,8 +234,10 @@ class CostMonitor:
             "iteration_budget": self.budget_limits.max_iteration_cost,
             "iteration_usage_percentage": iter_usage_pct * 100,
             "within_budget": total_usage_pct < 1.0 and iter_usage_pct < 1.0,
-            "warning_triggered": total_usage_pct >= self.budget_limits.warning_threshold,
-            "emergency_stop_needed": total_usage_pct >= self.budget_limits.emergency_stop_threshold,
+            "warning_triggered": total_usage_pct
+            >= self.budget_limits.warning_threshold,
+            "emergency_stop_needed": total_usage_pct
+            >= self.budget_limits.emergency_stop_threshold,
         }
 
     def _check_budget_limits(self):
@@ -269,16 +277,18 @@ class CostMonitor:
 
         # Estimate remaining iterations (simple heuristic)
         # In practice, this would integrate with the iterative force mode's convergence detection
-        estimated_remaining = max(0, 10 - self.current_iteration)  # Assume max 10 iterations
+        estimated_remaining = max(
+            0, 10 - self.current_iteration
+        )  # Assume max 10 iterations
 
         predicted_additional_cost = avg_cost_per_iteration * estimated_remaining
         predicted_total = self.get_total_cost() + predicted_additional_cost
 
         # Calculate confidence based on cost variance
         if len(iteration_costs) > 1:
-            variance = sum((cost - avg_cost_per_iteration) ** 2 for cost in iteration_costs) / len(
-                iteration_costs
-            )
+            variance = sum(
+                (cost - avg_cost_per_iteration) ** 2 for cost in iteration_costs
+            ) / len(iteration_costs)
             confidence = max(0.1, 1.0 - (variance / avg_cost_per_iteration))
         else:
             confidence = 0.5
@@ -294,7 +304,9 @@ class CostMonitor:
             recommendation=recommendation,
         )
 
-    def _generate_cost_recommendation(self, predicted_total: float, confidence: float) -> str:
+    def _generate_cost_recommendation(
+        self, predicted_total: float, confidence: float
+    ) -> str:
         """Generate cost optimization recommendation."""
         if predicted_total > self.budget_limits.max_total_cost:
             return f"⚠️ Predicted cost ${predicted_total:.2f} exceeds budget. Consider reducing scope or switching to cheaper model."
@@ -305,7 +317,10 @@ class CostMonitor:
 
     def _save_cost_data(self):
         """Save cost data to cache for persistence."""
-        cost_file = self.cache_dir / f"costs_{self.session_start.strftime('%Y%m%d_%H%M%S')}.json"
+        cost_file = (
+            self.cache_dir
+            / f"costs_{self.session_start.strftime('%Y%m%d_%H%M%S')}.json"
+        )
 
         data = {
             "session_start": self.session_start.isoformat(),
@@ -313,7 +328,9 @@ class CostMonitor:
             "budget_limits": asdict(self.budget_limits),
             "total_usage": asdict(self.total_usage),
             "total_cost": self.get_total_cost(),
-            "iteration_costs": {str(k): asdict(v) for k, v in self.iteration_costs.items()},
+            "iteration_costs": {
+                str(k): asdict(v) for k, v in self.iteration_costs.items()
+            },
             "file_costs": {k: asdict(v) for k, v in self.file_costs.items()},
         }
 

@@ -9,10 +9,10 @@ This demonstrates how we could create a dual-purpose learning system that:
 
 import json
 import tempfile
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 from aider_lint_fixer.error_analyzer import ErrorAnalysis
 from aider_lint_fixer.lint_runner import LintError
@@ -21,6 +21,7 @@ from aider_lint_fixer.lint_runner import LintError
 @dataclass
 class ManualFixAttempt:
     """Record of a user's manual fix attempt."""
+
     error: LintError
     original_classification: bool  # Was it originally classified as fixable?
     user_attempted: bool
@@ -30,7 +31,7 @@ class ManualFixAttempt:
     time_to_fix_minutes: Optional[int] = None
     user_confidence: int = 5  # 1-10 scale
     timestamp: str = None
-    
+
     def __post_init__(self):
         if self.timestamp is None:
             self.timestamp = datetime.now().isoformat()
@@ -39,6 +40,7 @@ class ManualFixAttempt:
 @dataclass
 class CommunityContribution:
     """Potential contribution to the community."""
+
     error_pattern: str
     fix_pattern: str
     linter: str
@@ -51,16 +53,18 @@ class CommunityContribution:
 
 class CommunityLearningSystem:
     """System for learning from manual fixes and contributing to community."""
-    
+
     def __init__(self, project_root: str):
         self.project_root = Path(project_root)
         self.learning_cache = self.project_root / ".aider-lint-cache"
         self.manual_fixes_file = self.learning_cache / "manual_fixes.json"
-        self.community_contributions = self.learning_cache / "community_contributions.json"
-        
+        self.community_contributions = (
+            self.learning_cache / "community_contributions.json"
+        )
+
         # Ensure cache directory exists
         self.learning_cache.mkdir(exist_ok=True)
-    
+
     def record_manual_fix_attempt(self, attempt: ManualFixAttempt):
         """Record a manual fix attempt for learning."""
         # Load existing attempts
@@ -69,78 +73,94 @@ class CommunityLearningSystem:
         # Convert to JSON-serializable format
         attempt_dict = asdict(attempt)
         # Convert enum to string
-        if 'error' in attempt_dict and 'severity' in attempt_dict['error']:
-            attempt_dict['error']['severity'] = attempt_dict['error']['severity'].value
+        if "error" in attempt_dict and "severity" in attempt_dict["error"]:
+            attempt_dict["error"]["severity"] = attempt_dict["error"]["severity"].value
 
         # Add new attempt
         attempts.append(attempt_dict)
 
         # Save updated attempts
-        with open(self.manual_fixes_file, 'w') as f:
+        with open(self.manual_fixes_file, "w") as f:
             json.dump(attempts, f, indent=2)
-        
+
         # Update local learning
         self._update_local_learning(attempt)
-        
+
         # Check if this could be a community contribution
         if attempt.fix_successful and not attempt.original_classification:
             self._evaluate_community_contribution(attempt)
-    
+
     def _load_manual_fixes(self) -> List[Dict[str, Any]]:
         """Load existing manual fix attempts."""
         if not self.manual_fixes_file.exists():
             return []
-        
+
         try:
-            with open(self.manual_fixes_file, 'r') as f:
+            with open(self.manual_fixes_file, "r") as f:
                 return json.load(f)
         except Exception:
             return []
-    
+
     def _update_local_learning(self, attempt: ManualFixAttempt):
         """Update local learning system with manual fix results."""
         # This would integrate with the existing SmartErrorClassifier
-        print(f"🧠 Local Learning: Recording {attempt.error.rule_id} -> {attempt.fix_successful}")
-        
+        print(
+            f"🧠 Local Learning: Recording {attempt.error.rule_id} -> {attempt.fix_successful}"
+        )
+
         # Example: Update pattern matching for similar errors
         if attempt.fix_successful and not attempt.original_classification:
-            print(f"   📈 Upgrading classification for pattern: {attempt.error.message[:50]}...")
+            print(
+                f"   📈 Upgrading classification for pattern: {attempt.error.message[:50]}..."
+            )
         elif not attempt.fix_successful and attempt.original_classification:
-            print(f"   📉 Downgrading classification for pattern: {attempt.error.message[:50]}...")
-    
+            print(
+                f"   📉 Downgrading classification for pattern: {attempt.error.message[:50]}..."
+            )
+
     def _evaluate_community_contribution(self, attempt: ManualFixAttempt):
         """Evaluate if this fix could benefit the community."""
         # Analyze if this is a pattern worth sharing
         similar_attempts = self._find_similar_attempts(attempt)
-        
+
         if len(similar_attempts) >= 2:  # Need multiple successful fixes
-            success_rate = sum(1 for a in similar_attempts if a['fix_successful']) / len(similar_attempts)
-            
+            success_rate = sum(
+                1 for a in similar_attempts if a["fix_successful"]
+            ) / len(similar_attempts)
+
             if success_rate >= 0.8:  # 80% success rate threshold
-                contribution = self._create_community_contribution(attempt, similar_attempts)
+                contribution = self._create_community_contribution(
+                    attempt, similar_attempts
+                )
                 self._save_community_contribution(contribution)
-                print(f"🌟 Community Contribution Identified: {contribution.github_issue_title}")
-    
+                print(
+                    f"🌟 Community Contribution Identified: {contribution.github_issue_title}"
+                )
+
     def _find_similar_attempts(self, attempt: ManualFixAttempt) -> List[Dict[str, Any]]:
         """Find similar manual fix attempts."""
         attempts = self._load_manual_fixes()
-        
+
         similar = []
         for existing in attempts:
-            if (existing['error']['rule_id'] == attempt.error.rule_id and
-                existing['error']['linter'] == attempt.error.linter):
+            if (
+                existing["error"]["rule_id"] == attempt.error.rule_id
+                and existing["error"]["linter"] == attempt.error.linter
+            ):
                 similar.append(existing)
-        
+
         return similar
-    
-    def _create_community_contribution(self, attempt: ManualFixAttempt, similar_attempts: List[Dict]) -> CommunityContribution:
+
+    def _create_community_contribution(
+        self, attempt: ManualFixAttempt, similar_attempts: List[Dict]
+    ) -> CommunityContribution:
         """Create a community contribution from successful fix patterns."""
         error = attempt.error
-        success_count = sum(1 for a in similar_attempts if a['fix_successful'])
-        
+        success_count = sum(1 for a in similar_attempts if a["fix_successful"])
+
         # Generate GitHub issue content
         title = f"Enhancement: Improve {error.linter} {error.rule_id} classification"
-        
+
         body = f"""## 🎯 Enhancement Request
 
 ### **Issue Description**
@@ -177,56 +197,60 @@ if error.linter == "{error.linter}" and "{error.rule_id}" in error.rule_id:
 ### **Data Source**
 This enhancement request was automatically generated from user feedback in the community learning system.
 """
-        
+
         return CommunityContribution(
             error_pattern=f"{error.linter}:{error.rule_id}",
             fix_pattern=attempt.fix_description,
             linter=error.linter,
             language="ansible" if error.linter == "ansible-lint" else "unknown",
-            success_rate=success_count/len(similar_attempts),
+            success_rate=success_count / len(similar_attempts),
             sample_count=len(similar_attempts),
             github_issue_title=title,
-            github_issue_body=body
+            github_issue_body=body,
         )
-    
+
     def _save_community_contribution(self, contribution: CommunityContribution):
         """Save a potential community contribution."""
         contributions = []
         if self.community_contributions.exists():
             try:
-                with open(self.community_contributions, 'r') as f:
+                with open(self.community_contributions, "r") as f:
                     contributions = json.load(f)
             except Exception:
                 pass
-        
+
         contributions.append(asdict(contribution))
-        
-        with open(self.community_contributions, 'w') as f:
+
+        with open(self.community_contributions, "w") as f:
             json.dump(contributions, f, indent=2)
-    
-    def generate_github_issues(self, auto_create: bool = False) -> List[CommunityContribution]:
+
+    def generate_github_issues(
+        self, auto_create: bool = False
+    ) -> List[CommunityContribution]:
         """Generate GitHub issues for community contributions."""
         if not self.community_contributions.exists():
             return []
-        
-        with open(self.community_contributions, 'r') as f:
+
+        with open(self.community_contributions, "r") as f:
             contributions_data = json.load(f)
-        
+
         contributions = [CommunityContribution(**data) for data in contributions_data]
-        
+
         print(f"📋 Found {len(contributions)} potential community contributions:")
-        
+
         for i, contrib in enumerate(contributions, 1):
             print(f"\n{i}. {contrib.github_issue_title}")
             print(f"   Pattern: {contrib.error_pattern}")
-            print(f"   Success Rate: {contrib.success_rate:.1f}% ({contrib.sample_count} samples)")
-            
+            print(
+                f"   Success Rate: {contrib.success_rate:.1f}% ({contrib.sample_count} samples)"
+            )
+
             if auto_create:
                 # This would integrate with GitHub API
                 print(f"   🚀 Would create GitHub issue automatically")
             else:
                 print(f"   💡 Run with --create-issues to submit to GitHub")
-        
+
         return contributions
 
 
@@ -234,13 +258,13 @@ def demonstrate_community_learning():
     """Demonstrate the community learning system."""
     print("🌍 Community Learning System Demo")
     print("=" * 50)
-    
+
     with tempfile.TemporaryDirectory() as temp_dir:
         system = CommunityLearningSystem(temp_dir)
-        
+
         # Simulate user fixing an "unfixable" error
-        from aider_lint_fixer.lint_runner import LintError, ErrorSeverity
-        
+        from aider_lint_fixer.lint_runner import ErrorSeverity, LintError
+
         error = LintError(
             file_path="roles/test/tasks/main.yml",
             line=10,
@@ -250,9 +274,9 @@ def demonstrate_community_learning():
             severity=ErrorSeverity.ERROR,
             linter="ansible-lint",
             context="",
-            fix_suggestion=""
+            fix_suggestion="",
         )
-        
+
         # Record multiple successful manual fixes
         for i in range(3):
             attempt = ManualFixAttempt(
@@ -262,15 +286,17 @@ def demonstrate_community_learning():
                 fix_successful=True,
                 fix_description="Removed trailing whitespace from YAML file",
                 time_to_fix_minutes=1,
-                user_confidence=9
+                user_confidence=9,
             )
-            
+
             system.record_manual_fix_attempt(attempt)
-        
+
         # Generate community contributions
         contributions = system.generate_github_issues()
-        
-        print(f"\n🎯 Result: System identified {len(contributions)} patterns for community contribution!")
+
+        print(
+            f"\n🎯 Result: System identified {len(contributions)} patterns for community contribution!"
+        )
 
 
 if __name__ == "__main__":

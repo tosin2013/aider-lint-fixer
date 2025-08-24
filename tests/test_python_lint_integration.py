@@ -100,7 +100,9 @@ print("Should be in main guard")
 
         # Should find errors in our problematic code
         self.assertTrue(result.success)  # Should succeed even with errors found
-        self.assertGreater(len(result.errors), 0, "Should detect lint errors in problematic code")
+        self.assertGreater(
+            len(result.errors), 0, "Should detect lint errors in problematic code"
+        )
 
         # Verify error structure
         first_error = result.errors[0]
@@ -161,7 +163,9 @@ print("Should be in main guard")
         # Should find issues in our problematic code
         self.assertTrue(result.success)  # Should succeed even with issues found
         total_issues = len(result.errors) + len(result.warnings)
-        self.assertGreater(total_issues, 0, "Should detect lint issues in problematic code")
+        self.assertGreater(
+            total_issues, 0, "Should detect lint issues in problematic code"
+        )
 
         # Verify issue structure
         if result.errors:
@@ -207,8 +211,12 @@ print("Should be in main guard")
         # Test flake8 profiles
         flake8_linter = Flake8Linter(str(self.project_root))
         if flake8_linter.is_available():
-            basic_result = flake8_linter.run_with_profile("basic", [str(self.python_file)])
-            strict_result = flake8_linter.run_with_profile("strict", [str(self.python_file)])
+            basic_result = flake8_linter.run_with_profile(
+                "basic", [str(self.python_file)]
+            )
+            strict_result = flake8_linter.run_with_profile(
+                "strict", [str(self.python_file)]
+            )
 
             # Both should succeed
             self.assertTrue(basic_result.success)
@@ -225,8 +233,12 @@ print("Should be in main guard")
         # Test pylint profiles
         pylint_linter = PylintLinter(str(self.project_root))
         if pylint_linter.is_available():
-            basic_result = pylint_linter.run_with_profile("basic", [str(self.python_file)])
-            strict_result = pylint_linter.run_with_profile("strict", [str(self.python_file)])
+            basic_result = pylint_linter.run_with_profile(
+                "basic", [str(self.python_file)]
+            )
+            strict_result = pylint_linter.run_with_profile(
+                "strict", [str(self.python_file)]
+            )
 
             # Both should succeed
             self.assertTrue(basic_result.success)
@@ -265,12 +277,15 @@ class TestPythonLintCLIIntegration(unittest.TestCase):
 
         if "python" in project_info.languages:
             lint_runner = LintRunner(project_info)
-            available_linters = lint_runner._detect_available_linters(["flake8", "pylint"])
+            available_linters = lint_runner._detect_available_linters(
+                ["flake8", "pylint"]
+            )
 
             # At least one Python linter should be available
             python_linters_available = any(available_linters.values())
             self.assertTrue(
-                python_linters_available, "At least one Python linter should be available"
+                python_linters_available,
+                "At least one Python linter should be available",
             )
 
 

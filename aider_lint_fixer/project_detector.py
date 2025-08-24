@@ -171,7 +171,9 @@ class ProjectDetector:
         project_path = Path(project_path).resolve()
 
         if not project_path.exists() or not project_path.is_dir():
-            raise ValueError(f"Project path does not exist or is not a directory: {project_path}")
+            raise ValueError(
+                f"Project path does not exist or is not a directory: {project_path}"
+            )
 
         logger.info(f"Detecting project information for: {project_path}")
 
@@ -344,7 +346,9 @@ class ProjectDetector:
                         }
                         break
 
-    def _parse_config_file(self, file_path: Path, linter_name: str) -> Optional[Dict[str, Any]]:
+    def _parse_config_file(
+        self, file_path: Path, linter_name: str
+    ) -> Optional[Dict[str, Any]]:
         """Parse a configuration file.
 
         Args:
@@ -387,11 +391,23 @@ class ProjectDetector:
 
                     # Extract linter-specific config from pyproject.toml
                     if file_path.name == "pyproject.toml":
-                        if linter_name == "black" and "tool" in data and "black" in data["tool"]:
+                        if (
+                            linter_name == "black"
+                            and "tool" in data
+                            and "black" in data["tool"]
+                        ):
                             return data["tool"]["black"]
-                        elif linter_name == "isort" and "tool" in data and "isort" in data["tool"]:
+                        elif (
+                            linter_name == "isort"
+                            and "tool" in data
+                            and "isort" in data["tool"]
+                        ):
                             return data["tool"]["isort"]
-                        elif linter_name == "mypy" and "tool" in data and "mypy" in data["tool"]:
+                        elif (
+                            linter_name == "mypy"
+                            and "tool" in data
+                            and "mypy" in data["tool"]
+                        ):
                             return data["tool"]["mypy"]
 
                     return data

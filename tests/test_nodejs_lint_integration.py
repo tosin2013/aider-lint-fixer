@@ -86,7 +86,9 @@ module.exports = badFunction;
             error_rules = [error.rule_id for error in result.errors]
 
             # Should detect unused variables
-            self.assertIn("no-unused-vars", error_rules, "Should detect unused variables")
+            self.assertIn(
+                "no-unused-vars", error_rules, "Should detect unused variables"
+            )
 
             # Should detect == vs === issues
             self.assertIn("eqeqeq", error_rules, "Should detect == vs === issues")
@@ -129,12 +131,17 @@ module.exports = badFunction;
             result = self.lint_runner.run_linter("prettier", [self.js_file])
 
             # Prettier should find formatting issues (as warnings)
-            self.assertGreater(len(result.warnings), 0, "Prettier should detect formatting issues")
+            self.assertGreater(
+                len(result.warnings), 0, "Prettier should detect formatting issues"
+            )
 
             # Check that the warning mentions formatting
             warning_messages = [warning.message for warning in result.warnings]
             self.assertTrue(
-                any("style" in msg.lower() or "format" in msg.lower() for msg in warning_messages),
+                any(
+                    "style" in msg.lower() or "format" in msg.lower()
+                    for msg in warning_messages
+                ),
                 "Should detect formatting issues",
             )
 
@@ -149,10 +156,14 @@ module.exports = badFunction;
         """Test that Node.js linters support different profiles."""
         try:
             # Test basic profile
-            result_basic = self.lint_runner.run_linter("eslint", [self.js_file], profile="basic")
+            result_basic = self.lint_runner.run_linter(
+                "eslint", [self.js_file], profile="basic"
+            )
 
             # Test strict profile
-            result_strict = self.lint_runner.run_linter("eslint", [self.js_file], profile="strict")
+            result_strict = self.lint_runner.run_linter(
+                "eslint", [self.js_file], profile="strict"
+            )
 
             # Both should work
             self.assertIsNotNone(result_basic)
@@ -218,7 +229,15 @@ function test(x,y) {
         # Test with ESLint
         try:
             result = runner.invoke(
-                main, [self.test_dir, "--linters", "eslint", "--dry-run", "--max-errors", "5"]
+                main,
+                [
+                    self.test_dir,
+                    "--linters",
+                    "eslint",
+                    "--dry-run",
+                    "--max-errors",
+                    "5",
+                ],
             )
 
             # Should not crash

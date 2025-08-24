@@ -50,7 +50,9 @@ class PylintLinter(BaseLinter):
             pass
         return None
 
-    def build_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
+    def build_command(
+        self, file_paths: Optional[List[str]] = None, **kwargs
+    ) -> List[str]:
         """Build pylint command."""
         command = ["pylint", "--output-format=json"]
 

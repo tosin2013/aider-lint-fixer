@@ -232,7 +232,9 @@ class ErrorAnalyzer:
         logger.info(f"Analyzed {len(file_analyses)} files with lint errors")
 
         # Perform structural analysis if high error count detected
-        total_errors = sum(len(analysis.error_analyses) for analysis in file_analyses.values())
+        total_errors = sum(
+            len(analysis.error_analyses) for analysis in file_analyses.values()
+        )
 
         if total_errors >= 100:  # Research threshold for chaotic codebases
             logger.info(
@@ -240,23 +242,23 @@ class ErrorAnalyzer:
             )
 
             try:
-                structural_analysis = self.structural_detector.analyze_structural_problems(
-                    file_analyses
+                structural_analysis = (
+                    self.structural_detector.analyze_structural_problems(file_analyses)
                 )
 
                 # Add structural insights to file analyses
                 for file_path, analysis in file_analyses.items():
                     if file_path in structural_analysis.hotspot_files:
-                        analysis.complexity_score = min(10.0, analysis.complexity_score + 2.0)
+                        analysis.complexity_score = min(
+                            10.0, analysis.complexity_score + 2.0
+                        )
                         logger.debug(f"Marked {file_path} as structural hotspot")
 
                     if file_path in structural_analysis.refactoring_candidates:
                         # Add structural problem context to error analyses
                         for error_analysis in analysis.error_analyses:
                             if not error_analysis.fix_strategy:
-                                error_analysis.fix_strategy = (
-                                    "Consider refactoring - part of structural problem cluster"
-                                )
+                                error_analysis.fix_strategy = "Consider refactoring - part of structural problem cluster"
 
                 # Log structural analysis results
                 logger.info("Structural analysis completed:")
@@ -266,7 +268,9 @@ class ErrorAnalyzer:
                 logger.info(
                     f"- Structural issues found: {len(structural_analysis.structural_issues)}"
                 )
-                logger.info(f"- Hotspot files: {len(structural_analysis.hotspot_files)}")
+                logger.info(
+                    f"- Hotspot files: {len(structural_analysis.hotspot_files)}"
+                )
                 logger.info(
                     f"- Refactoring candidates: {len(structural_analysis.refactoring_candidates)}"
                 )
@@ -357,7 +361,9 @@ class ErrorAnalyzer:
             control_flow_analysis = None
             if len(errors) > 5:  # Threshold for control flow analysis
                 error_lines = {error.line for error in errors}
-                control_flow_analysis = self._get_control_flow_analysis(file_path, error_lines)
+                control_flow_analysis = self._get_control_flow_analysis(
+                    file_path, error_lines
+                )
 
             # Analyze each error
             for error in errors:
@@ -378,9 +384,13 @@ class ErrorAnalyzer:
 
             # Calculate complexity score - ensure this always gets set
             try:
-                file_analysis.complexity_score = self._calculate_file_complexity(file_analysis)
+                file_analysis.complexity_score = self._calculate_file_complexity(
+                    file_analysis
+                )
             except Exception as e:
-                logger.warning(f"Failed to calculate complexity score for {file_path}: {e}")
+                logger.warning(
+                    f"Failed to calculate complexity score for {file_path}: {e}"
+                )
                 file_analysis.complexity_score = 0.0  # Default fallback value
 
         except Exception as e:
@@ -430,7 +440,9 @@ class ErrorAnalyzer:
         # Add control flow insights if available
         control_flow_insights = {}
         if control_flow_analysis:
-            control_flow_insights = self.control_flow_analyzer.get_control_flow_insights(error.line)
+            control_flow_insights = (
+                self.control_flow_analyzer.get_control_flow_insights(error.line)
+            )
 
             # Adjust complexity and priority based on control flow context
             if control_flow_insights.get("complexity_context") == "high":
@@ -489,7 +501,9 @@ class ErrorAnalyzer:
         # Check message-based categorization
         if any(word in message for word in ["import", "module"]):
             return ErrorCategory.IMPORT
-        elif any(word in message for word in ["format", "indent", "whitespace", "spacing"]):
+        elif any(
+            word in message for word in ["format", "indent", "whitespace", "spacing"]
+        ):
             return ErrorCategory.FORMATTING
         elif any(word in message for word in ["type", "annotation"]):
             return ErrorCategory.TYPE
@@ -510,7 +524,9 @@ class ErrorAnalyzer:
 
         return ErrorCategory.OTHER
 
-    def _determine_complexity(self, error: LintError, category: ErrorCategory) -> FixComplexity:
+    def _determine_complexity(
+        self, error: LintError, category: ErrorCategory
+    ) -> FixComplexity:
         """Determine the complexity of fixing an error.
 
         Args:
@@ -531,7 +547,9 @@ class ErrorAnalyzer:
         if error.linter == "ansible-lint" and "jinja[invalid]" in rule_id:
             # Simple quote syntax errors are easily fixable
             if "expected token ','" in message and (
-                "got 'n'" in message or "got 'not'" in message or "got 'qubinode'" in message
+                "got 'n'" in message
+                or "got 'not'" in message
+                or "got 'qubinode'" in message
             ):
                 return FixComplexity.SIMPLE
             # Other template errors might be more complex
@@ -630,7 +648,9 @@ class ErrorAnalyzer:
         language = detect_language_from_file_path(error.file_path)
 
         # Use smart classifier for enhanced pattern matching
-        result = self.smart_classifier.classify_error(error.message, language, error.linter)
+        result = self.smart_classifier.classify_error(
+            error.message, language, error.linter
+        )
 
         # High confidence predictions override default logic
         if result.confidence > 0.8:
@@ -643,7 +663,9 @@ class ErrorAnalyzer:
         # Medium confidence: combine with traditional logic
         if result.confidence > 0.5:
             smart_fixable = result.fixable
-            traditional_fixable = self._traditional_is_fixable(error, category, complexity)
+            traditional_fixable = self._traditional_is_fixable(
+                error, category, complexity
+            )
 
             # If both agree, use that result
             if smart_fixable == traditional_fixable:
@@ -652,7 +674,10 @@ class ErrorAnalyzer:
             # If they disagree, be conservative for syntax errors
             # Exception: trivial YAML formatting errors are safe to fix
             if category == ErrorCategory.SYNTAX:
-                if complexity == FixComplexity.TRIVIAL and error.linter == "ansible-lint":
+                if (
+                    complexity == FixComplexity.TRIVIAL
+                    and error.linter == "ansible-lint"
+                ):
                     # Trust smart classifier for trivial YAML formatting issues
                     return smart_fixable
                 return False
@@ -676,7 +701,9 @@ class ErrorAnalyzer:
             # Simple quote syntax errors are fixable
             message = (error.message or "").lower()
             if "expected token ','" in message and (
-                "got 'n'" in message or "got 'not'" in message or "got 'qubinode'" in message
+                "got 'n'" in message
+                or "got 'not'" in message
+                or "got 'qubinode'" in message
             ):
                 return True
             # YAML key duplicates are also fixable
@@ -720,7 +747,9 @@ class ErrorAnalyzer:
         """Get statistics about the pattern matching system."""
         return self.smart_classifier.get_statistics()
 
-    def _extract_context(self, error: LintError, file_content: Optional[str]) -> List[str]:
+    def _extract_context(
+        self, error: LintError, file_content: Optional[str]
+    ) -> List[str]:
         """Extract context lines around an error.
 
         Args:
@@ -746,7 +775,9 @@ class ErrorAnalyzer:
 
         return context_lines
 
-    def _determine_fix_strategy(self, error: LintError, category: ErrorCategory) -> Optional[str]:
+    def _determine_fix_strategy(
+        self, error: LintError, category: ErrorCategory
+    ) -> Optional[str]:
         """Determine the strategy for fixing an error.
 
         Args:
@@ -770,7 +801,9 @@ class ErrorAnalyzer:
 
         return strategies.get(category, "Apply appropriate fix based on error message")
 
-    def _estimate_effort(self, complexity: FixComplexity, category: ErrorCategory) -> int:
+    def _estimate_effort(
+        self, complexity: FixComplexity, category: ErrorCategory
+    ) -> int:
         """Estimate the effort required to fix an error.
 
         Args:
@@ -855,7 +888,9 @@ class ErrorAnalyzer:
             }
             complexity_score += complexity_weights.get(analysis.complexity, 0.5)
 
-        complexity_score = min(5.0, complexity_score / len(file_analysis.error_analyses))
+        complexity_score = min(
+            5.0, complexity_score / len(file_analysis.error_analyses)
+        )
 
         return error_score + complexity_score
 

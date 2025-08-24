@@ -35,8 +35,14 @@ class TestStructuralProblemType:
         assert StructuralProblemType.POOR_SEPARATION.value == "poor_separation"
         assert StructuralProblemType.COMPLEXITY_HOTSPOTS.value == "complexity_hotspots"
         assert StructuralProblemType.DEPENDENCY_CYCLES.value == "dependency_cycles"
-        assert StructuralProblemType.ARCHITECTURAL_VIOLATIONS.value == "architectural_violations"
-        assert StructuralProblemType.TECHNICAL_DEBT_CLUSTERS.value == "technical_debt_clusters"
+        assert (
+            StructuralProblemType.ARCHITECTURAL_VIOLATIONS.value
+            == "architectural_violations"
+        )
+        assert (
+            StructuralProblemType.TECHNICAL_DEBT_CLUSTERS.value
+            == "technical_debt_clusters"
+        )
 
 
 class TestStructuralIssue:
@@ -170,7 +176,9 @@ class TestStructuralProblemDetector:
         error_types = {"import/no-cycle", "no-global-assign", "other-error"}
         mock_errors = [MagicMock() for _ in range(10)]
 
-        coupling_score = self.detector._calculate_coupling_score(error_types, mock_errors)
+        coupling_score = self.detector._calculate_coupling_score(
+            error_types, mock_errors
+        )
 
         assert 0 <= coupling_score <= 1
         assert coupling_score > 0  # Should have some coupling indicators
@@ -180,7 +188,9 @@ class TestStructuralProblemDetector:
         error_types = {"unused-import", "unused-variable", "other-error"}
         mock_errors = [MagicMock() for _ in range(10)]
 
-        cohesion_score = self.detector._calculate_cohesion_score(error_types, mock_errors)
+        cohesion_score = self.detector._calculate_cohesion_score(
+            error_types, mock_errors
+        )
 
         assert 0 <= cohesion_score <= 1
 
@@ -276,7 +286,10 @@ class TestStructuralProblemDetector:
                 error_density=0.08,  # High density
                 lines_of_code=250,
                 error_types=set(),
-                complexity_indicators={"max-len": 15, "max-statements": 8},  # High complexity
+                complexity_indicators={
+                    "max-len": 15,
+                    "max-statements": 8,
+                },  # High complexity
                 coupling_score=0.5,
                 cohesion_score=0.5,
             )
@@ -321,7 +334,9 @@ class TestStructuralProblemDetector:
             for i in range(10)
         ]
 
-        issues = self.detector._detect_architectural_violations(metrics, mock_file_analyses)
+        issues = self.detector._detect_architectural_violations(
+            metrics, mock_file_analyses
+        )
 
         assert len(issues) >= 1
         issue = issues[0]
@@ -409,7 +424,9 @@ class TestStructuralProblemDetector:
             )
         ]
 
-        candidates = self.detector._identify_refactoring_candidates(metrics, structural_issues)
+        candidates = self.detector._identify_refactoring_candidates(
+            metrics, structural_issues
+        )
 
         assert "candidate.py" in candidates
 
@@ -478,7 +495,9 @@ class TestStructuralProblemDetector:
 
         assert analysis.total_files == 1
         assert analysis.total_errors == 5
-        assert len(analysis.structural_issues) == 0  # No structural analysis below threshold
+        assert (
+            len(analysis.structural_issues) == 0
+        )  # No structural analysis below threshold
 
     def test_full_structural_analysis_above_threshold(self):
         """Test structural analysis with error count above threshold."""
