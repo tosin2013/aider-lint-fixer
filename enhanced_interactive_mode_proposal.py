@@ -8,7 +8,7 @@ to attempt fixing unfixable errors with proper warnings and confirmation.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List
+from typing import List
 
 from aider_lint_fixer.error_analyzer import ErrorAnalysis, FixComplexity
 
@@ -69,7 +69,8 @@ def enhanced_interactive_mode(
             print(f"\n{i}. {error.file_path}:{error.line}")
             print(f"   {error.linter} {error.rule_id}: {error.message}")
             print(
-                f"   Category: {error_analysis.category.value}, Complexity: {error_analysis.complexity.value}"
+                f"   Category: {error_analysis.category.value}, "
+                f"Complexity: {error_analysis.complexity.value}"
             )
 
             choice = click.prompt(
@@ -102,21 +103,25 @@ def enhanced_interactive_mode(
             print(f"\n{i}. {error.file_path}:{error.line}")
             print(f"   {error.linter} {error.rule_id}: {error.message}")
             print(
-                f"   Category: {error_analysis.category.value}, Complexity: {error_analysis.complexity.value}"
+                f"   Category: {error_analysis.category.value}, "
+                f"Complexity: {error_analysis.complexity.value}"
             )
 
             # Show warning based on complexity
             if error_analysis.complexity == FixComplexity.MANUAL:
                 print(
-                    f"   {Fore.RED}⚠️  WARNING: This error requires manual intervention{Style.RESET_ALL}"
+                    f"   {Fore.RED}⚠️  WARNING: This error requires manual "
+                    f"intervention{Style.RESET_ALL}"
                 )
             elif error_analysis.complexity == FixComplexity.COMPLEX:
                 print(
-                    f"   {Fore.YELLOW}⚠️  WARNING: This error is complex and may need domain knowledge{Style.RESET_ALL}"
+                    f"   {Fore.YELLOW}⚠️  WARNING: This error is complex and may need "
+                    f"domain knowledge{Style.RESET_ALL}"
                 )
 
             print(
-                f"   {Fore.CYAN}💡 Reason not fixable: {_get_unfixable_reason(error_analysis)}{Style.RESET_ALL}"
+                f"   {Fore.CYAN}💡 Reason not fixable: "
+                f"{_get_unfixable_reason(error_analysis)}{Style.RESET_ALL}"
             )
 
             choice = click.prompt(
@@ -137,7 +142,8 @@ def enhanced_interactive_mode(
                     FixComplexity.COMPLEX,
                 ]:
                     confirmed = click.confirm(
-                        f"   {Fore.RED}⚠️  Are you sure you want to attempt this risky fix?{Style.RESET_ALL}",
+                        f"   {Fore.RED}⚠️  Are you sure you want to attempt this "
+                        f"risky fix?{Style.RESET_ALL}",
                         default=False,
                     )
                     if not confirmed:
@@ -182,7 +188,9 @@ def demonstrate_enhanced_interactive():
     # if enhanced_interactive:
     #     choices = enhanced_interactive_mode(all_error_analyses, max_errors)
     #     # Process only the errors user chose to fix
-    #     errors_to_fix = [choice.error_analysis for choice in choices if choice.choice == UserChoice.FIX]
+    #     errors_to_fix = [
+    #         choice.error_analysis for choice in choices if choice.choice == UserChoice.FIX
+    #     ]
 
     print("Example workflow:")
     print("1. Show all errors (fixable + unfixable)")

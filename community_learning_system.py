@@ -14,7 +14,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from aider_lint_fixer.error_analyzer import ErrorAnalysis
 from aider_lint_fixer.lint_runner import LintError
 
 
@@ -145,6 +144,9 @@ class CommunityLearningSystem:
         """Create a community contribution from successful fix patterns."""
         error = attempt.error
         success_count = sum(1 for a in similar_attempts if a["fix_successful"])
+        avg_confidence = sum(a.get("user_confidence", 5) for a in similar_attempts) / len(
+            similar_attempts
+        )
 
         # Generate GitHub issue content
         title = f"Enhancement: Improve {error.linter} {error.rule_id} classification"
@@ -152,7 +154,8 @@ class CommunityLearningSystem:
         body = f"""## 🎯 Enhancement Request
 
 ### **Issue Description**
-Users are successfully fixing errors that are currently classified as "unfixable" by the learning system.
+Users are successfully fixing errors that are currently classified as "unfixable" by the
+learning system.
 
 ### **Error Pattern**
 - **Linter**: {error.linter}
@@ -161,8 +164,9 @@ Users are successfully fixing errors that are currently classified as "unfixable
 - **Current Classification**: Not automatically fixable
 
 ### **Evidence from Real Usage**
-- **Success Rate**: {success_count}/{len(similar_attempts)} attempts successful ({success_count/len(similar_attempts)*100:.1f}%)
-- **User Confidence**: Average {sum(a.get('user_confidence', 5) for a in similar_attempts)/len(similar_attempts):.1f}/10
+- **Success Rate**: {success_count}/{len(similar_attempts)} attempts successful (
+    {success_count/len(similar_attempts)*100:.1f}%)
+- **User Confidence**: Average {avg_confidence:.1f}/10
 
 ### **Example Fix Description**
 {attempt.fix_description}
@@ -183,7 +187,8 @@ if error.linter == "{error.linter}" and "{error.rule_id}" in error.rule_id:
 - Better user experience for similar error patterns
 
 ### **Data Source**
-This enhancement request was automatically generated from user feedback in the community learning system.
+This enhancement request was automatically generated from user feedback in the
+community learning system.
 """
 
         return CommunityContribution(
@@ -231,9 +236,9 @@ This enhancement request was automatically generated from user feedback in the c
 
             if auto_create:
                 # This would integrate with GitHub API
-                print(f"   🚀 Would create GitHub issue automatically")
+                print("   🚀 Would create GitHub issue automatically")
             else:
-                print(f"   💡 Run with --create-issues to submit to GitHub")
+                print("   💡 Run with --create-issues to submit to GitHub")
 
         return contributions
 
@@ -279,7 +284,8 @@ def demonstrate_community_learning():
         contributions = system.generate_github_issues()
 
         print(
-            f"\n🎯 Result: System identified {len(contributions)} patterns for community contribution!"
+            f"\n🎯 Result: System identified {len(contributions)} patterns for "
+            f"community contribution!"
         )
 
 

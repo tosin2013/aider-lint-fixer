@@ -219,7 +219,7 @@ def _generate_github_templates(ecosystem: LanguageEcosystem) -> Dict[str, str]:
 ### **Common in Python Ecosystem**
 This pattern appears frequently in:
 - Django projects
-- Flask applications  
+- Flask applications
 - Data science notebooks
 - CLI tools
 
@@ -326,18 +326,19 @@ def demonstrate_multi_language_learning():
         print(f"   Example Repos: {', '.join(ecosystem.github_repo_examples[:2])}")
 
         if data["real_world_scenarios"]:
-            print(f"\n   📊 Real-World Learning Examples:")
+            print("\n   📊 Real-World Learning Examples:")
             for scenario in data["real_world_scenarios"][:2]:
                 print(f"   • {scenario['error'][:50]}...")
                 print(
-                    f"     Success Rate: {scenario['success_rate']}, Fix Time: {scenario['fix_time']}"
+                    f"     Success Rate: {scenario['success_rate']}, "
+                    f"Fix Time: {scenario['fix_time']}"
                 )
 
-        print(f"\n   🧠 Learning Patterns:")
+        print("\n   🧠 Learning Patterns:")
         for pattern in data["learning_patterns"][:2]:
             print(f"   • {pattern}")
 
-    print(f"\n🎯 UNIVERSAL BENEFITS")
+    print("\n🎯 UNIVERSAL BENEFITS")
     print("=" * 60)
     print("✅ Each language ecosystem contributes unique patterns")
     print("✅ Cross-language learning (YAML issues affect multiple languages)")
