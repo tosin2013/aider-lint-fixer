@@ -105,6 +105,12 @@ for ansible_dir in "${ANSIBLE_LOCAL_TEMP}" "${ANSIBLE_REMOTE_TEMP}" "${ANSIBLE_G
     fi
 done
 
+# Select ansible-lint version based on environment variable
+if command -v select-ansible-version.sh >/dev/null 2>&1; then
+    # Source the script to export PATH changes to current shell
+    source select-ansible-version.sh
+fi
+
 # Version info logging
 if [[ "${AIDER_LINT_FIXER_DEBUG}" == "true" ]]; then
     log "Container Environment:"

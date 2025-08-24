@@ -71,7 +71,7 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 ### **Ansible Linters**
 | Linter | Tested Version | Supported Versions | Profile Support |
 |--------|----------------|-------------------|-----------------|
-| **ansible-lint** | `25.6.1` | `25.6.1`, `25.6.x`, `25.x` | ✅ basic, production |
+| **ansible-lint** | `25.6.1 / 6.22.2 / 24.12.2` | All versions via ANSIBLE_LINT_VERSION | ✅ basic, production |
 
 ### **Python Linters**
 | Linter | Tested Version | Supported Versions | Profile Support |
@@ -90,6 +90,36 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 - **Tested Version**: Explicitly tested and validated in our CI/CD
 - **Supported Versions**: Expected to work based on API compatibility
 - **Profile Support**: Configurable strictness levels for different environments
+
+### **🏢 Enterprise & RHEL Compatibility**
+
+**Ansible-lint Multi-Version Support** addresses the major version compatibility issues between enterprise environments and the latest container versions:
+
+| Environment | ansible-lint | ansible-core | Usage |
+|-------------|--------------|--------------|-------|
+| **Latest (Technology Preview)** | 25.6.1 | 2.19.0 | `ANSIBLE_LINT_VERSION=latest` |
+| **Enterprise/RHEL 9** | 6.22.2 | 2.15.13 | `ANSIBLE_LINT_VERSION=enterprise` |
+| **RHEL 10 Compatible** | 24.12.2 | 2.18.8 | `ANSIBLE_LINT_VERSION=rhel10` |
+
+**Why This Matters:**
+- **RHEL 10 Incompatibility**: ansible-core 2.19 is NOT supported on RHEL 10
+- **Enterprise Standards**: Many organizations standardize on ansible-lint 6.x
+- **Consistency**: Ensures results match your local development environment
+
+**Container Usage Examples:**
+```bash
+# Use enterprise-compatible version (default for RHEL environments)
+podman run -e ANSIBLE_LINT_VERSION=enterprise \
+  -v $(pwd):/workspace:Z quay.io/takinosh/aider-lint-fixer
+
+# Use RHEL 10 compatible version
+podman run -e ANSIBLE_LINT_VERSION=rhel10 \
+  -v $(pwd):/workspace:Z quay.io/takinosh/aider-lint-fixer
+
+# Use latest version (Technology Preview only)
+podman run -e ANSIBLE_LINT_VERSION=latest \
+  -v $(pwd):/workspace:Z quay.io/takinosh/aider-lint-fixer
+```
 
 ## 🚀 Quick Start
 
