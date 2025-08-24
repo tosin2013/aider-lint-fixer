@@ -63,6 +63,21 @@ fi
 # Ensure cache directory exists and is writable
 mkdir -p "${AIDER_LINT_CACHE_DIR}"
 
+# Set up ansible temp directories and ensure they're writable
+if [[ -n "${ANSIBLE_LOCAL_TEMP}" ]]; then
+    # Ensure ansible temp directory exists and is writable
+    mkdir -p "${ANSIBLE_LOCAL_TEMP}"
+    if [[ ! -w "${ANSIBLE_LOCAL_TEMP}" ]]; then
+        warn "Ansible temp directory ${ANSIBLE_LOCAL_TEMP} is not writable"
+        # Fallback to user's home directory or /tmp
+        if [[ -w "/tmp" ]]; then
+            export ANSIBLE_LOCAL_TEMP="/tmp/ansible-local"
+            mkdir -p "${ANSIBLE_LOCAL_TEMP}"
+            log "Using fallback ansible temp directory: ${ANSIBLE_LOCAL_TEMP}"
+        fi
+    fi
+fi
+
 # Version info logging
 if [[ "${AIDER_LINT_FIXER_DEBUG}" == "true" ]]; then
     log "Container Environment:"
@@ -71,6 +86,7 @@ if [[ "${AIDER_LINT_FIXER_DEBUG}" == "true" ]]; then
     echo "  aider-lint-fixer: $(python -m aider_lint_fixer --version)"
     echo "  Working directory: $(pwd)"
     echo "  Cache directory: ${AIDER_LINT_CACHE_DIR}"
+    echo "  Ansible temp directory: ${ANSIBLE_LOCAL_TEMP:-'Not set'}"
     echo "  Mounted files: $(ls -la /workspace 2>/dev/null | wc -l) entries"
 fi
 

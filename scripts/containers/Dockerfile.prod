@@ -110,6 +110,10 @@ ENV AIDER_LINT_FIXER_LOG_LEVEL=INFO
 ENV AIDER_LINT_FIXER_MAX_FILES=10
 ENV AIDER_LINT_FIXER_MAX_ERRORS=5
 
+# Ansible configuration for non-root user
+ENV ANSIBLE_LOCAL_TEMP=/app/.ansible/tmp
+ENV ANSIBLE_REMOTE_TEMP=/app/.ansible/tmp
+
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -m aider_lint_fixer --version || exit 1
