@@ -77,8 +77,8 @@ class BaseLinter(ABC):
 
     def run(self, file_paths: Optional[List[str]] = None, **kwargs) -> LinterResult:
         """Run the linter and return results."""
-        import time
         import os
+        import time
 
         if not self.is_available():
             return LinterResult(
@@ -188,7 +188,7 @@ class BaseLinter(ABC):
         """Set up ansible environment variables for proper temp directory handling."""
         import os
         from pathlib import Path
-        
+
         # Set ansible temp directories to writable locations
         if "ANSIBLE_LOCAL_TEMP" not in env:
             env["ANSIBLE_LOCAL_TEMP"] = "/tmp/ansible-local"
