@@ -610,11 +610,11 @@ def main(
     if list_linters:
         import platform
 
+        from .project_detector import ProjectDetector as LocalProjectDetector
         from .supported_versions import (
             get_platform_compatibility_info,
             get_supported_linters,
         )
-        from .project_detector import ProjectDetector as LocalProjectDetector
 
         # Get project info for availability detection
         project_detector = LocalProjectDetector()
