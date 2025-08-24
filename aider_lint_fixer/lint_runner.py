@@ -470,6 +470,42 @@ class LintRunner:
             execution_time=0.0,
         )
 
+    def _check_modular_linter_availability(self, linter_name: str) -> Optional[bool]:
+        """Check availability using modular linter implementation if available.
+        
+        Args:
+            linter_name: Name of the linter to check
+            
+        Returns:
+            True if available, False if not available, None if no modular implementation
+        """
+        # Import modular linters
+        _import_modular_linters()
+        
+        # Map linter names to their modular classes
+        modular_linters = {
+            "ansible-lint": AnsibleLintLinter,
+            "flake8": Flake8Linter,
+            "pylint": PylintLinter,
+            "eslint": ESLintLinter,
+            "jshint": JSHintLinter,
+            "prettier": PrettierLinter,
+        }
+        
+        linter_class = modular_linters.get(linter_name)
+        if linter_class is None:
+            return None  # No modular implementation
+            
+        try:
+            # Create linter instance and check availability
+            linter_instance = linter_class(str(self.project_info.root_path))
+            is_available = linter_instance.is_available()
+            logger.debug(f"Modular {linter_name} availability check: {is_available}")
+            return is_available
+        except Exception as e:
+            logger.debug(f"Error checking modular {linter_name} availability: {e}")
+            return False
+
     def _detect_available_linters(
         self, linter_names: Optional[List[str]] = None
     ) -> Dict[str, bool]:
@@ -494,6 +530,18 @@ class LintRunner:
                 logger.debug(f"Skipping {linter_name} on Windows (platform incompatibility)")
                 available[linter_name] = False
                 continue
+                
+            # First try modular linter availability check
+            modular_availability = self._check_modular_linter_availability(linter_name)
+            if modular_availability is not None:
+                available[linter_name] = modular_availability
+                if available[linter_name]:
+                    logger.debug(f"Linter {linter_name} is available (modular check)")
+                else:
+                    logger.debug(f"Linter {linter_name} not available (modular check)")
+                continue
+                
+            # Fallback to legacy availability check
             config = self.LINTER_COMMANDS[linter_name]
             try:
                 # Try to run the version command
@@ -506,12 +554,12 @@ class LintRunner:
                 )
                 available[linter_name] = result.returncode == 0
                 if available[linter_name]:
-                    logger.debug(f"Linter {linter_name} is available")
+                    logger.debug(f"Linter {linter_name} is available (legacy check)")
                 else:
-                    logger.debug(f"Linter {linter_name} check failed: {result.stderr}")
+                    logger.debug(f"Linter {linter_name} check failed (legacy): {result.stderr}")
             except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
                 available[linter_name] = False
-                logger.debug(f"Linter {linter_name} not available: {e}")
+                logger.debug(f"Linter {linter_name} not available (legacy): {e}")
         return available
 
     def run_linter(
