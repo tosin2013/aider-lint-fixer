@@ -1,0 +1,5 @@
+---
+- hosts: localhost
+  tasks:
+  - shell: echo "test"
+  - debug: msg="test"

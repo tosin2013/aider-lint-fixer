@@ -1,0 +1,15 @@
+---
+namespace: rhelai
+name: vllm
+version: 1.0.0
+readme: README.md
+authors:
+  - Red Hat
+description: VLLM deployment collection
+license:
+  - Apache-2.0  
+tags:
+  - ai
+  - llm
+  - vllm
+dependencies: {}
