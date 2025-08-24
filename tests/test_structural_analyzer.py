@@ -276,7 +276,10 @@ class TestStructuralProblemDetector:
                 error_density=0.08,  # High density
                 lines_of_code=250,
                 error_types=set(),
-                complexity_indicators={"max-len": 15, "max-statements": 8},  # High complexity
+                complexity_indicators={
+                    "max-len": 15,
+                    "max-statements": 8,
+                },  # High complexity
                 coupling_score=0.5,
                 cohesion_score=0.5,
             )

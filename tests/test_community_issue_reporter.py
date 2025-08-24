@@ -9,6 +9,7 @@ GitHub issue creation for community contributions.
 import json
 import tempfile
 from pathlib import Path
+
 import pytest
 
 
@@ -115,7 +116,10 @@ def test_github_issue_url_generation():
     print("\n3. Testing GitHub issue URL generation...")
 
     try:
-        from aider_lint_fixer.community_issue_reporter import CommunityIssue, CommunityIssueReporter
+        from aider_lint_fixer.community_issue_reporter import (
+            CommunityIssue,
+            CommunityIssueReporter,
+        )
 
         with tempfile.TemporaryDirectory() as temp_dir:
             reporter = CommunityIssueReporter(temp_dir)
@@ -159,7 +163,9 @@ def test_integration_with_enhanced_interactive():
     print("\n4. Testing integration with enhanced interactive mode...")
 
     try:
-        from aider_lint_fixer.community_issue_reporter import integrate_community_issue_reporting
+        from aider_lint_fixer.community_issue_reporter import (
+            integrate_community_issue_reporting,
+        )
         from aider_lint_fixer.enhanced_interactive import (
             CommunityLearningIntegration,
             ManualFixAttempt,

@@ -218,7 +218,15 @@ function test(x,y) {
         # Test with ESLint
         try:
             result = runner.invoke(
-                main, [self.test_dir, "--linters", "eslint", "--dry-run", "--max-errors", "5"]
+                main,
+                [
+                    self.test_dir,
+                    "--linters",
+                    "eslint",
+                    "--dry-run",
+                    "--max-errors",
+                    "5",
+                ],
             )
 
             # Should not crash

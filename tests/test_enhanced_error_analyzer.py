@@ -271,7 +271,10 @@ class TestEnhancedErrorAnalyzer:
 
             # Should have increased complexity due to high complexity context
             # The exact complexity depends on the original categorization
-            assert error_analysis.complexity in [FixComplexity.MODERATE, FixComplexity.COMPLEX]
+            assert error_analysis.complexity in [
+                FixComplexity.MODERATE,
+                FixComplexity.COMPLEX,
+            ]
 
     def test_enhanced_priority_adjustment(self):
         """Test that priority is adjusted based on control flow context."""

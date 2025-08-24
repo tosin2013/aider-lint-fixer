@@ -208,13 +208,17 @@ class TestContextManager:
 
             for i in range(5):
                 self.manager.add_context(
-                    content=f"Old error {i}", priority=ContextPriority.LOW, category="error"
+                    content=f"Old error {i}",
+                    priority=ContextPriority.LOW,
+                    category="error",
                 )
 
         # Trigger summarization by adding current items
         for i in range(5):
             self.manager.add_context(
-                content=f"Current error {i}", priority=ContextPriority.HIGH, category="error"
+                content=f"Current error {i}",
+                priority=ContextPriority.HIGH,
+                category="error",
             )
 
         # Force context management

@@ -6,20 +6,18 @@ Integration tests for ansible-lint support in aider-lint-fixer.
 import os
 import shutil
 import subprocess
-
-# Add the parent directory to the path so we can import our modules
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+# Add the parent directory to the path so we can import our modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from aider_lint_fixer.config_manager import ConfigManager
-from aider_lint_fixer.lint_runner import LintRunner
-from aider_lint_fixer.main import main
-from aider_lint_fixer.project_detector import ProjectDetector, ProjectInfo
+# pylint: disable=wrong-import-position
+from aider_lint_fixer.lint_runner import LintRunner  # noqa: E402
+from aider_lint_fixer.project_detector import ProjectDetector, ProjectInfo  # noqa: E402
 
 
 class TestAnsibleLintIntegration(unittest.TestCase):
@@ -144,7 +142,13 @@ class TestAnsibleLintIntegration(unittest.TestCase):
             self.skipTest("ansible-lint not installed")
 
         # Test with real ansible-lint output (saved from our debugging)
-        sample_output = """[{"type": "issue", "check_name": "name[play]", "categories": ["idiom"], "url": "https://ansible.readthedocs.io/projects/lint/rules/name/", "severity": "major", "description": "All plays should be named.", "fingerprint": "695eeb9d297c19090389897ca43f1dc7880f825960fa9bfd401749ba9e784999", "location": {"path": "playbook.yml", "lines": {"begin": 2}}}]"""
+        sample_output = (
+            """[{"type": "issue", "check_name": "name[play]", "categories": ["idiom"], """
+            """"url": "https://ansible.readthedocs.io/projects/lint/rules/name/", """
+            """"severity": "major", "description": "All plays should be named.","""
+            """"fingerprint": "695eeb9d297c19090389897ca43f1dc7880f825960fa9bfd401749ba9e784999","""
+            """"location": {"path": "playbook.yml", "lines": {"begin": 2}}}]"""
+        )
 
         # Test our parsing logic directly
         errors, warnings = linter.parse_output(sample_output, "", 2)
@@ -272,7 +276,7 @@ class TestAnsibleLintIntegration(unittest.TestCase):
 
         if len(lint_result.errors) > 0:
             # Test that aider integration can process the errors
-            fix_result = integration._run_aider_fix(
+            integration._run_aider_fix(
                 "playbook.yml", lint_result.errors[:3]
             )  # Test with first 3 errors
 
@@ -314,9 +318,16 @@ class TestAnsibleLintCLIIntegration(unittest.TestCase):
         # Check if ansible-lint is available
         try:
             subprocess.run(
-                ["ansible-lint", "--version"], capture_output=True, check=True, timeout=10
+                ["ansible-lint", "--version"],
+                capture_output=True,
+                check=True,
+                timeout=10,
             )
-        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+        except (
+            subprocess.CalledProcessError,
+            FileNotFoundError,
+            subprocess.TimeoutExpired,
+        ):
             self.skipTest("ansible-lint not available")
 
         # Test CLI execution (dry run to avoid needing API keys)

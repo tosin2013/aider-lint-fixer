@@ -21,7 +21,9 @@ def test_enhanced_interactive_help():
     # Test help output
     print("\n1. Testing CLI flag exposure...")
     result = subprocess.run(
-        [sys.executable, "-m", "aider_lint_fixer", "--help"], capture_output=True, text=True
+        [sys.executable, "-m", "aider_lint_fixer", "--help"],
+        capture_output=True,
+        text=True,
     )
 
     assert result.returncode == 0, f"Help command failed: {result.stderr}"

@@ -116,7 +116,11 @@ class TestEnhancedPatternMatching:
 
             assert result.fixable is True
             assert result.confidence > 0.5
-            assert result.method in ["rule_knowledge", "pattern_matching", "ml_classification"]
+            assert result.method in [
+                "rule_knowledge",
+                "pattern_matching",
+                "ml_classification",
+            ]
 
     def test_multi_language_support(self):
         """Test that classifier supports multiple languages."""
@@ -129,7 +133,10 @@ class TestEnhancedPatternMatching:
 
             for language in languages:
                 result = classifier.classify_error(
-                    f"Test error for {language}", language, f"{language}-linter", "test-rule"
+                    f"Test error for {language}",
+                    language,
+                    f"{language}-linter",
+                    "test-rule",
                 )
 
                 assert result is not None

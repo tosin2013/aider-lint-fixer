@@ -270,7 +270,8 @@ class TestPythonLintCLIIntegration(unittest.TestCase):
             # At least one Python linter should be available
             python_linters_available = any(available_linters.values())
             self.assertTrue(
-                python_linters_available, "At least one Python linter should be available"
+                python_linters_available,
+                "At least one Python linter should be available",
             )
 
 

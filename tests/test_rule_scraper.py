@@ -12,7 +12,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from bs4 import BeautifulSoup
 
-from aider_lint_fixer.rule_scraper import RuleInfo, RuleScraper, scrape_and_update_knowledge_base
+from aider_lint_fixer.rule_scraper import (
+    RuleInfo,
+    RuleScraper,
+    scrape_and_update_knowledge_base,
+)
 
 
 class TestRuleScraper:

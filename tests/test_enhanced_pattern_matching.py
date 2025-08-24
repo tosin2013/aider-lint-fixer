@@ -46,8 +46,18 @@ def generate_yaml_test_cases(rule_id, expected_fixable):
     if "line-length" in rule_id:
         test_cases.extend(
             [
-                ("Line too long (130 > 120 characters)", "ansible-lint", rule_id, expected_fixable),
-                ("Line too long (125 > 120 characters)", "ansible-lint", rule_id, expected_fixable),
+                (
+                    "Line too long (130 > 120 characters)",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
+                (
+                    "Line too long (125 > 120 characters)",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
                 (
                     "yaml[line-length] Line exceeds maximum",
                     "ansible-lint",
@@ -59,8 +69,18 @@ def generate_yaml_test_cases(rule_id, expected_fixable):
     elif "comments" in rule_id:
         test_cases.extend(
             [
-                ("Missing starting space in comment", "ansible-lint", rule_id, expected_fixable),
-                ("Too few spaces before comment", "ansible-lint", rule_id, expected_fixable),
+                (
+                    "Missing starting space in comment",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
+                (
+                    "Too few spaces before comment",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
                 (
                     "yaml[comments] Comment formatting issue",
                     "ansible-lint",
@@ -72,8 +92,18 @@ def generate_yaml_test_cases(rule_id, expected_fixable):
     elif "document-start" in rule_id:
         test_cases.extend(
             [
-                ('missing document start "---"', "ansible-lint", rule_id, expected_fixable),
-                ('found forbidden document start "---"', "ansible-lint", rule_id, expected_fixable),
+                (
+                    'missing document start "---"',
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
+                (
+                    'found forbidden document start "---"',
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
                 (
                     "yaml[document-start] Document start issue",
                     "ansible-lint",
@@ -85,7 +115,12 @@ def generate_yaml_test_cases(rule_id, expected_fixable):
     elif "trailing-spaces" in rule_id:
         test_cases.extend(
             [
-                ("Spaces are found at the end of lines", "ansible-lint", rule_id, expected_fixable),
+                (
+                    "Spaces are found at the end of lines",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
                 (
                     "yaml[trailing-spaces] Trailing whitespace",
                     "ansible-lint",
@@ -103,7 +138,12 @@ def generate_yaml_test_cases(rule_id, expected_fixable):
                     rule_id,
                     expected_fixable,
                 ),
-                ("yaml[indentation] Indentation error", "ansible-lint", rule_id, expected_fixable),
+                (
+                    "yaml[indentation] Indentation error",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                ),
             ]
         )
     else:
@@ -137,7 +177,12 @@ def generate_comprehensive_test_data(scraped_rules):
         elif rule_id.startswith("jinja"):
             test_cases.extend(
                 [
-                    ("Jinja2 spacing could be improved", "ansible-lint", rule_id, expected_fixable),
+                    (
+                        "Jinja2 spacing could be improved",
+                        "ansible-lint",
+                        rule_id,
+                        expected_fixable,
+                    ),
                     (
                         "jinja[spacing] Template spacing issue",
                         "ansible-lint",
@@ -149,7 +194,12 @@ def generate_comprehensive_test_data(scraped_rules):
         else:
             # General test case
             test_cases.append(
-                (description or f"{rule_id} error", "ansible-lint", rule_id, expected_fixable)
+                (
+                    description or f"{rule_id} error",
+                    "ansible-lint",
+                    rule_id,
+                    expected_fixable,
+                )
             )
 
     return test_cases
@@ -178,10 +228,30 @@ class TestEnhancedPatternMatching:
     def test_yaml_rule_classification(self, smart_classifier, scraped_rules):
         """Test classification of YAML rules with high accuracy."""
         yaml_test_cases = [
-            ("Line too long (130 > 120 characters)", "ansible-lint", "yaml[line-length]", True),
-            ("Missing starting space in comment", "ansible-lint", "yaml[comments]", True),
-            ('missing document start "---"', "ansible-lint", "yaml[document-start]", True),
-            ("Spaces are found at the end of lines", "ansible-lint", "yaml[trailing-spaces]", True),
+            (
+                "Line too long (130 > 120 characters)",
+                "ansible-lint",
+                "yaml[line-length]",
+                True,
+            ),
+            (
+                "Missing starting space in comment",
+                "ansible-lint",
+                "yaml[comments]",
+                True,
+            ),
+            (
+                'missing document start "---"',
+                "ansible-lint",
+                "yaml[document-start]",
+                True,
+            ),
+            (
+                "Spaces are found at the end of lines",
+                "ansible-lint",
+                "yaml[trailing-spaces]",
+                True,
+            ),
             (
                 "Wrong indentation: expected 4 but found 2",
                 "ansible-lint",
@@ -529,7 +599,10 @@ class TestMLLearningSystem:
             """Worker function for concurrent testing."""
             for i in range(5):
                 smart_classifier.learn_from_fix(
-                    f"Worker {worker_id} message {i}", "ansible", "ansible-lint", i % 2 == 0
+                    f"Worker {worker_id} message {i}",
+                    "ansible",
+                    "ansible-lint",
+                    i % 2 == 0,
                 )
                 time.sleep(0.01)  # Small delay to increase chance of concurrent access
 

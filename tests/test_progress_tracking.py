@@ -8,6 +8,7 @@ This script demonstrates the new progress tracking features for long-running lin
 import tempfile
 import time
 from pathlib import Path
+
 import pytest
 
 
@@ -38,7 +39,10 @@ def test_progress_tracker_basic_functionality():
     print("\n2. Testing basic functionality...")
 
     try:
-        from aider_lint_fixer.progress_tracker import EnhancedProgressTracker, ProgressStage
+        from aider_lint_fixer.progress_tracker import (
+            EnhancedProgressTracker,
+            ProgressStage,
+        )
 
         # Test with small project (should not use progress bars)
         small_tracker = EnhancedProgressTracker(".", total_errors=50, verbose=False)

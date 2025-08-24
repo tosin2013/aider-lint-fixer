@@ -245,7 +245,11 @@ class TestCostMonitor:
         cost_data = {
             "session_start": (mock_now - timedelta(minutes=30)).isoformat(),
             "current_model": "gpt-4-turbo",
-            "total_usage": {"input_tokens": 1000, "output_tokens": 500, "total_tokens": 1500},
+            "total_usage": {
+                "input_tokens": 1000,
+                "output_tokens": 500,
+                "total_tokens": 1500,
+            },
             "total_cost": 0.025,
         }
 
