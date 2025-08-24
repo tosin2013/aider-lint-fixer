@@ -114,9 +114,9 @@ fi
 # Version info logging
 if [[ "${AIDER_LINT_FIXER_DEBUG}" == "true" ]]; then
     log "Container Environment:"
-    echo "  Python: $(python --version)"
+    echo "  Python: $(/usr/local/bin/python --version)"
     echo "  Node.js: $(node --version 2>/dev/null || echo 'Not available')"
-    echo "  aider-lint-fixer: $(python -m aider_lint_fixer --version)"
+    echo "  aider-lint-fixer: $(/usr/local/bin/python -m aider_lint_fixer --version)"
     echo "  Working directory: $(pwd)"
     echo "  Cache directory: ${AIDER_LINT_CACHE_DIR}"
     echo "  Ansible Local Temp: ${ANSIBLE_LOCAL_TEMP:-'Not set'}"
@@ -130,13 +130,13 @@ fi
 # Handle special commands
 case "$1" in
     --help|help|-h)
-        exec python -m aider_lint_fixer --help
+        exec /usr/local/bin/python -m aider_lint_fixer --help
         ;;
     --version|version|-v)
-        exec python -m aider_lint_fixer --version
+        exec /usr/local/bin/python -m aider_lint_fixer --version
         ;;
     --stats|stats)
-        exec python -m aider_lint_fixer --stats
+        exec /usr/local/bin/python -m aider_lint_fixer --stats
         ;;
     bash|shell)
         log "Starting interactive shell"
@@ -144,7 +144,7 @@ case "$1" in
         ;;
     test)
         log "Running self-test"
-        exec python -m aider_lint_fixer /workspace --dry-run --verbose --linters flake8 "${@:2}"
+        exec /usr/local/bin/python -m aider_lint_fixer /workspace --dry-run --verbose --linters flake8 "${@:2}"
         ;;
 esac
 
@@ -152,8 +152,8 @@ esac
 # If no arguments provided, show help
 if [[ $# -eq 0 ]]; then
     log "No arguments provided, showing help"
-    exec python -m aider_lint_fixer --help
+    exec /usr/local/bin/python -m aider_lint_fixer --help
 else
     log "Running aider-lint-fixer with arguments: $*"
-    exec python -m aider_lint_fixer "$@"
+    exec /usr/local/bin/python -m aider_lint_fixer "$@"
 fi

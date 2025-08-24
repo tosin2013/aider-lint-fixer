@@ -3,19 +3,15 @@
 # Usage: docker build -f scripts/containers/Dockerfile.prod -t aider-lint-fixer:latest .
 
 # Build stage
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
-
-# Install Node.js and npm for linters
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
 
 # Create build directory
 WORKDIR /build
@@ -25,53 +21,47 @@ COPY requirements.txt pyproject.toml setup.py ./
 COPY aider_lint_fixer/ ./aider_lint_fixer/
 
 # Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir -r requirements.txt
 
 # Install Python linters
-RUN pip install --no-cache-dir \
+RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
     flake8==7.3.0 \
     pylint==3.3.7
 
 # Install multiple ansible-lint versions in separate virtual environments
-# Latest version (Technology Preview - ansible-core 2.19 not supported on RHEL 10)
+# Each venv is completely isolated with its own ansible stack
+# Latest version (Technology Preview - ansible-core 2.19.0)
 RUN python3 -m venv /opt/venv-latest && \
-    /opt/venv-latest/bin/pip install --no-cache-dir --upgrade pip && \
-    /opt/venv-latest/bin/pip install --no-cache-dir \
+    /opt/venv-latest/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir --upgrade pip && \
+    /opt/venv-latest/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
         ansible-lint==25.6.1 \
-        ansible-core==2.19.0 \
-        ansible==10.6.0
+        ansible-core==2.19.0 && \
+    /opt/venv-latest/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
+        ansible
 
 # Enterprise/RHEL 9 compatible version
 RUN python3 -m venv /opt/venv-enterprise && \
-    /opt/venv-enterprise/bin/pip install --no-cache-dir --upgrade pip && \
-    /opt/venv-enterprise/bin/pip install --no-cache-dir \
+    /opt/venv-enterprise/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir --upgrade pip && \
+    /opt/venv-enterprise/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
         ansible-lint==6.22.2 \
         ansible-core==2.15.13 \
         ansible==8.7.0
 
-# RHEL 10 compatible version (latest ansible-core supported on RHEL 10)
+# RHEL 10 compatible version (ansible-core 2.18.x series)
 RUN python3 -m venv /opt/venv-rhel10 && \
-    /opt/venv-rhel10/bin/pip install --no-cache-dir --upgrade pip && \
-    /opt/venv-rhel10/bin/pip install --no-cache-dir \
+    /opt/venv-rhel10/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir --upgrade pip && \
+    /opt/venv-rhel10/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
         ansible-lint==24.12.2 \
-        ansible-core==2.18.8 \
-        ansible==9.15.0
-
-# Install Node.js linters globally
-RUN npm install -g \
-    eslint@8.57.1 \
-    jshint@2.13.6 \
-    prettier@3.6.2 \
-    && npm cache clean --force \
-    && ls -la /usr/local/bin/eslint* /usr/local/bin/jshint* /usr/local/bin/prettier* || true \
-    && ls -la /usr/local/lib/node_modules/ || true
+        ansible-core==2.18.0 && \
+    /opt/venv-rhel10/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
+        ansible
 
 # Install aider-chat
-RUN pip install --no-cache-dir "aider-chat>=0.85.0"
+RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir "aider-chat>=0.85.0"
 
 # Install the package
-RUN pip install --no-cache-dir .
+RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir .
 
 # Production stage
 FROM python:3.11-slim
@@ -87,6 +77,7 @@ LABEL name="aider-lint-fixer" \
 # Install basic runtime dependencies  
 RUN apt-get update && apt-get install -y \
     git \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
@@ -99,15 +90,20 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
+# Copy virtual environments for ansible-lint versions
+COPY --from=builder /opt/venv-latest /opt/venv-latest
+COPY --from=builder /opt/venv-enterprise /opt/venv-enterprise  
+COPY --from=builder /opt/venv-rhel10 /opt/venv-rhel10
+
 # Install Node.js and npm in production stage (simpler approach)
 RUN apt-get update && apt-get install -y \
-    curl \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js linters in production stage
-RUN npm install -g \
+RUN npm config set strict-ssl false && \
+    npm install -g \
     eslint@8.57.1 \
     jshint@2.13.6 \
     prettier@3.6.2 \
