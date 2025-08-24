@@ -94,15 +94,22 @@ def print_project_info(project_info):
     """
     print(f"\n{Fore.GREEN}📁 Project Detection Results:{Style.RESET_ALL}")
     print(f"   Root: {project_info.root_path}")
-    print(
-        f"   Languages: {', '.join(project_info.languages) if project_info.languages else 'None detected'}"
+    languages = ", ".join(project_info.languages) if project_info.languages else "None detected"
+    print(f"   Languages: {languages}")
+
+    package_managers = (
+        ", ".join(project_info.package_managers)
+        if project_info.package_managers
+        else "None detected"
     )
-    print(
-        f"   Package Managers: {', '.join(project_info.package_managers) if project_info.package_managers else 'None detected'}"
+    print(f"   Package Managers: {package_managers}")
+
+    lint_configs = (
+        ", ".join(project_info.lint_configs.keys())
+        if project_info.lint_configs
+        else "None detected"
     )
-    print(
-        f"   Lint Configs: {', '.join(project_info.lint_configs.keys()) if project_info.lint_configs else 'None detected'}"
-    )
+    print(f"   Lint Configs: {lint_configs}")
     print(f"   Source Files: {len(project_info.source_files)}")
 
 
@@ -129,7 +136,8 @@ def print_lint_summary(results, baseline_results=None, baseline_total=None):
             baseline_warning_count = len(baseline_result.warnings)
             if baseline_error_count != error_count or baseline_warning_count != warning_count:
                 print(
-                    f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings (baseline: {baseline_error_count} errors, {baseline_warning_count} warnings)"
+                    f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings "
+                    f"(baseline: {baseline_error_count} errors, {baseline_warning_count} warnings)"
                 )
             else:
                 print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
@@ -138,7 +146,8 @@ def print_lint_summary(results, baseline_results=None, baseline_total=None):
     if baseline_total and baseline_total != total_errors:
         print(f"\n   Processing Total: {total_errors} errors, {total_warnings} warnings")
         print(
-            f"   Baseline Total: {baseline_total} errors (showing {total_errors/baseline_total*100:.1f}% of all errors)"
+            f"   Baseline Total: {baseline_total} errors (showing "
+            f"{total_errors / baseline_total * 100:.1f}% of all errors)"
         )
     else:
         print(f"\n   Total: {total_errors} errors, {total_warnings} warnings")
@@ -172,7 +181,7 @@ def print_fix_summary(sessions):
             ):  # Show first 5 attempted errors
                 error = error_analysis.error
                 print(
-                    f"         {i+1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})"
+                    f"         {i + 1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})"
                 )
             if len(session.errors_to_fix) > 5:
                 print(f"         ... and {len(session.errors_to_fix) - 5} more")
@@ -234,15 +243,18 @@ def print_verification_summary(verification_results):
         total_attempted += result["total_original_errors"]
         total_fixed += result["errors_fixed"]
         success_rate = result["success_rate"] * 100
+        errors_fixed = result["errors_fixed"]
+        total_errors = result["total_original_errors"]
         print(
-            f"   📄 Session {session_id[:8]}: {result['errors_fixed']}/{result['total_original_errors']} fixed ({success_rate:.1f}%)"
+            f"   📄 Session {session_id[:8]}: {errors_fixed}/{total_errors} "
+            f"fixed ({success_rate:.1f}%)"
         )
         # Show detailed information about what was fixed
         if result["fixed_errors"]:
             print("      ✅ Successfully Fixed:")
             for i, error in enumerate(result["fixed_errors"][:5]):  # Show first 5 fixed errors
                 print(
-                    f"         {i+1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})"
+                    f"         {i + 1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})"
                 )
             if len(result["fixed_errors"]) > 5:
                 print(f"         ... and {len(result['fixed_errors']) - 5} more")
@@ -253,7 +265,7 @@ def print_verification_summary(verification_results):
                 result["remaining_errors"][:3]
             ):  # Show first 3 remaining errors
                 print(
-                    f"         {i+1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})"
+                    f"         {i + 1}. {error.linter} {error.rule_id}: {error.message} (line {error.line})"
                 )
             if len(result["remaining_errors"]) > 3:
                 print(f"         ... and {len(result['remaining_errors']) - 3} more")
@@ -610,32 +622,61 @@ def main(
     if list_linters:
         import platform
 
+        from .project_detector import ProjectDetector as LocalProjectDetector
         from .supported_versions import (
             get_platform_compatibility_info,
             get_supported_linters,
         )
 
-        linters_list = get_supported_linters()
+        # Get project info for availability detection
+        project_detector = LocalProjectDetector()
+        project_info = project_detector.detect_project(project_path)
+
+        # Create lint runner to check actual availability
+        lint_runner = LintRunner(project_info)
+
+        # Get static list of supported linters
+        static_linters_list = get_supported_linters()
+
+        # Check actual availability
+        available_linters = lint_runner._detect_available_linters(static_linters_list)
+
+        # Separate available and unavailable linters
+        actually_available = [
+            linter for linter, available in available_linters.items() if available
+        ]
+        unavailable = [linter for linter, available in available_linters.items() if not available]
+
         compatibility_info = get_platform_compatibility_info()
+
         if output_format == "json":
             import json
 
             output_data = {
-                "available_linters": linters_list,
+                "available_linters": actually_available,
+                "unavailable_linters": unavailable,
                 "platform": platform.system(),
                 "platform_notes": compatibility_info,
             }
             print(json.dumps(output_data, indent=2))
         else:
             print(f"Available linters on {platform.system()}:")
-            for linter in linters_list:
-                print(f"  • {linter}")
+            for linter in actually_available:
+                print(f"  ✅ {linter}")
+
+            if unavailable:
+                print("\nUnavailable linters (not installed):")
+                for linter in unavailable:
+                    print(f"  ❌ {linter}")
+
             # Show platform compatibility notes if any
             if compatibility_info:
                 print("\nPlatform compatibility notes:")
                 for linter, note in compatibility_info.items():
                     print(f"  ⚠️  {linter}: {note}")
-            print(f"\nTotal: {len(linters_list)} linters available")
+            print(
+                f"\nTotal: {len(actually_available)} linters available, {len(unavailable)} unavailable"
+            )
             print("Use --linters <name1,name2> to specify which linters to run")
         return
     # Handle stats flag
@@ -1176,9 +1217,7 @@ def main(
                 # Import iterative force mode
                 try:
                     from .iterative_force_mode import (
-                        IterationResult,
                         IterativeForceMode,
-                        LoopExitReason,
                     )
 
                     iterative_mode = IterativeForceMode(
@@ -1193,7 +1232,6 @@ def main(
                         print(f"\n{Fore.CYAN}🔄 ITERATION {iteration}{Style.RESET_ALL}")
                         print("=" * 50)
                         # Run single force iteration (this will be the existing force mode logic)
-                        import time
 
                         # Store the force mode logic result for this iteration
                         # (The existing force mode logic will continue below)

@@ -39,18 +39,6 @@ try:
 except ImportError:
     JSHINT_AVAILABLE = False
 try:
-    from .eslint_linter import ESLintLinter
-
-    ESLINT_AVAILABLE = True
-except ImportError:
-    ESLINT_AVAILABLE = False
-try:
-    from .jshint_linter import JSHintLinter
-
-    JSHINT_AVAILABLE = True
-except ImportError:
-    JSHINT_AVAILABLE = False
-try:
     from .prettier_linter import PrettierLinter
 
     PRETTIER_AVAILABLE = True

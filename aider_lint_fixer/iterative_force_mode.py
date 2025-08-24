@@ -15,7 +15,7 @@ from typing import Dict, List, Optional, Tuple
 
 from .context_manager import ContextManager, ContextPriority
 from .convergence_analyzer import AdvancedConvergenceAnalyzer, ConvergenceState
-from .cost_monitor import BudgetExceededException, CostModel, CostMonitor
+from .cost_monitor import BudgetExceededException, CostMonitor
 
 logger = logging.getLogger(__name__)
 

@@ -7,9 +7,9 @@ import subprocess
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
-from ..lint_runner import ErrorSeverity, LintError
+from ..lint_runner import LintError
 
 logger = logging.getLogger(__name__)
 

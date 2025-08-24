@@ -9,7 +9,6 @@ import re
 import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from .native_lint_detector import NativeLintDetector
@@ -28,7 +27,8 @@ PrettierLinter = None
 
 def _import_modular_linters():
     """Import modular linters with individual error handling for platform compatibility."""
-    global MODULAR_LINTERS_AVAILABLE, AnsibleLintLinter, Flake8Linter, PylintLinter, ESLintLinter, JSHintLinter, PrettierLinter
+    global MODULAR_LINTERS_AVAILABLE, AnsibleLintLinter, Flake8Linter
+    global PylintLinter, ESLintLinter, JSHintLinter, PrettierLinter
     if not MODULAR_LINTERS_AVAILABLE:
         imported_linters = []
         # Import each linter individually to handle platform-specific issues
@@ -264,7 +264,8 @@ class LintRunner:
             if use_json:
                 command.extend(native_command.json_format_args)
             # For native commands, don't add file paths - they use project's full scope
-            # Native commands like "npm run lint" are designed to run on the project's configured files
+            # Native commands like "npm run lint" are designed to run on the project's
+            # configured files
             # Adding specific file paths often breaks the command (e.g., "npm run lint unknown")
             # If file-specific linting is needed, we should fall back to modular implementation
             logger.info(f"Running native {native_command.linter_type}: {' '.join(command)}")
@@ -290,8 +291,6 @@ class LintRunner:
                 errors = []
                 warnings = []
                 # Simple error counting for non-JSON output
-                output_lines = (result.stdout + result.stderr).split("\n")
-                error_count = len([line for line in output_lines if "error" in line.lower()])
                 return LintResult(
                     linter=native_command.linter_type,
                     success=result.returncode in [0, 1, 2],  # Many linters use 2 for "issues found"
@@ -364,8 +363,10 @@ class LintRunner:
         # Parse ESLint text output format
         # ESLint groups errors by file:
         # /path/to/file.js
-        #    21:1   error  This line has a length of 128. Maximum allowed is 120                 max-len
-        #    47:1   error  This line has a length of 123. Maximum allowed is 120                 max-len
+        #    21:1   error  This line has a length of 128. Maximum allowed is 120
+        #                max-len
+        #    47:1   error  This line has a length of 123. Maximum allowed is 120
+        #                max-len
         output = stdout + stderr
         lines = output.split("\n")
         current_file = "unknown"
@@ -386,7 +387,8 @@ class LintRunner:
             # Check if this line contains an error or warning
             if not ("error" in line.lower() or "warning" in line.lower()):
                 continue
-            # ESLint format: "   21:1   error  This line has a length of 128. Maximum allowed is 120                 max-len"
+            # ESLint format: "   21:1   error  This line has a length of 128.
+            # Maximum allowed is 120                 max-len"
             # Look for the pattern: spaces + number:number + spaces + error/warning + message + rule
             if ":" in line and ("error" in line or "warning" in line):
                 try:
@@ -433,7 +435,6 @@ class LintRunner:
         )
         if summary_match and not errors:
             # If we couldn't parse individual errors, create summary errors
-            total_problems = int(summary_match.group(1))
             error_count = int(summary_match.group(2))
             warning_count = int(summary_match.group(3))
             # Create generic errors for the count
@@ -470,6 +471,42 @@ class LintRunner:
             execution_time=0.0,
         )
 
+    def _check_modular_linter_availability(self, linter_name: str) -> Optional[bool]:
+        """Check availability using modular linter implementation if available.
+
+        Args:
+            linter_name: Name of the linter to check
+
+        Returns:
+            True if available, False if not available, None if no modular implementation
+        """
+        # Import modular linters
+        _import_modular_linters()
+
+        # Map linter names to their modular classes
+        modular_linters = {
+            "ansible-lint": AnsibleLintLinter,
+            "flake8": Flake8Linter,
+            "pylint": PylintLinter,
+            "eslint": ESLintLinter,
+            "jshint": JSHintLinter,
+            "prettier": PrettierLinter,
+        }
+
+        linter_class = modular_linters.get(linter_name)
+        if linter_class is None:
+            return None  # No modular implementation
+
+        try:
+            # Create linter instance and check availability
+            linter_instance = linter_class(str(self.project_info.root_path))
+            is_available = linter_instance.is_available()
+            logger.debug(f"Modular {linter_name} availability check: {is_available}")
+            return is_available
+        except Exception as e:
+            logger.debug(f"Error checking modular {linter_name} availability: {e}")
+            return False
+
     def _detect_available_linters(
         self, linter_names: Optional[List[str]] = None
     ) -> Dict[str, bool]:
@@ -494,6 +531,18 @@ class LintRunner:
                 logger.debug(f"Skipping {linter_name} on Windows (platform incompatibility)")
                 available[linter_name] = False
                 continue
+
+            # First try modular linter availability check
+            modular_availability = self._check_modular_linter_availability(linter_name)
+            if modular_availability is not None:
+                available[linter_name] = modular_availability
+                if available[linter_name]:
+                    logger.debug(f"Linter {linter_name} is available (modular check)")
+                else:
+                    logger.debug(f"Linter {linter_name} not available (modular check)")
+                continue
+
+            # Fallback to legacy availability check
             config = self.LINTER_COMMANDS[linter_name]
             try:
                 # Try to run the version command
@@ -506,12 +555,12 @@ class LintRunner:
                 )
                 available[linter_name] = result.returncode == 0
                 if available[linter_name]:
-                    logger.debug(f"Linter {linter_name} is available")
+                    logger.debug(f"Linter {linter_name} is available (legacy check)")
                 else:
-                    logger.debug(f"Linter {linter_name} check failed: {result.stderr}")
+                    logger.debug(f"Linter {linter_name} check failed (legacy): {result.stderr}")
             except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
                 available[linter_name] = False
-                logger.debug(f"Linter {linter_name} not available: {e}")
+                logger.debug(f"Linter {linter_name} not available (legacy): {e}")
         return available
 
     def run_linter(
@@ -602,7 +651,8 @@ class LintRunner:
             )
             lint_result.execution_time = execution_time
             logger.info(
-                f"Linter {linter_name} completed in {execution_time:.2f}s with {len(lint_result.errors)} errors"
+                f"Linter {linter_name} completed in {execution_time:.2f}s "
+                f"with {len(lint_result.errors)} errors"
             )
             return lint_result
         except subprocess.TimeoutExpired:
