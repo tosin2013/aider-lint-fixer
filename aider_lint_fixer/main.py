@@ -94,15 +94,22 @@ def print_project_info(project_info):
     """
     print(f"\n{Fore.GREEN}📁 Project Detection Results:{Style.RESET_ALL}")
     print(f"   Root: {project_info.root_path}")
-    print(
-        f"   Languages: {', '.join(project_info.languages) if project_info.languages else 'None detected'}"
+    languages = ', '.join(project_info.languages) if project_info.languages else 'None detected'
+    print(f"   Languages: {languages}")
+
+    package_managers = (
+        ', '.join(project_info.package_managers)
+        if project_info.package_managers
+        else 'None detected'
     )
-    print(
-        f"   Package Managers: {', '.join(project_info.package_managers) if project_info.package_managers else 'None detected'}"
+    print(f"   Package Managers: {package_managers}")
+
+    lint_configs = (
+        ', '.join(project_info.lint_configs.keys())
+        if project_info.lint_configs
+        else 'None detected'
     )
-    print(
-        f"   Lint Configs: {', '.join(project_info.lint_configs.keys()) if project_info.lint_configs else 'None detected'}"
-    )
+    print(f"   Lint Configs: {lint_configs}")
     print(f"   Source Files: {len(project_info.source_files)}")
 
 
@@ -129,7 +136,8 @@ def print_lint_summary(results, baseline_results=None, baseline_total=None):
             baseline_warning_count = len(baseline_result.warnings)
             if baseline_error_count != error_count or baseline_warning_count != warning_count:
                 print(
-                    f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings (baseline: {baseline_error_count} errors, {baseline_warning_count} warnings)"
+                    f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings "
+                    f"(baseline: {baseline_error_count} errors, {baseline_warning_count} warnings)"
                 )
             else:
                 print(f"   {status} {linter_name}: {error_count} errors, {warning_count} warnings")
@@ -653,7 +661,7 @@ def main(
                 print(f"  ✅ {linter}")
 
             if unavailable:
-                print(f"\nUnavailable linters (not installed):")
+                print("\nUnavailable linters (not installed):")
                 for linter in unavailable:
                     print(f"  ❌ {linter}")
 
@@ -1205,9 +1213,7 @@ def main(
                 # Import iterative force mode
                 try:
                     from .iterative_force_mode import (
-                        IterationResult,
                         IterativeForceMode,
-                        LoopExitReason,
                     )
 
                     iterative_mode = IterativeForceMode(
@@ -1222,7 +1228,6 @@ def main(
                         print(f"\n{Fore.CYAN}🔄 ITERATION {iteration}{Style.RESET_ALL}")
                         print("=" * 50)
                         # Run single force iteration (this will be the existing force mode logic)
-                        import time
 
                         # Store the force mode logic result for this iteration
                         # (The existing force mode logic will continue below)
