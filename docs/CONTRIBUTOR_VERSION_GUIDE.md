@@ -281,7 +281,7 @@ PRs require:
 - **v1.7.0**: Learning System with 46.1% fixability rate
 - **v1.6.0**: TypeScript Projects & Smart ESLint integration
 
-See [CHANGELOG.md](../CHANGELOG.md) for detailed release notes.
+See the project changelog for detailed release notes.
 
 ## Getting Help
 
@@ -295,4 +295,4 @@ See [CHANGELOG.md](../CHANGELOG.md) for detailed release notes.
 - [Installation Guide](./INSTALLATION_GUIDE.md)
 - [Node.js Linters Guide](./NODEJS_LINTERS_GUIDE.md)
 - [Linter Testing Guide](./LINTER_TESTING_GUIDE.md)
-- [Project README](../README.md)
+- [Project Home](./index.md)

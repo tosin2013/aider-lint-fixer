@@ -162,7 +162,7 @@ docker build --no-cache -t aider-lint-fixer .
 
 ### Getting Help
 
-- Check the [README.md](../README.md) for basic usage
+- Check the [getting started tutorial](./tutorials/getting-started.md) for basic usage
 - Review [CONTRIBUTOR_VERSION_GUIDE.md](./CONTRIBUTOR_VERSION_GUIDE.md) for development setup
 - Report issues on [GitHub Issues](https://github.com/tosin2013/aider-lint-fixer/issues)
 
