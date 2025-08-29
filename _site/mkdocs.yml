@@ -1,0 +1,90 @@
+site_name: aider-lint-fixer
+site_description: AI-powered linting tool that automatically detects and fixes code quality issues across multiple programming languages
+site_url: https://tosin2013.github.io/aider-lint-fixer
+
+# Configure paths when running from project root with -f docs/mkdocs.yml
+docs_dir: docs
+site_dir: _site
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mermaid2
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.details
+  - admonition
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Tutorials:
+    - Overview: tutorials/index.md
+    - Getting Started: tutorials/getting-started.md
+    - Getting Started with Containers: tutorials/getting-started-with-containers.md
+    - Development Environment: tutorials/setting-up-your-development-environment.md
+    - Writing and Running Tests: tutorials/writing-and-running-tests.md
+    - Container Deployment: tutorials/container-deployment.md
+  - How-To Guides:
+    - Overview: how-to/index.md
+    - Configure Linters: how-to/configure-linters.md
+    - Add a New Feature: how-to/how-to-add-a-new-feature.md
+    - Debug Common Issues: how-to/how-to-debug-common-issues.md
+    - Deploy to Production: how-to/deploy-to-production.md
+    - Deploy Your Application: how-to/how-to-deploy-your-application.md
+    - Setup Development Environment: how-to/setup-development-environment.md
+    - Integrate with Aider: how-to/integrate-with-aider.md
+    - Run Tests: how-to/run-tests.md
+    - Monitor Performance: how-to/monitor-performance.md
+    - Security Best Practices: how-to/security-best-practices.md
+  - Reference:
+    - Overview: reference/index.md
+    - API Documentation: reference/api-documentation.md
+    - API Reference: reference/api-reference.md
+    - Command Line Interface: reference/command-line-interface.md
+    - Configuration Reference: reference/configuration-reference.md
+    - Error Codes: reference/error-codes.md
+    - Linter Plugins: reference/linter-plugins.md
+  - Explanation:
+    - Overview: explanation/index.md
+    - Architecture Overview: explanation/architecture-overview.md
+    - Container Architecture: explanation/container-architecture.md
+    - Design Decisions: explanation/design-decisions.md
+    - Technology Stack: explanation/technology-stack.md
+  - ADRs:
+    - Overview: adrs/README.md
+    - "0001: Record Architecture Decisions": adrs/0001-record-architecture-decisions.md
+    - "0002: AI Integration Architecture": adrs/0002-ai-integration-architecture.md
+    - "0003: Modular Plugin System": adrs/0003-modular-plugin-system.md
+    - "0004: Python Ecosystem Focus": adrs/0004-python-ecosystem-focus.md
+    - "0005: Python Linter Ecosystem": adrs/0005-python-linter-ecosystem.md
+    - "0006: JavaScript TypeScript Ecosystem": adrs/0006-javascript-typescript-ecosystem.md
+    - "0007: Infrastructure DevOps Linter Ecosystem": adrs/0007-infrastructure-devops-linter-ecosystem.md
+    - "0008: Deployment Environments": adrs/0008-deployment-environments.md
+    - "0009: RHEL Container Build Requirements": adrs/0009-rhel-container-build-requirements.md

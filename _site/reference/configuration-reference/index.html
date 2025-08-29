@@ -1,0 +1,3230 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-powered linting tool that automatically detects and fixes code quality issues across multiple programming languages">
+      
+      
+      
+        <link rel="canonical" href="https://tosin2013.github.io/aider-lint-fixer/reference/configuration-reference/">
+      
+      
+        <link rel="prev" href="../command-line-interface/">
+      
+      
+        <link rel="next" href="../error-codes/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Configuration Reference - aider-lint-fixer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="aider-lint-fixer" class="md-header__button md-logo" aria-label="aider-lint-fixer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            aider-lint-fixer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorials/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../how-to/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../explanation/" class="md-tabs__link">
+          
+  
+  
+  Explanation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adrs/" class="md-tabs__link">
+          
+  
+  
+  ADRs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="aider-lint-fixer" class="md-nav__button md-logo" aria-label="aider-lint-fixer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    aider-lint-fixer
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tutorials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started-with-containers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started with Containers
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/setting-up-your-development-environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Development Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/writing-and-running-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Writing and Running Tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/container-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Container Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How-To Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/configure-linters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configure Linters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/how-to-add-a-new-feature/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Add a New Feature
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/how-to-debug-common-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debug Common Issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/deploy-to-production/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy to Production
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/how-to-deploy-your-application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy Your Application
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/setup-development-environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Setup Development Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/integrate-with-aider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integrate with Aider
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/run-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Run Tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/monitor-performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Monitor Performance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/security-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Security Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../command-line-interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Command Line Interface
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Configuration Reference
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration Reference
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration File Locations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration File Format
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Sections
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#llm-configuration-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      LLM Configuration (llm)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LLM Configuration (llm)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Providers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linter-configuration-linters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linter Configuration (linters)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linter Configuration (linters)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-enabled-linters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Enabled Linters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smart-selection-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Smart Selection Defaults
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aider-configuration-aider" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aider Configuration (aider)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project-configuration-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project Configuration (project)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging Configuration (logging)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#llm-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      LLM Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-key-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Key Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aider-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aider Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-specific-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool-Specific Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command Line Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Command Line Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#llm-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      LLM Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linter-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linter Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Processing Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-selection-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      File Selection Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smart-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Smart Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cost Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profile-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Profile Configurations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Profile Configurations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strict-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Strict Profile
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-configuration-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Configuration Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration Guide
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from-v1x-to-v2x" class="md-nav__link">
+    <span class="md-ellipsis">
+      From v1.x to v2.x
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Conversion
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../error-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Error Codes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linter-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Linter Plugins
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Explanation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Explanation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/architecture-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/container-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Container Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/design-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Design Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/technology-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Technology Stack
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            ADRs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0001-record-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0001: Record Architecture Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0002-ai-integration-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0002: AI Integration Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0003-modular-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0003: Modular Plugin System
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0004-python-ecosystem-focus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0004: Python Ecosystem Focus
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0005-python-linter-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0005: Python Linter Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0006-javascript-typescript-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0006: JavaScript TypeScript Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0007-infrastructure-devops-linter-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0007: Infrastructure DevOps Linter Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0008-deployment-environments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0008: Deployment Environments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0009-rhel-container-build-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0009: RHEL Container Build Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration File Locations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration File Format
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Sections
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#llm-configuration-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      LLM Configuration (llm)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LLM Configuration (llm)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Providers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linter-configuration-linters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linter Configuration (linters)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linter Configuration (linters)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-enabled-linters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Enabled Linters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smart-selection-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Smart Selection Defaults
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aider-configuration-aider" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aider Configuration (aider)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project-configuration-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project Configuration (project)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging Configuration (logging)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#llm-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      LLM Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-key-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Key Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aider-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aider Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-specific-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool-Specific Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command Line Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Command Line Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#llm-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      LLM Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linter-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linter Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Processing Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-selection-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      File Selection Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smart-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Smart Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cost Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profile-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Profile Configurations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Profile Configurations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strict-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Strict Profile
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-configuration-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Configuration Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration Guide
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from-v1x-to-v2x" class="md-nav__link">
+    <span class="md-ellipsis">
+      From v1.x to v2.x
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Conversion
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="configuration-reference">Configuration Reference<a class="headerlink" href="#configuration-reference" title="Permanent link">&para;</a></h1>
+<p>This document provides comprehensive configuration options for aider-lint-fixer.</p>
+<h2 id="configuration-file-locations">Configuration File Locations<a class="headerlink" href="#configuration-file-locations" title="Permanent link">&para;</a></h2>
+<p>Configuration files are loaded in the following order (later files override earlier ones):</p>
+<ol>
+<li>Default configuration (built-in)</li>
+<li>Global configuration: <code>~/.aider-lint-fixer.yml</code></li>
+<li>Project configuration: <code>[PROJECT_ROOT]/.aider-lint-fixer.yml</code></li>
+<li>Environment variables</li>
+<li>Command-line arguments</li>
+</ol>
+<h2 id="configuration-file-format">Configuration File Format<a class="headerlink" href="#configuration-file-format" title="Permanent link">&para;</a></h2>
+<p>Configuration files use YAML format. Here's a complete example:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># LLM Configuration</span>
+<span class="nt">llm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;deepseek&quot;</span><span class="w">  </span><span class="c1"># Options: deepseek, openrouter, ollama</span>
+<span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;deepseek/deepseek-chat&quot;</span>
+<span class="w">  </span><span class="nt">fallback_providers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;openrouter&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;ollama&quot;</span>
+<span class="w">  </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w">  </span><span class="c1"># Set via environment variables</span>
+<span class="w">  </span><span class="nt">api_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w">  </span><span class="c1"># Optional API base URL</span>
+
+<span class="c1"># Linter Configuration</span>
+<span class="nt">linters</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">auto_detect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flake8</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pylint</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">black</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">isort</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mypy</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eslint</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prettier</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tslint</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">golint</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gofmt</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">govet</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rustfmt</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clippy</span>
+<span class="w">  </span><span class="nt">smart_selection_defaults</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">development</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">ci</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">tutorial</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">production</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="c1"># Aider Configuration</span>
+<span class="nt">aider</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">auto_commit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">backup_files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">max_retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">context_window</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
+
+<span class="c1"># Project Settings</span>
+<span class="nt">project</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">exclude_patterns</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.min.js&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.min.css&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node_modules/&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;__pycache__/&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;.git/&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;.venv/&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;venv/&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;build/&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;dist/&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;target/&quot;</span>
+<span class="w">  </span><span class="nt">include_patterns</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.py&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.js&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.ts&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.jsx&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.tsx&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.go&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.rs&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.java&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.c&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.cpp&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.h&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.hpp&quot;</span>
+
+<span class="c1"># Logging Configuration</span>
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;INFO&quot;</span><span class="w">  </span><span class="c1"># DEBUG, INFO, WARNING, ERROR, CRITICAL</span>
+<span class="w">  </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;aider-lint-fixer.log&quot;</span>
+<span class="w">  </span><span class="nt">max_size</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10MB&quot;</span>
+<span class="w">  </span><span class="nt">backup_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+</code></pre></div>
+<h2 id="configuration-sections">Configuration Sections<a class="headerlink" href="#configuration-sections" title="Permanent link">&para;</a></h2>
+<h3 id="llm-configuration-llm">LLM Configuration (<code>llm</code>)<a class="headerlink" href="#llm-configuration-llm" title="Permanent link">&para;</a></h3>
+<p>Controls the Language Learning Model provider and settings.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>provider</code></td>
+<td>string</td>
+<td><code>"deepseek"</code></td>
+<td>LLM provider to use</td>
+</tr>
+<tr>
+<td><code>model</code></td>
+<td>string</td>
+<td><code>"deepseek/deepseek-chat"</code></td>
+<td>Specific model to use</td>
+</tr>
+<tr>
+<td><code>fallback_providers</code></td>
+<td>list</td>
+<td><code>["openrouter", "ollama"]</code></td>
+<td>Fallback providers if primary fails</td>
+</tr>
+<tr>
+<td><code>api_key</code></td>
+<td>string</td>
+<td><code>null</code></td>
+<td>API key (use environment variables)</td>
+</tr>
+<tr>
+<td><code>api_base</code></td>
+<td>string</td>
+<td><code>null</code></td>
+<td>Custom API base URL</td>
+</tr>
+</tbody>
+</table>
+<h4 id="supported-providers">Supported Providers<a class="headerlink" href="#supported-providers" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>deepseek</strong>: DeepSeek AI models</li>
+<li><strong>openrouter</strong>: OpenRouter API gateway</li>
+<li><strong>ollama</strong>: Local Ollama models</li>
+</ul>
+<h3 id="linter-configuration-linters">Linter Configuration (<code>linters</code>)<a class="headerlink" href="#linter-configuration-linters" title="Permanent link">&para;</a></h3>
+<p>Controls which linters are enabled and how they're selected.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auto_detect</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Automatically detect project type and enable relevant linters</td>
+</tr>
+<tr>
+<td><code>enabled</code></td>
+<td>list</td>
+<td>See default list</td>
+<td>List of enabled linters</td>
+</tr>
+<tr>
+<td><code>smart_selection_defaults</code></td>
+<td>object</td>
+<td>See below</td>
+<td>Environment-specific defaults</td>
+</tr>
+</tbody>
+</table>
+<h4 id="default-enabled-linters">Default Enabled Linters<a class="headerlink" href="#default-enabled-linters" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Python</strong>: flake8, pylint, black, isort, mypy</li>
+<li><strong>JavaScript/TypeScript</strong>: eslint, prettier, tslint</li>
+<li><strong>Go</strong>: golint, gofmt, govet</li>
+<li><strong>Rust</strong>: rustfmt, clippy</li>
+</ul>
+<h4 id="smart-selection-defaults">Smart Selection Defaults<a class="headerlink" href="#smart-selection-defaults" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Environment</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>development</code></td>
+<td><code>true</code></td>
+<td>Fast feedback during development</td>
+</tr>
+<tr>
+<td><code>ci</code></td>
+<td><code>false</code></td>
+<td>Comprehensive checking in CI</td>
+</tr>
+<tr>
+<td><code>tutorial</code></td>
+<td><code>true</code></td>
+<td>Always smart for tutorials</td>
+</tr>
+<tr>
+<td><code>production</code></td>
+<td><code>false</code></td>
+<td>Safety first in production</td>
+</tr>
+</tbody>
+</table>
+<h3 id="aider-configuration-aider">Aider Configuration (<code>aider</code>)<a class="headerlink" href="#aider-configuration-aider" title="Permanent link">&para;</a></h3>
+<p>Controls aider.chat integration behavior.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auto_commit</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Automatically commit fixes</td>
+</tr>
+<tr>
+<td><code>backup_files</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Create backups before making changes</td>
+</tr>
+<tr>
+<td><code>max_retries</code></td>
+<td>integer</td>
+<td><code>3</code></td>
+<td>Maximum retries for aider operations</td>
+</tr>
+<tr>
+<td><code>context_window</code></td>
+<td>integer</td>
+<td><code>8192</code></td>
+<td>Context window size for AI model</td>
+</tr>
+</tbody>
+</table>
+<h3 id="project-configuration-project">Project Configuration (<code>project</code>)<a class="headerlink" href="#project-configuration-project" title="Permanent link">&para;</a></h3>
+<p>Controls file inclusion and exclusion patterns.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>exclude_patterns</code></td>
+<td>list</td>
+<td>See default list</td>
+<td>Patterns to exclude from processing</td>
+</tr>
+<tr>
+<td><code>include_patterns</code></td>
+<td>list</td>
+<td>See default list</td>
+<td>Patterns to include in processing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="logging-configuration-logging">Logging Configuration (<code>logging</code>)<a class="headerlink" href="#logging-configuration-logging" title="Permanent link">&para;</a></h3>
+<p>Controls logging behavior and output.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>level</code></td>
+<td>string</td>
+<td><code>"INFO"</code></td>
+<td>Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)</td>
+</tr>
+<tr>
+<td><code>file</code></td>
+<td>string</td>
+<td><code>"aider-lint-fixer.log"</code></td>
+<td>Log file path</td>
+</tr>
+<tr>
+<td><code>max_size</code></td>
+<td>string</td>
+<td><code>"10MB"</code></td>
+<td>Maximum log file size</td>
+</tr>
+<tr>
+<td><code>backup_count</code></td>
+<td>integer</td>
+<td><code>5</code></td>
+<td>Number of backup log files to keep</td>
+</tr>
+</tbody>
+</table>
+<h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
+<p>Configuration can be overridden using environment variables:</p>
+<h3 id="llm-environment-variables">LLM Environment Variables<a class="headerlink" href="#llm-environment-variables" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AIDER_LLM_PROVIDER</code></td>
+<td>Override LLM provider</td>
+<td><code>deepseek</code></td>
+</tr>
+<tr>
+<td><code>AIDER_LLM_MODEL</code></td>
+<td>Override LLM model</td>
+<td><code>deepseek/deepseek-chat</code></td>
+</tr>
+<tr>
+<td><code>OLLAMA_API_BASE</code></td>
+<td>Ollama API base URL</td>
+<td><code>http://localhost:11434</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="api-key-environment-variables">API Key Environment Variables<a class="headerlink" href="#api-key-environment-variables" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DEEPSEEK_API_KEY</code></td>
+<td>DeepSeek API key</td>
+</tr>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td>OpenAI API key</td>
+</tr>
+<tr>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td>Anthropic Claude API key</td>
+</tr>
+<tr>
+<td><code>OPENROUTER_API_KEY</code></td>
+<td>OpenRouter API key</td>
+</tr>
+</tbody>
+</table>
+<h3 id="aider-environment-variables">Aider Environment Variables<a class="headerlink" href="#aider-environment-variables" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AIDER_AUTO_COMMIT</code></td>
+<td>Auto-commit behavior</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>AIDER_MAX_RETRIES</code></td>
+<td>Maximum retries</td>
+<td><code>5</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="logging-environment-variables">Logging Environment Variables<a class="headerlink" href="#logging-environment-variables" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AIDER_LOG_LEVEL</code></td>
+<td>Log level</td>
+<td><code>DEBUG</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="tool-specific-environment-variables">Tool-Specific Environment Variables<a class="headerlink" href="#tool-specific-environment-variables" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AIDER_LINT_FIXER_DEBUG</code></td>
+<td>Enable debug mode</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>AIDER_LINT_FIXER_LOG_LEVEL</code></td>
+<td>Tool log level</td>
+<td><code>INFO</code></td>
+</tr>
+<tr>
+<td><code>AIDER_LINT_FIXER_MAX_FILES</code></td>
+<td>Maximum files to process</td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>AIDER_LINT_FIXER_MAX_ERRORS</code></td>
+<td>Maximum errors per file</td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><code>ANSIBLE_LINT_VERSION</code></td>
+<td>Ansible-lint version selection</td>
+<td><code>enterprise</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="command-line-options">Command Line Options<a class="headerlink" href="#command-line-options" title="Permanent link">&para;</a></h2>
+<p>Configuration can also be set via command-line arguments, which override all other settings:</p>
+<h3 id="basic-options">Basic Options<a class="headerlink" href="#basic-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--config</code>, <code>-c</code></td>
+<td>string</td>
+<td>Path to configuration file</td>
+</tr>
+<tr>
+<td><code>--verbose</code>, <code>-v</code></td>
+<td>flag</td>
+<td>Enable verbose output</td>
+</tr>
+<tr>
+<td><code>--quiet</code>, <code>-q</code></td>
+<td>flag</td>
+<td>Suppress non-error output</td>
+</tr>
+<tr>
+<td><code>--no-color</code></td>
+<td>flag</td>
+<td>Disable colored output</td>
+</tr>
+<tr>
+<td><code>--log-file</code></td>
+<td>string</td>
+<td>Path to log file</td>
+</tr>
+<tr>
+<td><code>--no-banner</code></td>
+<td>flag</td>
+<td>Disable banner output</td>
+</tr>
+</tbody>
+</table>
+<h3 id="llm-options">LLM Options<a class="headerlink" href="#llm-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--llm</code></td>
+<td>string</td>
+<td>LLM provider</td>
+</tr>
+<tr>
+<td><code>--model</code></td>
+<td>string</td>
+<td>Specific model to use</td>
+</tr>
+<tr>
+<td><code>--ai-model</code></td>
+<td>choice</td>
+<td>AI model for cost calculations</td>
+</tr>
+</tbody>
+</table>
+<h3 id="linter-options">Linter Options<a class="headerlink" href="#linter-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--linters</code></td>
+<td>string</td>
+<td>Comma-separated list of linters</td>
+</tr>
+<tr>
+<td><code>--profile</code></td>
+<td>choice</td>
+<td>Linter profile (basic, default, strict)</td>
+</tr>
+<tr>
+<td><code>--ansible-profile</code></td>
+<td>choice</td>
+<td>Ansible-lint profile (basic, production)</td>
+</tr>
+<tr>
+<td><code>--list-linters</code></td>
+<td>flag</td>
+<td>List all available linters</td>
+</tr>
+</tbody>
+</table>
+<h3 id="processing-options">Processing Options<a class="headerlink" href="#processing-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--max-files</code></td>
+<td>integer</td>
+<td>Maximum files to process</td>
+</tr>
+<tr>
+<td><code>--max-errors</code></td>
+<td>integer</td>
+<td>Maximum errors per file</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>flag</td>
+<td>Show what would be fixed</td>
+</tr>
+<tr>
+<td><code>--check-only</code></td>
+<td>flag</td>
+<td>Only check, don't fix</td>
+</tr>
+<tr>
+<td><code>--interactive</code></td>
+<td>flag</td>
+<td>Confirm each fix</td>
+</tr>
+</tbody>
+</table>
+<h3 id="file-selection-options">File Selection Options<a class="headerlink" href="#file-selection-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--include</code></td>
+<td>string</td>
+<td>Include patterns (multiple allowed)</td>
+</tr>
+<tr>
+<td><code>--exclude</code></td>
+<td>string</td>
+<td>Exclude patterns (multiple allowed)</td>
+</tr>
+<tr>
+<td><code>--extensions</code></td>
+<td>string</td>
+<td>File extensions to process</td>
+</tr>
+<tr>
+<td><code>--target-dir</code></td>
+<td>string</td>
+<td>Target directory to lint</td>
+</tr>
+</tbody>
+</table>
+<h3 id="smart-features">Smart Features<a class="headerlink" href="#smart-features" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--smart-linter-selection</code></td>
+<td>flag</td>
+<td>Enable smart linter selection</td>
+</tr>
+<tr>
+<td><code>--max-linter-time</code></td>
+<td>float</td>
+<td>Time budget for linters (seconds)</td>
+</tr>
+<tr>
+<td><code>--confidence-threshold</code></td>
+<td>float</td>
+<td>Minimum confidence for selection (0.0-1.0)</td>
+</tr>
+<tr>
+<td><code>--dag-workflow</code></td>
+<td>flag</td>
+<td>Enable DAG workflow execution</td>
+</tr>
+<tr>
+<td><code>--max-workers</code></td>
+<td>integer</td>
+<td>Maximum parallel workers</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cost-management">Cost Management<a class="headerlink" href="#cost-management" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--max-cost</code></td>
+<td>float</td>
+<td>Maximum total cost budget</td>
+</tr>
+<tr>
+<td><code>--max-iteration-cost</code></td>
+<td>float</td>
+<td>Maximum cost per iteration</td>
+</tr>
+<tr>
+<td><code>--show-cost-prediction</code></td>
+<td>flag</td>
+<td>Show cost predictions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="advanced-options">Advanced Options<a class="headerlink" href="#advanced-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--use-architect-mode</code></td>
+<td>flag</td>
+<td>Use architect mode for complex errors</td>
+</tr>
+<tr>
+<td><code>--architect-model</code></td>
+<td>string</td>
+<td>Model for architect reasoning</td>
+</tr>
+<tr>
+<td><code>--editor-model</code></td>
+<td>string</td>
+<td>Model for file editing</td>
+</tr>
+<tr>
+<td><code>--architect-only</code></td>
+<td>flag</td>
+<td>Only use architect mode</td>
+</tr>
+</tbody>
+</table>
+<h2 id="profile-configurations">Profile Configurations<a class="headerlink" href="#profile-configurations" title="Permanent link">&para;</a></h2>
+<h3 id="basic-profile">Basic Profile<a class="headerlink" href="#basic-profile" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Minimal linter set</li>
+<li>Fast execution</li>
+<li>Good for initial setup or CI</li>
+</ul>
+<h3 id="default-profile">Default Profile<a class="headerlink" href="#default-profile" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Balanced linter selection</li>
+<li>Reasonable performance</li>
+<li>Recommended for most projects</li>
+</ul>
+<h3 id="strict-profile">Strict Profile<a class="headerlink" href="#strict-profile" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Comprehensive linting</li>
+<li>Slower execution</li>
+<li>Best for production-ready code</li>
+</ul>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Start with Basic Profile</strong>: Use the basic profile for initial setup and gradually move to stricter profiles.</p>
+</li>
+<li>
+<p><strong>Use Project-Specific Configs</strong>: Create <code>.aider-lint-fixer.yml</code> in your project root for project-specific settings.</p>
+</li>
+<li>
+<p><strong>Environment Variables for Secrets</strong>: Always use environment variables for API keys, never commit them to configuration files.</p>
+</li>
+<li>
+<p><strong>Smart Selection in Development</strong>: Enable smart linter selection during development for faster feedback.</p>
+</li>
+<li>
+<p><strong>Comprehensive Checking in CI</strong>: Disable smart selection in CI environments for thorough validation.</p>
+</li>
+<li>
+<p><strong>Exclude Build Artifacts</strong>: Always exclude build directories, node_modules, and other generated content.</p>
+</li>
+<li>
+<p><strong>Log Rotation</strong>: Configure appropriate log rotation to prevent disk space issues.</p>
+</li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="common-configuration-issues">Common Configuration Issues<a class="headerlink" href="#common-configuration-issues" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Configuration Not Loading</strong>: Check file paths and YAML syntax</li>
+<li><strong>API Key Not Found</strong>: Verify environment variable names and values</li>
+<li><strong>Linters Not Found</strong>: Ensure linters are installed and in PATH</li>
+<li><strong>Permission Issues</strong>: Check file permissions for config files</li>
+</ol>
+<h3 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h3>
+<p>Use the <code>--check-only</code> flag to validate configuration without making changes:</p>
+<div class="highlight"><pre><span></span><code>aider-lint-fixer<span class="w"> </span>--check-only<span class="w"> </span>--verbose
+</code></pre></div>
+<h2 id="migration-guide">Migration Guide<a class="headerlink" href="#migration-guide" title="Permanent link">&para;</a></h2>
+<h3 id="from-v1x-to-v2x">From v1.x to v2.x<a class="headerlink" href="#from-v1x-to-v2x" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Update configuration file format from JSON to YAML</li>
+<li>Rename <code>smart_selection</code> to <code>smart_linter_selection</code></li>
+<li>Add new <code>logging</code> section for log configuration</li>
+<li>Update environment variable names (add <code>AIDER_</code> prefix)</li>
+</ol>
+<h3 id="configuration-conversion">Configuration Conversion<a class="headerlink" href="#configuration-conversion" title="Permanent link">&para;</a></h3>
+<p>Use the built-in migration tool:</p>
+<div class="highlight"><pre><span></span><code>aider-lint-fixer<span class="w"> </span>--migrate-config<span class="w"> </span>path/to/old-config.json
+</code></pre></div>
+<p>This will create a new YAML configuration file with equivalent settings.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

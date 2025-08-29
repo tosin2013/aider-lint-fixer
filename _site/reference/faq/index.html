@@ -1,0 +1,2463 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-powered linting tool that automatically detects and fixes code quality issues across multiple programming languages">
+      
+      
+      
+        <link rel="canonical" href="https://tosin2013.github.io/aider-lint-fixer/reference/faq/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Frequently Asked Questions - aider-lint-fixer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#frequently-asked-questions" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="aider-lint-fixer" class="md-header__button md-logo" aria-label="aider-lint-fixer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            aider-lint-fixer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Frequently Asked Questions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorials/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../how-to/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../explanation/" class="md-tabs__link">
+          
+  
+  
+  Explanation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adrs/" class="md-tabs__link">
+          
+  
+  
+  ADRs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="aider-lint-fixer" class="md-nav__button md-logo" aria-label="aider-lint-fixer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    aider-lint-fixer
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tutorials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started-with-containers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started with Containers
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/setting-up-your-development-environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Development Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/writing-and-running-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Writing and Running Tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/container-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Container Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How-To Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/configure-linters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configure Linters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/how-to-add-a-new-feature/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Add a New Feature
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/how-to-debug-common-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debug Common Issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/deploy-to-production/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy to Production
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/how-to-deploy-your-application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy Your Application
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/setup-development-environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Setup Development Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/integrate-with-aider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integrate with Aider
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/run-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Run Tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/monitor-performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Monitor Performance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/security-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Security Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../command-line-interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Command Line Interface
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../error-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Error Codes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linter-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Linter Plugins
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Explanation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Explanation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/architecture-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/container-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Container Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/design-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Design Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/technology-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Technology Stack
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            ADRs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0001-record-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0001: Record Architecture Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0002-ai-integration-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0002: AI Integration Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0003-modular-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0003: Modular Plugin System
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0004-python-ecosystem-focus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0004: Python Ecosystem Focus
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0005-python-linter-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0005: Python Linter Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0006-javascript-typescript-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0006: JavaScript TypeScript Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0007-infrastructure-devops-linter-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0007: Infrastructure DevOps Linter Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0008-deployment-environments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0008: Deployment Environments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0009-rhel-container-build-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0009: RHEL Container Build Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#general-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="General Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-aider-lint-fixer" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is aider-lint-fixer?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-linters-are-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Which linters are supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-auto-fixing-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does auto-fixing work?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-and-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation and Setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation and Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-install-aider-lint-fixer" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I install aider-lint-fixer?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-are-the-system-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      What are the system requirements?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-configure-linters" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I configure linters?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-run-linting-on-my-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I run linting on my project?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-exclude-certain-files-or-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I exclude certain files or directories?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-integrate-with-my-ide" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I integrate with my IDE?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-use-different-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I use different profiles?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Container Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-the-difference-between-default-and-rhel-containers" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's the difference between default and RHEL containers?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-do-i-need-to-build-rhel-containers-myself" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why do I need to build RHEL containers myself?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-troubleshoot-container-builds" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I troubleshoot container builds?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-handle-conflicting-linter-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I handle conflicting linter rules?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-configure-for-monorepos" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I configure for monorepos?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-existing-linter-configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use existing linter configuration files?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-improve-linting-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I improve linting performance?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-is-the-first-run-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why is the first run slow?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-error-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Error Messages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-debug-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I debug issues?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-report-bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I report bugs?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-integrate-with-cicd" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I integrate with CI/CD?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-with-pre-commit-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use with pre-commit hooks?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-integrate-with-code-review-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I integrate with code review tools?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Help
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Help">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-can-i-find-more-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where can I find more documentation?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-get-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I get support?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-contribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I contribute?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="frequently-asked-questions">Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permanent link">&para;</a></h1>
+<p>This document answers common questions about aider-lint-fixer usage, configuration, and troubleshooting.</p>
+<h2 id="general-questions">General Questions<a class="headerlink" href="#general-questions" title="Permanent link">&para;</a></h2>
+<h3 id="what-is-aider-lint-fixer">What is aider-lint-fixer?<a class="headerlink" href="#what-is-aider-lint-fixer" title="Permanent link">&para;</a></h3>
+<p>aider-lint-fixer is an AI-powered tool that automatically detects and fixes linting issues across multiple programming languages. It supports Python, JavaScript/TypeScript, and Ansible with a unified interface and intelligent auto-fixing capabilities.</p>
+<h3 id="which-linters-are-supported">Which linters are supported?<a class="headerlink" href="#which-linters-are-supported" title="Permanent link">&para;</a></h3>
+<p><strong>Python</strong>:
+- flake8 (style and error checking)
+- pylint (comprehensive code analysis)
+- mypy (static type checking)
+- bandit (security analysis)
+- black (code formatting)</p>
+<p><strong>JavaScript/TypeScript</strong>:
+- ESLint (linting and style checking)
+- JSHint (error detection)
+- Prettier (code formatting)
+- TSLint (TypeScript-specific, deprecated but supported)</p>
+<p><strong>Ansible</strong>:
+- ansible-lint (playbook and role validation)</p>
+<p><strong>Other</strong>:
+- YAML linting for configuration files
+- Markdown linting for documentation</p>
+<h3 id="how-does-auto-fixing-work">How does auto-fixing work?<a class="headerlink" href="#how-does-auto-fixing-work" title="Permanent link">&para;</a></h3>
+<p>aider-lint-fixer uses AI to understand code context and apply intelligent fixes:
+1. <strong>Pattern Recognition</strong>: Identifies common linting issues
+2. <strong>Context Analysis</strong>: Understands surrounding code structure
+3. <strong>Safe Transformations</strong>: Applies fixes that preserve functionality
+4. <strong>Backup Creation</strong>: Creates backups before making changes
+5. <strong>Validation</strong>: Re-runs linters to verify fixes</p>
+<h2 id="installation-and-setup">Installation and Setup<a class="headerlink" href="#installation-and-setup" title="Permanent link">&para;</a></h2>
+<h3 id="how-do-i-install-aider-lint-fixer">How do I install aider-lint-fixer?<a class="headerlink" href="#how-do-i-install-aider-lint-fixer" title="Permanent link">&para;</a></h3>
+<p><strong>Container-based (Recommended)</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># macOS/Ubuntu - use default container</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>aider-lint-fixer:latest<span class="w"> </span>.
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace:ro<span class="w"> </span>aider-lint-fixer:latest
+
+<span class="c1"># RHEL - build customer container</span>
+./scripts/containers/build-rhel9.sh<span class="w"> </span>--validate
+podman<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace:ro<span class="w"> </span>my-company/aider-lint-fixer:rhel9
+</code></pre></div></p>
+<p><strong>Native Installation</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Create virtual environment</span>
+python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/.venv/aider-lint-fixer
+<span class="nb">source</span><span class="w"> </span>~/.venv/aider-lint-fixer/bin/activate
+
+<span class="c1"># Install from source</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+
+<span class="c1"># Install additional linters</span>
+pip<span class="w"> </span>install<span class="w"> </span>flake8<span class="w"> </span>pylint<span class="w"> </span>mypy
+npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>eslint<span class="w"> </span>prettier
+</code></pre></div></p>
+<h3 id="what-are-the-system-requirements">What are the system requirements?<a class="headerlink" href="#what-are-the-system-requirements" title="Permanent link">&para;</a></h3>
+<p><strong>Minimum Requirements</strong>:
+- Python 3.9+ (Python 3.11+ recommended)
+- 2GB RAM
+- 1GB disk space</p>
+<p><strong>For JavaScript Support</strong>:
+- Node.js 16+ (Node.js 18+ recommended)
+- npm or yarn</p>
+<p><strong>For Container Usage</strong>:
+- Docker or Podman
+- 4GB RAM recommended for large projects</p>
+<h3 id="how-do-i-configure-linters">How do I configure linters?<a class="headerlink" href="#how-do-i-configure-linters" title="Permanent link">&para;</a></h3>
+<p>Create <code>.aider-lint.yaml</code> in your project root:
+<div class="highlight"><pre><span></span><code><span class="nt">linters</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flake8</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eslint</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ansible-lint</span>
+
+<span class="nt">profiles</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">development</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">auto_fix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">strict</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">ci</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">strict</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">fail_fast</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div></p>
+<p>See <a href="../../how-to/configure-linters/">Configure Linters</a> for detailed configuration options.</p>
+<h2 id="usage-questions">Usage Questions<a class="headerlink" href="#usage-questions" title="Permanent link">&para;</a></h2>
+<h3 id="how-do-i-run-linting-on-my-project">How do I run linting on my project?<a class="headerlink" href="#how-do-i-run-linting-on-my-project" title="Permanent link">&para;</a></h3>
+<p><strong>Basic Usage</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Lint entire project</span>
+aider-lint-fixer
+
+<span class="c1"># Lint specific files</span>
+aider-lint-fixer<span class="w"> </span>file1.py<span class="w"> </span>file2.js
+
+<span class="c1"># Use specific linters</span>
+aider-lint-fixer<span class="w"> </span>--linters<span class="w"> </span>flake8,eslint
+
+<span class="c1"># Auto-fix issues</span>
+aider-lint-fixer<span class="w"> </span>--auto-fix<span class="w"> </span>--backup
+</code></pre></div></p>
+<p><strong>Container Usage</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Default container</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace:ro<span class="w"> </span>aider-lint-fixer:latest
+
+<span class="c1"># RHEL container</span>
+podman<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace:ro<span class="w"> </span>my-company/aider-lint-fixer:rhel9
+</code></pre></div></p>
+<h3 id="can-i-exclude-certain-files-or-directories">Can I exclude certain files or directories?<a class="headerlink" href="#can-i-exclude-certain-files-or-directories" title="Permanent link">&para;</a></h3>
+<p>Yes, use exclude patterns in your configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># .aider-lint.yaml</span>
+<span class="nt">exclude_patterns</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;build/&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;dist/&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node_modules/&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.min.js&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;__pycache__/&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;.git/&quot;</span>
+</code></pre></div>
+<p>Or use command-line options:
+<div class="highlight"><pre><span></span><code>aider-lint-fixer<span class="w"> </span>--exclude<span class="w"> </span><span class="s2">&quot;build/,dist/,*.min.js&quot;</span>
+</code></pre></div></p>
+<h3 id="how-do-i-integrate-with-my-ide">How do I integrate with my IDE?<a class="headerlink" href="#how-do-i-integrate-with-my-ide" title="Permanent link">&para;</a></h3>
+<p><strong>VS Code</strong>:
+1. Install the aider-lint-fixer extension
+2. Configure in settings.json:
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;aider-lint-fixer.configFile&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;.aider-lint.yaml&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;aider-lint-fixer.autoFix&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;aider-lint-fixer.lintOnSave&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>PyCharm/IntelliJ</strong>:
+1. Add external tool configuration
+2. Program: <code>aider-lint-fixer</code>
+3. Arguments: <code>--file $FilePath$</code></p>
+<p>See platform-specific guides for detailed IDE integration:
+- <a href="../../how-to/macos-ubuntu-developer-guide/">macOS/Ubuntu Developer Guide</a>
+- <a href="../../how-to/red-hat-developer-guide/">Red Hat Developer Guide</a></p>
+<h3 id="how-do-i-use-different-profiles">How do I use different profiles?<a class="headerlink" href="#how-do-i-use-different-profiles" title="Permanent link">&para;</a></h3>
+<p>Profiles allow different configurations for different environments:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use development profile (auto-fix enabled)</span>
+aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>development
+
+<span class="c1"># Use CI profile (strict mode)</span>
+aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>ci
+
+<span class="c1"># Use production profile (security-focused)</span>
+aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>production
+</code></pre></div>
+<h2 id="container-questions">Container Questions<a class="headerlink" href="#container-questions" title="Permanent link">&para;</a></h2>
+<h3 id="whats-the-difference-between-default-and-rhel-containers">What's the difference between default and RHEL containers?<a class="headerlink" href="#whats-the-difference-between-default-and-rhel-containers" title="Permanent link">&para;</a></h3>
+<p><strong>Default Container</strong> (macOS/Ubuntu):
+- Latest ansible-lint and linting tools
+- No subscription requirements
+- Optimized for development environments
+- Uses Docker</p>
+<p><strong>RHEL Containers</strong> (Enterprise):
+- Version-specific ansible-core (2.14 for RHEL 9, 2.16+ for RHEL 10)
+- Requires Red Hat subscription for building
+- Customer-build approach for compliance
+- Uses Podman (RHEL native)</p>
+<h3 id="why-do-i-need-to-build-rhel-containers-myself">Why do I need to build RHEL containers myself?<a class="headerlink" href="#why-do-i-need-to-build-rhel-containers-myself" title="Permanent link">&para;</a></h3>
+<p>Red Hat licensing requires customers to build containers with their own subscriptions:
+- UBI images don't include ansible-core by default
+- ansible-core requires AppStream repository access
+- Cannot distribute pre-built containers with ansible-core
+- Ensures compliance with Red Hat subscription terms</p>
+<h3 id="how-do-i-troubleshoot-container-builds">How do I troubleshoot container builds?<a class="headerlink" href="#how-do-i-troubleshoot-container-builds" title="Permanent link">&para;</a></h3>
+<p><strong>RHEL Container Issues</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Check subscription status</span>
+subscription-manager<span class="w"> </span>status
+
+<span class="c1"># Validate build script</span>
+./scripts/containers/build-rhel9.sh<span class="w"> </span>--dry-run
+
+<span class="c1"># Debug build interactively</span>
+podman<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--entrypoint<span class="w"> </span>/bin/bash<span class="w"> </span>registry.redhat.io/ubi9/ubi:latest
+</code></pre></div></p>
+<p><strong>General Container Issues</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Check container runtime</span>
+docker<span class="w"> </span>info<span class="w">  </span><span class="c1"># or podman info</span>
+
+<span class="c1"># Clean up containers and images</span>
+docker<span class="w"> </span>system<span class="w"> </span>prune<span class="w"> </span>-a
+
+<span class="c1"># Check resource usage</span>
+docker<span class="w"> </span>stats
+</code></pre></div></p>
+<h2 id="configuration-questions">Configuration Questions<a class="headerlink" href="#configuration-questions" title="Permanent link">&para;</a></h2>
+<h3 id="how-do-i-handle-conflicting-linter-rules">How do I handle conflicting linter rules?<a class="headerlink" href="#how-do-i-handle-conflicting-linter-rules" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Use unified configuration</strong> to manage conflicts:
+<div class="highlight"><pre><span></span><code><span class="c1"># .aider-lint.yaml</span>
+<span class="nt">linters</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">python</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">flake8</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ignore</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;E203&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;W503&quot;</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># Conflicts with black</span>
+<span class="w">    </span><span class="nt">black</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">line_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">88</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use per-file ignores</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># .flake8</span>
+<span class="na">per-file-ignores</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="na">__init__.py</span><span class="o">:</span><span class="s">F401</span>
+<span class="w">    </span><span class="na">tests/*</span><span class="o">:</span><span class="s">S101</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Configure linter precedence</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># .aider-lint.yaml</span>
+<span class="nt">linter_precedence</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">black</span><span class="w">      </span><span class="c1"># Formatting takes precedence</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flake8</span><span class="w">     </span><span class="c1"># Then style checking</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pylint</span><span class="w">     </span><span class="c1"># Finally comprehensive analysis</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="how-do-i-configure-for-monorepos">How do I configure for monorepos?<a class="headerlink" href="#how-do-i-configure-for-monorepos" title="Permanent link">&para;</a></h3>
+<p>Use directory-specific configurations:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># .aider-lint.yaml (root)</span>
+<span class="nt">linters</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flake8</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eslint</span>
+
+<span class="nt">directory_configs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">backend/</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">linters</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flake8</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pylint</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mypy</span>
+<span class="w">    </span><span class="nt">python</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">strict</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="w">  </span><span class="nt">frontend/</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">linters</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eslint</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prettier</span>
+<span class="w">    </span><span class="nt">javascript</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">typescript</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="w">  </span><span class="nt">ansible/</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">linters</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ansible-lint</span>
+<span class="w">    </span><span class="nt">ansible</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+</code></pre></div>
+<h3 id="can-i-use-existing-linter-configuration-files">Can I use existing linter configuration files?<a class="headerlink" href="#can-i-use-existing-linter-configuration-files" title="Permanent link">&para;</a></h3>
+<p>Yes, aider-lint-fixer automatically discovers and uses:
+- <code>.flake8</code>, <code>pyproject.toml</code> for Python
+- <code>.eslintrc.js</code>, <code>package.json</code> for JavaScript
+- <code>.ansible-lint</code> for Ansible</p>
+<p>You can also specify configuration files explicitly:
+<div class="highlight"><pre><span></span><code><span class="c1"># .aider-lint.yaml</span>
+<span class="nt">linters</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">python</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">flake8</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">config_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-flake8.cfg</span>
+<span class="w">  </span><span class="nt">javascript</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">eslint</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">config_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-eslint.js</span>
+</code></pre></div></p>
+<h2 id="performance-questions">Performance Questions<a class="headerlink" href="#performance-questions" title="Permanent link">&para;</a></h2>
+<h3 id="how-can-i-improve-linting-performance">How can I improve linting performance?<a class="headerlink" href="#how-can-i-improve-linting-performance" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Enable parallel processing</strong>:
+<div class="highlight"><pre><span></span><code>aider-lint-fixer<span class="w"> </span>--parallel<span class="w"> </span>--jobs<span class="w"> </span><span class="m">4</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use caching</strong>:
+<div class="highlight"><pre><span></span><code>aider-lint-fixer<span class="w"> </span>--cache-dir<span class="w"> </span>~/.cache/aider-lint
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Exclude unnecessary files</strong>:
+<div class="highlight"><pre><span></span><code><span class="nt">exclude_patterns</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node_modules/&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;build/&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.min.js&quot;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use incremental linting</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Only lint changed files</span>
+aider-lint-fixer<span class="w"> </span>--changed-only
+
+<span class="c1"># Lint since specific commit</span>
+aider-lint-fixer<span class="w"> </span>--since<span class="w"> </span>HEAD~1
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="why-is-the-first-run-slow">Why is the first run slow?<a class="headerlink" href="#why-is-the-first-run-slow" title="Permanent link">&para;</a></h3>
+<p>The first run may be slower due to:
+- Installing linter dependencies
+- Building caches
+- Analyzing entire codebase</p>
+<p>Subsequent runs are much faster due to caching.</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="common-error-messages">Common Error Messages<a class="headerlink" href="#common-error-messages" title="Permanent link">&para;</a></h3>
+<p><strong>"No linters found"</strong>:
+- Install required linters: <code>pip install flake8</code> or <code>npm install -g eslint</code>
+- Check PATH configuration
+- Verify virtual environment activation</p>
+<p><strong>"Configuration file not found"</strong>:
+- Create <code>.aider-lint.yaml</code> in project root
+- Use <code>--config</code> to specify custom location
+- Check file permissions</p>
+<p><strong>"Permission denied"</strong>:
+- Check file permissions: <code>chmod +x aider-lint-fixer</code>
+- Use proper container volume mounts
+- Verify user permissions in containers</p>
+<p><strong>"Linter execution failed"</strong>:
+- Check linter installation: <code>flake8 --version</code>
+- Verify configuration syntax
+- Run linter directly to debug: <code>flake8 file.py</code></p>
+<h3 id="how-do-i-debug-issues">How do I debug issues?<a class="headerlink" href="#how-do-i-debug-issues" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Enable verbose output</strong>:
+<div class="highlight"><pre><span></span><code>aider-lint-fixer<span class="w"> </span>--verbose<span class="w"> </span>--debug
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check configuration</strong>:
+<div class="highlight"><pre><span></span><code>aider-lint-fixer<span class="w"> </span>--show-config<span class="w"> </span>--validate-config
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Test individual linters</strong>:
+<div class="highlight"><pre><span></span><code>aider-lint-fixer<span class="w"> </span>--linters<span class="w"> </span>flake8<span class="w"> </span>--dry-run
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check logs</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Container logs</span>
+docker<span class="w"> </span>logs<span class="w"> </span>&lt;container-id&gt;
+
+<span class="c1"># System logs</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>aider-lint-fixer
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="how-do-i-report-bugs">How do I report bugs?<a class="headerlink" href="#how-do-i-report-bugs" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Gather information</strong>:</li>
+<li>aider-lint-fixer version: <code>aider-lint-fixer --version</code></li>
+<li>System information: <code>uname -a</code></li>
+<li>Python version: <code>python --version</code></li>
+<li>
+<p>Linter versions: <code>flake8 --version</code>, <code>eslint --version</code></p>
+</li>
+<li>
+<p><strong>Create minimal reproduction</strong>:</p>
+</li>
+<li>Isolate the issue to specific files/configuration</li>
+<li>Include configuration files</li>
+<li>
+<p>Provide sample code that triggers the issue</p>
+</li>
+<li>
+<p><strong>Submit issue</strong>:</p>
+</li>
+<li>Use GitHub issue template</li>
+<li>Include all gathered information</li>
+<li>Describe expected vs actual behavior</li>
+</ol>
+<h2 id="integration-questions">Integration Questions<a class="headerlink" href="#integration-questions" title="Permanent link">&para;</a></h2>
+<h3 id="how-do-i-integrate-with-cicd">How do I integrate with CI/CD?<a class="headerlink" href="#how-do-i-integrate-with-cicd" title="Permanent link">&para;</a></h3>
+<p><strong>GitHub Actions</strong>:
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run linting</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">docker run --rm -v ${{ github.workspace }}:/workspace:ro \</span>
+<span class="w">      </span><span class="no">aider-lint-fixer:latest \</span>
+<span class="w">      </span><span class="no">--profile ci --output-format github-actions</span>
+</code></pre></div></p>
+<p><strong>Jenkins</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">stage</span><span class="o">(</span><span class="s1">&#39;Lint&#39;</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">steps</span><span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="n">sh</span><span class="w"> </span><span class="s1">&#39;aider-lint-fixer --profile ci --output-format junit&#39;</span>
+<span class="w">        </span><span class="n">publishTestResults</span><span class="w"> </span><span class="nl">testResultsPattern:</span><span class="w"> </span><span class="s1">&#39;lint-results.xml&#39;</span>
+<span class="w">    </span><span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></p>
+<p><strong>GitLab CI</strong>:
+<div class="highlight"><pre><span></span><code><span class="nt">lint</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aider-lint-fixer --profile ci</span>
+<span class="w">  </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">junit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lint-results.xml</span>
+</code></pre></div></p>
+<h3 id="can-i-use-with-pre-commit-hooks">Can I use with pre-commit hooks?<a class="headerlink" href="#can-i-use-with-pre-commit-hooks" title="Permanent link">&para;</a></h3>
+<p>Yes, create <code>.pre-commit-config.yaml</code>:
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aider-lint-fixer</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Aider Lint Fixer</span>
+<span class="w">        </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aider-lint-fixer --profile ci</span>
+<span class="w">        </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system</span>
+<span class="w">        </span><span class="nt">files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\.(py|js|ts|yml|yaml)$</span>
+</code></pre></div></p>
+<h3 id="how-do-i-integrate-with-code-review-tools">How do I integrate with code review tools?<a class="headerlink" href="#how-do-i-integrate-with-code-review-tools" title="Permanent link">&para;</a></h3>
+<p>Most code review tools support standard formats:
+- <strong>GitHub</strong>: Use <code>--output-format github-actions</code>
+- <strong>GitLab</strong>: Use <code>--output-format gitlab-ci</code>
+- <strong>SonarQube</strong>: Use <code>--output-format sonarqube</code>
+- <strong>Generic</strong>: Use <code>--output-format sarif</code> for SARIF-compatible tools</p>
+<h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
+<h3 id="where-can-i-find-more-documentation">Where can I find more documentation?<a class="headerlink" href="#where-can-i-find-more-documentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>How-to Guides</strong>: Platform-specific setup and usage</li>
+<li><strong>Tutorials</strong>: Step-by-step walkthroughs</li>
+<li><strong>Reference</strong>: API documentation and configuration options</li>
+<li><strong>ADRs</strong>: Architectural decisions and rationale</li>
+</ul>
+<h3 id="how-do-i-get-support">How do I get support?<a class="headerlink" href="#how-do-i-get-support" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Documentation</strong>: Check relevant guides and tutorials</li>
+<li><strong>GitHub Issues</strong>: Search existing issues or create new ones</li>
+<li><strong>Community Forum</strong>: Join discussions and ask questions</li>
+<li><strong>Enterprise Support</strong>: Contact your Red Hat representative (for RHEL users)</li>
+</ol>
+<h3 id="how-do-i-contribute">How do I contribute?<a class="headerlink" href="#how-do-i-contribute" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Fork the repository</strong> on GitHub</li>
+<li><strong>Create feature branch</strong>: <code>git checkout -b feature/new-linter</code></li>
+<li><strong>Add tests</strong> for new functionality</li>
+<li><strong>Submit pull request</strong> with clear description</li>
+<li><strong>Follow code review</strong> process</li>
+</ol>
+<p>See <a href="../../how-to/how-to-add-a-new-feature/">Contributing Guide</a> for detailed instructions.</p>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../how-to/configure-linters/">Configure Linters</a></li>
+<li><a href="../../how-to/red-hat-developer-guide/">Red Hat Developer Guide</a></li>
+<li><a href="../../how-to/macos-ubuntu-developer-guide/">macOS/Ubuntu Developer Guide</a></li>
+<li><a href="../../tutorials/container-deployment/">Container Deployment Tutorial</a></li>
+<li><a href="../api-documentation/">API Documentation</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

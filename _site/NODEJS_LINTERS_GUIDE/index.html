@@ -1,0 +1,2412 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-powered linting tool that automatically detects and fixes code quality issues across multiple programming languages">
+      
+      
+      
+        <link rel="canonical" href="https://tosin2013.github.io/aider-lint-fixer/NODEJS_LINTERS_GUIDE/">
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Node.js Linters Guide - aider-lint-fixer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#nodejs-linters-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="aider-lint-fixer" class="md-header__button md-logo" aria-label="aider-lint-fixer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            aider-lint-fixer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Node.js Linters Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tutorials/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../how-to/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../reference/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../explanation/" class="md-tabs__link">
+          
+  
+  
+  Explanation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../adrs/" class="md-tabs__link">
+          
+  
+  
+  ADRs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="aider-lint-fixer" class="md-nav__button md-logo" aria-label="aider-lint-fixer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    aider-lint-fixer
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tutorials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/getting-started-with-containers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started with Containers
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/setting-up-your-development-environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Development Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/writing-and-running-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Writing and Running Tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/container-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Container Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How-To Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/configure-linters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configure Linters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/how-to-add-a-new-feature/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Add a New Feature
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/how-to-debug-common-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debug Common Issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/deploy-to-production/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy to Production
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/how-to-deploy-your-application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy Your Application
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/setup-development-environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Setup Development Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/integrate-with-aider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integrate with Aider
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/run-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Run Tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/monitor-performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Monitor Performance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/security-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Security Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/command-line-interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Command Line Interface
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/configuration-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/error-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Error Codes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/linter-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Linter Plugins
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Explanation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Explanation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/architecture-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/container-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Container Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/design-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Design Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/technology-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Technology Stack
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            ADRs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0001-record-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0001: Record Architecture Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0002-ai-integration-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0002: AI Integration Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0003-modular-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0003: Modular Plugin System
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0004-python-ecosystem-focus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0004: Python Ecosystem Focus
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0005-python-linter-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0005: Python Linter Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0006-javascript-typescript-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0006: JavaScript TypeScript Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0007-infrastructure-devops-linter-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0007: Infrastructure DevOps Linter Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0008-deployment-environments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0008: Deployment Environments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0009-rhel-container-build-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0009: RHEL Container Build Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#supported-nodejs-linters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Node.js Linters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported Node.js Linters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#eslint" class="md-nav__link">
+    <span class="md-ellipsis">
+      ESLint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prettier" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prettier
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jshint" class="md-nav__link">
+    <span class="md-ellipsis">
+      JSHint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-project-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Project Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Basic Usage
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eslint-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      ESLint Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ESLint Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-configuration-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automatic Configuration Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-eslint-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported ESLint Rules
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typescript-specific-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      TypeScript-Specific Rules
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project Profiles
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Project Profiles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-profile-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Profile (Development)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strict-profile-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      Strict Profile (Production)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-react-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. React Project
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-nodejs-api-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Node.js API Project
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-monorepo-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Monorepo Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-custom-rule-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Custom Rule Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-typescript-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. TypeScript Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Performance Optimization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Use Cases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-legacy-javascript-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Legacy JavaScript Migration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-cicd-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. CI/CD Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-pre-commit-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Pre-commit Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-eslint-configuration-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. ESLint Configuration Not Found
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-typescript-parsing-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. TypeScript Parsing Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-large-project-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Large Project Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Tips
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rule Categories
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rule Categories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-success-rate-90" class="md-nav__link">
+    <span class="md-ellipsis">
+      High Success Rate (&gt;90%)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#medium-success-rate-70-90" class="md-nav__link">
+    <span class="md-ellipsis">
+      Medium Success Rate (70-90%)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complex-rules-70" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complex Rules (&lt;70%)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-with-other-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration with Other Tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration with Other Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prettier-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prettier Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webpackvite-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Webpack/Vite Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resources
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="nodejs-linters-guide">Node.js Linters Guide<a class="headerlink" href="#nodejs-linters-guide" title="Permanent link">&para;</a></h1>
+<p>This guide covers comprehensive support for JavaScript and TypeScript linting with aider-lint-fixer, including ESLint, Prettier, and project-specific configurations.</p>
+<h2 id="supported-nodejs-linters">Supported Node.js Linters<a class="headerlink" href="#supported-nodejs-linters" title="Permanent link">&para;</a></h2>
+<h3 id="eslint">ESLint<a class="headerlink" href="#eslint" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Version Support</strong>: 8.x, 9.x</li>
+<li><strong>Extensions</strong>: <code>.js</code>, <code>.jsx</code>, <code>.ts</code>, <code>.tsx</code>, <code>.mjs</code>, <code>.cjs</code></li>
+<li><strong>Configuration Detection</strong>: Automatic detection of <code>.eslintrc.*</code> files</li>
+<li><strong>TypeScript Support</strong>: Full integration with <code>@typescript-eslint</code></li>
+</ul>
+<h3 id="prettier">Prettier<a class="headerlink" href="#prettier" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Version Support</strong>: 2.x, 3.x</li>
+<li><strong>Integration</strong>: Works alongside ESLint for formatting</li>
+<li><strong>Configuration</strong>: Auto-detects <code>.prettierrc.*</code> files</li>
+</ul>
+<h3 id="jshint">JSHint<a class="headerlink" href="#jshint" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Version Support</strong>: 2.x</li>
+<li><strong>Legacy Support</strong>: For older JavaScript projects</li>
+<li><strong>Configuration</strong>: <code>.jshintrc</code> file detection</li>
+</ul>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<h3 id="1-project-detection">1. Project Detection<a class="headerlink" href="#1-project-detection" title="Permanent link">&para;</a></h3>
+<p>aider-lint-fixer automatically detects Node.js projects by looking for:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Package files</span>
+package.json
+package-lock.json
+yarn.lock
+
+<span class="c1"># TypeScript configuration</span>
+tsconfig.json
+
+<span class="c1"># ESLint configuration</span>
+.eslintrc.js
+.eslintrc.json
+.eslintrc.yml
+eslint.config.js
+
+<span class="c1"># Prettier configuration</span>
+.prettierrc
+.prettierrc.json
+prettier.config.js
+</code></pre></div>
+<h3 id="2-basic-usage">2. Basic Usage<a class="headerlink" href="#2-basic-usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Automatic detection and fixing</span>
+aider-lint-fixer<span class="w"> </span>./my-node-project
+
+<span class="c1"># Specific linter</span>
+aider-lint-fixer<span class="w"> </span>--linter<span class="w"> </span>eslint<span class="w"> </span>./src
+
+<span class="c1"># TypeScript project</span>
+aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>strict<span class="w"> </span>./typescript-app
+</code></pre></div>
+<h2 id="eslint-integration">ESLint Integration<a class="headerlink" href="#eslint-integration" title="Permanent link">&para;</a></h2>
+<h3 id="automatic-configuration-detection">Automatic Configuration Detection<a class="headerlink" href="#automatic-configuration-detection" title="Permanent link">&para;</a></h3>
+<p>aider-lint-fixer detects and respects your existing ESLint setup:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// .eslintrc.js - Automatically detected</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">extends</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;@typescript-eslint/recommended&#39;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">parser</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;@typescript-eslint/parser&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">plugins</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;@typescript-eslint&#39;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">rules</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s1">&#39;prefer-const&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;error&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;no-unused-vars&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;warn&#39;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="supported-eslint-rules">Supported ESLint Rules<a class="headerlink" href="#supported-eslint-rules" title="Permanent link">&para;</a></h3>
+<p>Common rules with high fix success rates:</p>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Fix Rate</th>
+<th>Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>semi</code></td>
+<td>98%</td>
+<td>Trivial</td>
+</tr>
+<tr>
+<td><code>quotes</code></td>
+<td>95%</td>
+<td>Trivial</td>
+</tr>
+<tr>
+<td><code>indent</code></td>
+<td>92%</td>
+<td>Simple</td>
+</tr>
+<tr>
+<td><code>no-unused-vars</code></td>
+<td>88%</td>
+<td>Simple</td>
+</tr>
+<tr>
+<td><code>prefer-const</code></td>
+<td>94%</td>
+<td>Simple</td>
+</tr>
+<tr>
+<td><code>no-trailing-spaces</code></td>
+<td>99%</td>
+<td>Trivial</td>
+</tr>
+<tr>
+<td><code>max-len</code></td>
+<td>75%</td>
+<td>Moderate</td>
+</tr>
+</tbody>
+</table>
+<h3 id="typescript-specific-rules">TypeScript-Specific Rules<a class="headerlink" href="#typescript-specific-rules" title="Permanent link">&para;</a></h3>
+<p>Enhanced support for TypeScript projects:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Example fixes for common TypeScript issues</span>
+<span class="c1">// @typescript-eslint/no-unused-vars</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">unusedVar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;remove me&#39;</span><span class="p">;</span><span class="w"> </span><span class="c1">// ❌ Removed automatically</span>
+
+<span class="c1">// @typescript-eslint/prefer-const</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">unchangedValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;hello&#39;</span><span class="p">;</span><span class="w"> </span><span class="c1">// ❌ Changed to const</span>
+
+<span class="c1">// @typescript-eslint/explicit-function-return-type</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">getValue</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// ❌ Adds return type</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mf">42</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="project-profiles">Project Profiles<a class="headerlink" href="#project-profiles" title="Permanent link">&para;</a></h2>
+<h3 id="basic-profile-development">Basic Profile (Development)<a class="headerlink" href="#basic-profile-development" title="Permanent link">&para;</a></h3>
+<p>Optimized for development environments:</p>
+<div class="highlight"><pre><span></span><code>aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>basic<span class="w"> </span>./src
+</code></pre></div>
+<p><strong>Includes:</strong>
+- Essential syntax errors
+- Code style issues
+- Basic TypeScript errors
+- Performance suggestions</p>
+<p><strong>Excludes:</strong>
+- Strict type checking
+- Complex refactoring rules
+- Deprecated APIs (warnings only)</p>
+<h3 id="strict-profile-production">Strict Profile (Production)<a class="headerlink" href="#strict-profile-production" title="Permanent link">&para;</a></h3>
+<p>Comprehensive checking for production code:</p>
+<div class="highlight"><pre><span></span><code>aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>strict<span class="w"> </span>./src
+</code></pre></div>
+<p><strong>Includes:</strong>
+- All basic profile rules
+- Strict TypeScript checking
+- Security vulnerability detection
+- Performance optimizations
+- Code complexity analysis</p>
+<h2 id="configuration-examples">Configuration Examples<a class="headerlink" href="#configuration-examples" title="Permanent link">&para;</a></h2>
+<h3 id="1-react-project">1. React Project<a class="headerlink" href="#1-react-project" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// package.json</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;scripts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;lint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aider-lint-fixer --profile basic ./src&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;lint:fix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aider-lint-fixer --auto-fix ./src&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;lint:strict&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aider-lint-fixer --profile strict ./src&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;devDependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@typescript-eslint/eslint-plugin&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^6.0.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;@typescript-eslint/parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^6.0.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;eslint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^8.45.0&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="2-nodejs-api-project">2. Node.js API Project<a class="headerlink" href="#2-nodejs-api-project" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// .eslintrc.js</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">env</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">node</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">es2022</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="k">extends</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s1">&#39;eslint:recommended&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;@typescript-eslint/recommended&#39;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nx">parser</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;@typescript-eslint/parser&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">plugins</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;@typescript-eslint&#39;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">rules</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s1">&#39;no-console&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;warn&#39;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Allow console in development</span>
+<span class="w">    </span><span class="s1">&#39;prefer-const&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;error&#39;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="3-monorepo-setup">3. Monorepo Setup<a class="headerlink" href="#3-monorepo-setup" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Root level - lint all packages</span>
+aider-lint-fixer<span class="w"> </span>--recursive<span class="w"> </span>./packages
+
+<span class="c1"># Specific package</span>
+aider-lint-fixer<span class="w"> </span>./packages/frontend
+
+<span class="c1"># Different profiles per package</span>
+aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>basic<span class="w"> </span>./packages/frontend
+aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>strict<span class="w"> </span>./packages/api
+</code></pre></div>
+<h2 id="advanced-features">Advanced Features<a class="headerlink" href="#advanced-features" title="Permanent link">&para;</a></h2>
+<h3 id="1-custom-rule-configuration">1. Custom Rule Configuration<a class="headerlink" href="#1-custom-rule-configuration" title="Permanent link">&para;</a></h3>
+<p>Override fixability for specific rules:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// .aider-lint-fixer.json</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;linters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;eslint&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;force_fix_rules&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;semi&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;quotes&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;prefer-const&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;skip_rules&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;no-any&quot;</span><span class="w"> </span><span class="c1">// Too complex for auto-fix</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="2-typescript-integration">2. TypeScript Integration<a class="headerlink" href="#2-typescript-integration" title="Permanent link">&para;</a></h3>
+<p>Enhanced TypeScript support:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Respect tsconfig.json settings</span>
+aider-lint-fixer<span class="w"> </span>--typescript-project<span class="w"> </span>./tsconfig.json<span class="w"> </span>./src
+
+<span class="c1"># Multiple TypeScript projects</span>
+aider-lint-fixer<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--typescript-project<span class="w"> </span>./frontend/tsconfig.json<span class="w"> </span>./frontend/src<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--typescript-project<span class="w"> </span>./backend/tsconfig.json<span class="w"> </span>./backend/src
+</code></pre></div>
+<h3 id="3-performance-optimization">3. Performance Optimization<a class="headerlink" href="#3-performance-optimization" title="Permanent link">&para;</a></h3>
+<p>For large Node.js projects:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Parallel processing</span>
+aider-lint-fixer<span class="w"> </span>--parallel<span class="w"> </span><span class="m">4</span><span class="w"> </span>./large-project
+
+<span class="c1"># Incremental fixing (only changed files)</span>
+aider-lint-fixer<span class="w"> </span>--incremental<span class="w"> </span>./src
+
+<span class="c1"># Focus on specific file types</span>
+aider-lint-fixer<span class="w"> </span>--include<span class="w"> </span><span class="s2">&quot;*.ts,*.tsx&quot;</span><span class="w"> </span>./src
+</code></pre></div>
+<h2 id="common-use-cases">Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permanent link">&para;</a></h2>
+<h3 id="1-legacy-javascript-migration">1. Legacy JavaScript Migration<a class="headerlink" href="#1-legacy-javascript-migration" title="Permanent link">&para;</a></h3>
+<p>Converting old JavaScript to modern standards:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Step 1: Basic cleanup</span>
+aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>basic<span class="w"> </span>./legacy-js
+
+<span class="c1"># Step 2: Modern JavaScript features</span>
+aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>strict<span class="w"> </span>--rules<span class="w"> </span><span class="s2">&quot;prefer-const,arrow-functions&quot;</span><span class="w"> </span>./legacy-js
+
+<span class="c1"># Step 3: TypeScript migration prep</span>
+aider-lint-fixer<span class="w"> </span>--typescript-prep<span class="w"> </span>./legacy-js
+</code></pre></div>
+<h3 id="2-cicd-integration">2. CI/CD Integration<a class="headerlink" href="#2-cicd-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># .github/workflows/lint.yml</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Lint Check</span>
+<span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">lint</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v3</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v3</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">node-version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;18&#39;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">npm install</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">npx aider-lint-fixer --strict --dry-run ./src</span>
+</code></pre></div>
+<h3 id="3-pre-commit-integration">3. Pre-commit Integration<a class="headerlink" href="#3-pre-commit-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># .pre-commit-config.yaml</span>
+<span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aider-lint-fixer</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Aider Lint Fixer</span>
+<span class="w">        </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aider-lint-fixer</span>
+<span class="w">        </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system</span>
+<span class="w">        </span><span class="nt">files</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;\.(js|jsx|ts|tsx)$&#39;</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;--auto-fix&#39;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h3>
+<h4 id="1-eslint-configuration-not-found">1. ESLint Configuration Not Found<a class="headerlink" href="#1-eslint-configuration-not-found" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check configuration detection</span>
+aider-lint-fixer<span class="w"> </span>--debug<span class="w"> </span>--dry-run<span class="w"> </span>./src
+
+<span class="c1"># Manually specify configuration</span>
+aider-lint-fixer<span class="w"> </span>--eslint-config<span class="w"> </span>./.eslintrc.js<span class="w"> </span>./src
+</code></pre></div>
+<h4 id="2-typescript-parsing-errors">2. TypeScript Parsing Errors<a class="headerlink" href="#2-typescript-parsing-errors" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Verify TypeScript setup</span>
+npx<span class="w"> </span>tsc<span class="w"> </span>--noEmit
+
+<span class="c1"># Use TypeScript-aware mode</span>
+aider-lint-fixer<span class="w"> </span>--typescript<span class="w"> </span>./src
+</code></pre></div>
+<h4 id="3-large-project-performance">3. Large Project Performance<a class="headerlink" href="#3-large-project-performance" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use incremental mode</span>
+aider-lint-fixer<span class="w"> </span>--incremental<span class="w"> </span>./large-project
+
+<span class="c1"># Exclude node_modules and build directories</span>
+aider-lint-fixer<span class="w"> </span>--exclude<span class="w"> </span><span class="s2">&quot;**/node_modules/**,**/dist/**&quot;</span><span class="w"> </span>./project
+</code></pre></div>
+<h3 id="performance-tips">Performance Tips<a class="headerlink" href="#performance-tips" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Use .eslintignore</strong>: Exclude unnecessary files</li>
+<li><strong>Incremental mode</strong>: Only process changed files</li>
+<li><strong>Parallel processing</strong>: Use <code>--parallel</code> for large projects</li>
+<li><strong>Targeted fixing</strong>: Focus on specific rule categories</li>
+</ol>
+<h2 id="rule-categories">Rule Categories<a class="headerlink" href="#rule-categories" title="Permanent link">&para;</a></h2>
+<h3 id="high-success-rate-90">High Success Rate (&gt;90%)<a class="headerlink" href="#high-success-rate-90" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Formatting rules (<code>semi</code>, <code>quotes</code>, <code>indent</code>)</li>
+<li>Simple style rules (<code>prefer-const</code>, <code>arrow-spacing</code>)</li>
+<li>Basic cleanup (<code>no-trailing-spaces</code>, <code>no-multiple-empty-lines</code>)</li>
+</ul>
+<h3 id="medium-success-rate-70-90">Medium Success Rate (70-90%)<a class="headerlink" href="#medium-success-rate-70-90" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Variable usage (<code>no-unused-vars</code>, <code>no-undef</code>)</li>
+<li>Import/export organization</li>
+<li>Basic TypeScript annotations</li>
+</ul>
+<h3 id="complex-rules-70">Complex Rules (&lt;70%)<a class="headerlink" href="#complex-rules-70" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Logic changes (<code>no-implicit-any</code>, <code>strict-boolean-expressions</code>)</li>
+<li>Architectural refactoring</li>
+<li>Complex type inference</li>
+</ul>
+<h2 id="integration-with-other-tools">Integration with Other Tools<a class="headerlink" href="#integration-with-other-tools" title="Permanent link">&para;</a></h2>
+<h3 id="prettier-integration">Prettier Integration<a class="headerlink" href="#prettier-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run Prettier first, then ESLint</span>
+prettier<span class="w"> </span>--write<span class="w"> </span>./src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>aider-lint-fixer<span class="w"> </span>./src
+
+<span class="c1"># Or use combined profile</span>
+aider-lint-fixer<span class="w"> </span>--profile<span class="w"> </span>prettier-eslint<span class="w"> </span>./src
+</code></pre></div>
+<h3 id="webpackvite-integration">Webpack/Vite Integration<a class="headerlink" href="#webpackvite-integration" title="Permanent link">&para;</a></h3>
+<p>Works seamlessly with build tools:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// webpack.config.js - No special configuration needed</span>
+<span class="c1">// Vite.config.js - Standard ESLint plugin integration</span>
+</code></pre></div>
+<h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://eslint.org/docs/rules/">ESLint Official Rules</a></li>
+<li><a href="https://typescript-eslint.io/rules/">TypeScript ESLint Rules</a></li>
+<li><a href="../INSTALLATION_GUIDE/">Installation Guide</a></li>
+<li><a href="../LINTER_TESTING_GUIDE/">Linter Testing Guide</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

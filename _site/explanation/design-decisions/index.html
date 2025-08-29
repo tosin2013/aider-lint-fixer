@@ -1,0 +1,3191 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-powered linting tool that automatically detects and fixes code quality issues across multiple programming languages">
+      
+      
+      
+        <link rel="canonical" href="https://tosin2013.github.io/aider-lint-fixer/explanation/design-decisions/">
+      
+      
+        <link rel="prev" href="../container-architecture/">
+      
+      
+        <link rel="next" href="../technology-stack/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Design Decisions - aider-lint-fixer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#design-decisions" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="aider-lint-fixer" class="md-header__button md-logo" aria-label="aider-lint-fixer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            aider-lint-fixer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Design Decisions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorials/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../how-to/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Explanation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adrs/" class="md-tabs__link">
+          
+  
+  
+  ADRs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="aider-lint-fixer" class="md-nav__button md-logo" aria-label="aider-lint-fixer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    aider-lint-fixer
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tutorials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started-with-containers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started with Containers
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/setting-up-your-development-environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Development Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/writing-and-running-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Writing and Running Tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/container-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Container Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How-To Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/configure-linters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configure Linters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/how-to-add-a-new-feature/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Add a New Feature
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/how-to-debug-common-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debug Common Issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/deploy-to-production/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy to Production
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/how-to-deploy-your-application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy Your Application
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/setup-development-environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Setup Development Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/integrate-with-aider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integrate with Aider
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/run-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Run Tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/monitor-performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Monitor Performance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/security-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Security Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/command-line-interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Command Line Interface
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/configuration-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/error-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Error Codes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/linter-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Linter Plugins
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Explanation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Explanation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../container-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Container Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Design Decisions
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Design Decisions
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎯 Core Philosophy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-stack-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      🏗️ Technology Stack Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏗️ Technology Stack Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-python-as-core-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Python as Core Language?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-runtime-hybrid-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Runtime Hybrid Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      🏛️ Architectural Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏛️ Architectural Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plugin-based-linter-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plugin-Based Linter Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-integration-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      AI Integration Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-strategy-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      🐳 Container Strategy Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🐳 Container Strategy Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dual-container-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dual Container Approach
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#podman-vs-docker-for-rhel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Podman vs Docker for RHEL
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚙️ Configuration Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Configuration Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unified-vs-language-specific-configs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unified vs Language-Specific Configs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚡ Performance Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚡ Performance Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-vs-sequential-linter-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel vs Sequential Linter Execution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-level-caching-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Level Caching Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-Level Caching Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-file-level-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. File-Level Caching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-ai-analysis-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. AI Analysis Caching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configuration-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configuration Caching
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔒 Security Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔒 Security Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#container-security-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container Security Model
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Container Security Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#non-root-container-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Non-root Container Execution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#volume-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Volume Security
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subscription-credential-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Subscription Credential Handling
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧪 Testing Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🧪 Testing Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-environment-testing-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Environment Testing Matrix
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-Environment Testing Matrix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-85-minimum-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unit Tests (85% minimum coverage)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔮 Future Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔮 Future Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#evolution-to-microservices-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evolution to Microservices Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Evolution to Microservices Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-service-boundaries-current-6-months" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 1: Service Boundaries (Current → 6 months)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-api-gateway-6-12-months" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 2: API Gateway (6-12 months)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-container-orchestration-12-months" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 3: Container Orchestration (12+ months)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloud-native-adoption-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cloud Native Adoption Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cloud Native Adoption Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#12-factor-app-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      12-Factor App Compliance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-and-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Health and Observability
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-first-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container-First Design
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-evolution-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      AI Evolution Roadmap
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AI Evolution Roadmap">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#direct-llm-integration-if-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Direct LLM Integration (If needed)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#domain-specific-ai-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domain-Specific AI Models
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#federated-ai-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Federated AI Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-impact-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      📊 Decision Impact Metrics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Decision Impact Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#success-metrics-for-key-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Success Metrics for Key Decisions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#learning-from-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Learning from Decisions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../technology-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Technology Stack
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            ADRs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0001-record-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0001: Record Architecture Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0002-ai-integration-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0002: AI Integration Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0003-modular-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0003: Modular Plugin System
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0004-python-ecosystem-focus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0004: Python Ecosystem Focus
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0005-python-linter-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0005: Python Linter Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0006-javascript-typescript-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0006: JavaScript TypeScript Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0007-infrastructure-devops-linter-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0007: Infrastructure DevOps Linter Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0008-deployment-environments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0008: Deployment Environments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0009-rhel-container-build-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0009: RHEL Container Build Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎯 Core Philosophy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-stack-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      🏗️ Technology Stack Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏗️ Technology Stack Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-python-as-core-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Python as Core Language?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-runtime-hybrid-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Runtime Hybrid Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      🏛️ Architectural Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏛️ Architectural Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plugin-based-linter-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plugin-Based Linter Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-integration-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      AI Integration Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-strategy-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      🐳 Container Strategy Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🐳 Container Strategy Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dual-container-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dual Container Approach
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#podman-vs-docker-for-rhel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Podman vs Docker for RHEL
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚙️ Configuration Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Configuration Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unified-vs-language-specific-configs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unified vs Language-Specific Configs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚡ Performance Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚡ Performance Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-vs-sequential-linter-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel vs Sequential Linter Execution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-level-caching-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Level Caching Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-Level Caching Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-file-level-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. File-Level Caching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-ai-analysis-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. AI Analysis Caching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configuration-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configuration Caching
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔒 Security Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔒 Security Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#container-security-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container Security Model
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Container Security Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#non-root-container-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Non-root Container Execution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#volume-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Volume Security
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subscription-credential-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Subscription Credential Handling
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧪 Testing Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🧪 Testing Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-environment-testing-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Environment Testing Matrix
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-Environment Testing Matrix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-85-minimum-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unit Tests (85% minimum coverage)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔮 Future Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔮 Future Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#evolution-to-microservices-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evolution to Microservices Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Evolution to Microservices Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-service-boundaries-current-6-months" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 1: Service Boundaries (Current → 6 months)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-api-gateway-6-12-months" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 2: API Gateway (6-12 months)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-container-orchestration-12-months" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 3: Container Orchestration (12+ months)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloud-native-adoption-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cloud Native Adoption Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cloud Native Adoption Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#12-factor-app-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      12-Factor App Compliance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-and-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Health and Observability
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-first-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container-First Design
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-evolution-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      AI Evolution Roadmap
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AI Evolution Roadmap">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#direct-llm-integration-if-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Direct LLM Integration (If needed)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#domain-specific-ai-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domain-Specific AI Models
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#federated-ai-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Federated AI Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-impact-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      📊 Decision Impact Metrics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Decision Impact Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#success-metrics-for-key-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Success Metrics for Key Decisions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#learning-from-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Learning from Decisions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="design-decisions">Design Decisions<a class="headerlink" href="#design-decisions" title="Permanent link">&para;</a></h1>
+<p>This document outlines the key architectural and design decisions made in aider-lint-fixer, explaining the rationale behind our choices for this AI-powered linting tool.</p>
+<h2 id="core-philosophy">🎯 Core Philosophy<a class="headerlink" href="#core-philosophy" title="Permanent link">&para;</a></h2>
+<p>Aider-lint-fixer is built on these fundamental principles:</p>
+<ul>
+<li><strong>🤖 AI-First</strong>: Leverage AI to automate code quality improvements</li>
+<li><strong>🔧 Multi-Language</strong>: Support the polyglot nature of modern development</li>
+<li><strong>🐳 Container-Ready</strong>: Cloud-native and enterprise deployment friendly</li>
+<li><strong>⚡ Performance</strong>: Fast execution even on large codebases</li>
+<li><strong>🔒 Security</strong>: Enterprise-grade security and compliance</li>
+</ul>
+<h2 id="technology-stack-decisions">🏗️ Technology Stack Decisions<a class="headerlink" href="#technology-stack-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="why-python-as-core-language">Why Python as Core Language?<a class="headerlink" href="#why-python-as-core-language" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Python as the primary language for the core application</p>
+<p><strong>✅ Rationale</strong>:
+- <strong>🐍 Mature Linting Ecosystem</strong>: Established tools like flake8, pylint, mypy
+- <strong>🤖 AI Integration</strong>: Rich ecosystem for LLM and AI tool integration (aider.chat)
+- <strong>🌐 Cross-Platform Support</strong>: Consistent behavior across macOS, Ubuntu, and RHEL
+- <strong>👥 Developer Familiarity</strong>: Widespread adoption in DevOps and automation
+- <strong>📦 Package Management</strong>: Robust dependency management with pip/poetry
+- <strong>🚀 Rapid Development</strong>: Fast iteration for AI integration experiments</p>
+<p><strong>⚖️ Trade-offs Considered</strong>:
+- Performance vs. Development Speed: Chose developer productivity
+- Ecosystem vs. Performance: Python's rich AI ecosystem won over raw speed</p>
+<h3 id="multi-runtime-hybrid-strategy">Multi-Runtime Hybrid Strategy<a class="headerlink" href="#multi-runtime-hybrid-strategy" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Support both Python and JavaScript runtimes rather than Python-only</p>
+<p><strong>✅ Rationale</strong>:
+- <strong>🌍 Modern Development Reality</strong>: Most projects use multiple languages
+- <strong>🏆 Best-in-Class Tools</strong>: ESLint for JavaScript, flake8 for Python
+- <strong>⚡ Native Performance</strong>: Each linter runs in its optimal environment
+- <strong>🎯 Domain Expertise</strong>: Language-specific linters know their domains best</p>
+<p><strong>⚖️ Trade-offs</strong>:
+- ➕ <strong>Benefits</strong>: Better linting quality, native performance, developer familiarity
+- ➖ <strong>Costs</strong>: Managing dual runtime dependencies, installation complexity
+- ➖ <strong>Complexity</strong>: Inter-runtime communication and coordination logic</p>
+<h2 id="architectural-patterns">🏛️ Architectural Patterns<a class="headerlink" href="#architectural-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="plugin-based-linter-architecture">Plugin-Based Linter Architecture<a class="headerlink" href="#plugin-based-linter-architecture" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Modular plugin system with <code>BaseLinter</code> abstract interface</p>
+<p><strong>🔧 Implementation</strong>:
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseLinter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_available</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if linter is installed and available&quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">LinterResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute linter on specified files&quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">LintError</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse linter output into structured errors&quot;&quot;&quot;</span>
+</code></pre></div></p>
+<p><strong>✅ Benefits</strong>:
+- <strong>🔄 Consistent Interface</strong>: Uniform API across all linters
+- <strong>🔌 Independent Evolution</strong>: Each linter can be updated separately<br />
+- <strong>➕ Easy Extension</strong>: New linters follow established patterns
+- <strong>🧪 Testability</strong>: Each linter can be unit tested in isolation
+- <strong>🎛️ Configuration</strong>: Standardized configuration interface</p>
+<p><strong>⚖️ Trade-offs</strong>:
+- <strong>📈 Abstraction Overhead</strong>: Additional layer between core and linters
+- <strong>🎨 Interface Constraints</strong>: All linters must conform to common interface
+- <strong>🔧 Maintenance</strong>: Interface changes affect all implementations</p>
+<h3 id="ai-integration-strategy">AI Integration Strategy<a class="headerlink" href="#ai-integration-strategy" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Wrapper around aider.chat rather than direct LLM integration</p>
+<p><strong>🎯 Strategic Choice</strong>: Partner with proven AI toolchain vs. build from scratch</p>
+<p><strong>✅ Rationale</strong>:
+- <strong>🏆 Proven Toolchain</strong>: aider.chat has established AI code modification patterns
+- <strong>🔧 Maintenance Reduction</strong>: Avoid reimplementing LLM interaction complexity
+- <strong>📈 Feature Inheritance</strong>: Benefit from ongoing aider.chat improvements
+- <strong>💰 Cost Optimization</strong>: Leverage aider.chat's optimized token usage
+- <strong>🚀 Time to Market</strong>: Focus on linting expertise, not AI infrastructure</p>
+<p><strong>🔧 Implementation Approach</strong>:
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AiderIntegration</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coordinate with aider.chat for AI-powered code fixes&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">analyze_and_fix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LintError</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">FixResult</span><span class="p">:</span>
+        <span class="c1"># 1. Prepare error context for AI</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_error_context</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+
+        <span class="c1"># 2. Execute aider.chat subprocess</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_aider_command</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+        <span class="c1"># 3. Parse and validate AI-generated fixes</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_fixes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>⚖️ Trade-offs</strong>:
+- ➕ <strong>Benefits</strong>: Faster development, proven AI patterns, ongoing improvements
+- ➖ <strong>Dependency Risk</strong>: Reliance on external tool's roadmap and stability
+- ➖ <strong>Control Limitations</strong>: Less control over AI interaction details</p>
+<h2 id="container-strategy-decisions">🐳 Container Strategy Decisions<a class="headerlink" href="#container-strategy-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="dual-container-approach">Dual Container Approach<a class="headerlink" href="#dual-container-approach" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Separate default and RHEL containers instead of unified approach</p>
+<p><strong>🎯 Problem</strong>: Different enterprise environments have different requirements</p>
+<p><strong>✅ Solution Strategy</strong>:
+- <strong>🐳 Default Container</strong>: Latest tools, no subscription constraints (macOS/Ubuntu)
+- <strong>🟥 RHEL 9 Container</strong>: ansible-core 2.14.x, customer-build required
+- <strong>🟥 RHEL 10 Container</strong>: ansible-core 2.16+, customer-build required</p>
+<p><strong>✅ Rationale</strong>:
+- <strong>📜 Licensing Constraints</strong>: RHEL containers require customer subscriptions
+- <strong>🔄 Version Incompatibilities</strong>: RHEL 9 (ansible-core 2.14) vs RHEL 10 (2.16+)
+- <strong>👨‍💻 Developer Experience</strong>: Simple default container for 90% of use cases
+- <strong>🏢 Enterprise Compliance</strong>: Customer-controlled build process for RHEL</p>
+<p><strong>🔧 Implementation Details</strong>:
+<div class="highlight"><pre><span></span><code><span class="c"># Default Container (Dockerfile)</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">python:3.11-slim</span>
+<span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nodejs<span class="w"> </span>npm
+<span class="c"># No subscription requirements</span>
+
+<span class="c"># RHEL Container (Dockerfile.rhel9)</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">registry.redhat.io/rhel9/python-311:latest</span>
+<span class="k">ARG</span><span class="w"> </span>RHEL_SUBSCRIPTION_USERNAME
+<span class="k">ARG</span><span class="w"> </span>RHEL_SUBSCRIPTION_PASSWORD
+<span class="k">RUN</span><span class="w"> </span>subscription-manager<span class="w"> </span>register<span class="w"> </span>#<span class="w"> </span>Customer<span class="w"> </span>credentials<span class="w"> </span>required
+</code></pre></div></p>
+<h3 id="podman-vs-docker-for-rhel">Podman vs Docker for RHEL<a class="headerlink" href="#podman-vs-docker-for-rhel" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Prioritize Podman for RHEL containers with Docker fallback</p>
+<p><strong>✅ Rationale</strong>:
+- <strong>🟥 Native RHEL Tool</strong>: Podman is the default container runtime in RHEL
+- <strong>🔒 Security Benefits</strong>: Rootless by default, no daemon required<br />
+- <strong>🏢 Enterprise Integration</strong>: Better RHEL ecosystem integration
+- <strong>🔄 Backward Compatibility</strong>: Docker remains supported as fallback</p>
+<p><strong>🔧 Implementation</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Primary: Podman (RHEL environments)</span>
+podman<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>Dockerfile.rhel9<span class="w"> </span>-t<span class="w"> </span>aider-lint-fixer:rhel9
+
+<span class="c1"># Fallback: Docker (compatibility)</span>
+docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>Dockerfile.rhel9<span class="w"> </span>-t<span class="w"> </span>aider-lint-fixer:rhel9
+</code></pre></div></p>
+<h2 id="configuration-management">⚙️ Configuration Management<a class="headerlink" href="#configuration-management" title="Permanent link">&para;</a></h2>
+<h3 id="unified-vs-language-specific-configs">Unified vs Language-Specific Configs<a class="headerlink" href="#unified-vs-language-specific-configs" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Support both unified and language-specific configuration</p>
+<p><strong>🎯 Challenge</strong>: Balance simplicity with flexibility for diverse teams</p>
+<p><strong>🔧 Hybrid Approach</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Unified configuration (.aider-lint-fixer.yml)</span>
+<span class="nt">llm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;deepseek&quot;</span>
+<span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;deepseek/deepseek-chat&quot;</span>
+
+<span class="nt">linters</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">auto_detect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;flake8&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;eslint&quot;</span><span class="p p-Indicator">]</span>
+
+<span class="c1"># Language-specific overrides still work</span>
+<span class="c1"># .flake8, .eslintrc.js, .pylintrc, pyproject.toml</span>
+</code></pre></div></p>
+<p><strong>✅ Benefits</strong>:
+- <strong>🎨 Flexibility</strong>: Teams can choose their preferred approach
+- <strong>🚀 Migration Path</strong>: Easy adoption from existing tool-specific configs<br />
+- <strong>📊 Profile Support</strong>: Development, CI, and production profiles
+- <strong>🔄 Backward Compatibility</strong>: Existing configurations continue working</p>
+<p><strong>⚖️ Trade-offs</strong>:
+- <strong>🔧 Configuration Complexity</strong>: Multiple config sources to manage
+- <strong>📋 Precedence Rules</strong>: Clear hierarchy needed for conflict resolution
+- <strong>📚 Documentation Overhead</strong>: Need to explain multiple config approaches</p>
+<p><strong>📋 Configuration Precedence</strong> (highest to lowest):
+1. Command-line arguments
+2. Environment variables<br />
+3. Project <code>.aider-lint-fixer.yml</code>
+4. Global <code>~/.aider-lint-fixer.yml</code>
+5. Language-specific configs (<code>.eslintrc.js</code>, <code>.flake8</code>, etc.)
+6. Default values</p>
+<h2 id="performance-decisions">⚡ Performance Decisions<a class="headerlink" href="#performance-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="parallel-vs-sequential-linter-execution">Parallel vs Sequential Linter Execution<a class="headerlink" href="#parallel-vs-sequential-linter-execution" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Parallel execution with configurable concurrency</p>
+<p><strong>🎯 Problem</strong>: Large codebases need fast feedback cycles</p>
+<p><strong>✅ Solution</strong>: Intelligent parallel processing with resource management</p>
+<p><strong>🔧 Implementation</strong>:
+<div class="highlight"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_linters_parallel</span><span class="p">(</span>
+    <span class="n">files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> 
+    <span class="n">max_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">resource_limits</span><span class="p">:</span> <span class="n">ResourceLimits</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">LinterResult</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Execute linters in parallel with intelligent scheduling</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">semaphore</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Semaphore</span><span class="p">(</span><span class="n">max_workers</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_single_linter</span><span class="p">(</span><span class="n">linter</span><span class="p">:</span> <span class="n">BaseLinter</span><span class="p">,</span> <span class="n">file_batch</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">semaphore</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">linter</span><span class="o">.</span><span class="n">run_async</span><span class="p">(</span><span class="n">file_batch</span><span class="p">)</span>
+
+    <span class="c1"># Smart batching based on file size and linter characteristics</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="n">create_optimal_batches</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">linters</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span>
+</code></pre></div></p>
+<p><strong>✅ Benefits</strong>:
+- <strong>⚡ Performance</strong>: 3-5x speedup for multi-file projects
+- <strong>🎛️ Resource Management</strong>: Configurable limits prevent system overload
+- <strong>🔒 Isolation</strong>: Each linter runs in separate process/container
+- <strong>📊 Monitoring</strong>: Real-time progress tracking and metrics</p>
+<p><strong>⚖️ Trade-offs</strong>:
+- <strong>🧠 Memory Usage</strong>: Higher memory consumption during parallel execution
+- <strong>🔧 Complexity</strong>: Coordination logic for parallel operations
+- <strong>⚠️ Error Handling</strong>: More complex error recovery scenarios</p>
+<h3 id="multi-level-caching-strategy">Multi-Level Caching Strategy<a class="headerlink" href="#multi-level-caching-strategy" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Intelligent caching at multiple levels for performance</p>
+<p><strong>🎯 Goal</strong>: Sub-second response times for incremental changes</p>
+<p><strong>🔧 Caching Levels</strong>:</p>
+<h4 id="1-file-level-caching">1. <strong>File-Level Caching</strong><a class="headerlink" href="#1-file-level-caching" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">file_hash</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">linter_version</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">config_hash</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="c1"># Cache hit rate: ~85% during development</span>
+</code></pre></div>
+<h4 id="2-ai-analysis-caching">2. <strong>AI Analysis Caching</strong><a class="headerlink" href="#2-ai-analysis-caching" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">error_signature</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">error_type</span><span class="p">,</span> <span class="n">error_context</span><span class="p">,</span> <span class="n">similar_fixes</span><span class="p">)</span>
+<span class="c1"># Reduces LLM API calls by ~60%</span>
+</code></pre></div>
+<h4 id="3-configuration-caching">3. <strong>Configuration Caching</strong><a class="headerlink" href="#3-configuration-caching" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">config_cache</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;parsed_configs&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+    <span class="s2">&quot;linter_availability&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+    <span class="s2">&quot;project_metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
+<span class="p">}</span>
+<span class="c1"># Startup time improvement: ~70%</span>
+</code></pre></div>
+<p><strong>📊 Performance Impact</strong>:
+- <strong>🚀 Cold Start</strong>: ~2-3 seconds (first run)
+- <strong>⚡ Warm Cache</strong>: ~200-500ms (subsequent runs)
+- <strong>💾 Cache Hit Rates</strong>: 85% file-level, 60% AI analysis, 95% config</p>
+<h2 id="security-decisions">🔒 Security Decisions<a class="headerlink" href="#security-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="container-security-model">Container Security Model<a class="headerlink" href="#container-security-model" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Defense-in-depth security for container environments</p>
+<p><strong>🛡️ Security Layers</strong>:</p>
+<h4 id="non-root-container-execution"><strong>Non-root Container Execution</strong><a class="headerlink" href="#non-root-container-execution" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c"># Create non-privileged user</span>
+<span class="k">RUN</span><span class="w"> </span>useradd<span class="w"> </span>-m<span class="w"> </span>-u<span class="w"> </span><span class="m">1001</span><span class="w"> </span>-g<span class="w"> </span><span class="m">1001</span><span class="w"> </span>aider
+<span class="k">USER</span><span class="w"> </span><span class="s">1001:1001</span>
+
+<span class="c"># Readonly filesystem where possible</span>
+<span class="k">VOLUME</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/workspace:ro&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;/output:rw&quot;</span><span class="p">]</span>
+</code></pre></div>
+<h4 id="volume-security"><strong>Volume Security</strong><a class="headerlink" href="#volume-security" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Read-only project code (default)</span>
+podman<span class="w"> </span>run<span class="w"> </span>-v<span class="w"> </span>./project:/workspace:ro<span class="w"> </span>aider-lint-fixer
+
+<span class="c1"># Writable only when needed</span>
+podman<span class="w"> </span>run<span class="w"> </span>-v<span class="w"> </span>./project:/workspace:rw<span class="w"> </span>--security-opt<span class="o">=</span>no-new-privileges
+</code></pre></div>
+<p><strong>🔧 Security Features</strong>:
+- <strong>👤 Non-root Execution</strong>: UID 1001 for security isolation
+- <strong>📂 Read-only Mounts</strong>: Project code mounted read-only by default
+- <strong>🔐 Credential Management</strong>: No secrets stored in container images
+- <strong>🟥 SELinux Support</strong>: Volume labeling for RHEL environments
+- <strong>🚫 No Privileged Access</strong>: Containers run without privileged flags</p>
+<h3 id="subscription-credential-handling">Subscription Credential Handling<a class="headerlink" href="#subscription-credential-handling" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Build-time credentials with automatic cleanup</p>
+<p><strong>🎯 Problem</strong>: RHEL containers need subscription access during build, but credentials must not persist</p>
+<p><strong>🔧 Secure Implementation</strong>:
+<div class="highlight"><pre><span></span><code><span class="c"># Build-time credential injection</span>
+<span class="k">ARG</span><span class="w"> </span>RHEL_SUBSCRIPTION_USERNAME
+<span class="k">ARG</span><span class="w"> </span>RHEL_SUBSCRIPTION_PASSWORD
+
+<span class="c"># Use credentials during build</span>
+<span class="k">RUN</span><span class="w"> </span>subscription-manager<span class="w"> </span>register<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--username<span class="o">=</span><span class="si">${</span><span class="nv">RHEL_SUBSCRIPTION_USERNAME</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--password<span class="o">=</span><span class="si">${</span><span class="nv">RHEL_SUBSCRIPTION_PASSWORD</span><span class="si">}</span>
+
+<span class="c"># Install packages</span>
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>python3<span class="w"> </span>nodejs<span class="w"> </span>npm
+
+<span class="c"># CRITICAL: Clean up credentials</span>
+<span class="k">RUN</span><span class="w"> </span>subscription-manager<span class="w"> </span>unregister<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>subscription-manager<span class="w"> </span>clean<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>rm<span class="w"> </span>-rf<span class="w"> </span>/etc/rhsm/
+</code></pre></div></p>
+<p><strong>🛡️ Security Measures</strong>:
+- <strong>⏱️ Build-time Only</strong>: Credentials never persist in final images
+- <strong>🧹 Automatic Cleanup</strong>: Subscription unregistration after build
+- <strong>🚫 No Credential Files</strong>: No credential files committed to git
+- <strong>🔍 Image Scanning</strong>: Final images contain no subscription data</p>
+<h2 id="testing-strategy">🧪 Testing Strategy<a class="headerlink" href="#testing-strategy" title="Permanent link">&para;</a></h2>
+<h3 id="multi-environment-testing-matrix">Multi-Environment Testing Matrix<a class="headerlink" href="#multi-environment-testing-matrix" title="Permanent link">&para;</a></h3>
+<p><strong>Decision</strong>: Comprehensive testing across all supported environments</p>
+<p><strong>🎯 Goal</strong>: Ensure consistent behavior across diverse deployment scenarios</p>
+<p><strong>📊 Test Matrix</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Environment</th>
+<th>Python Version</th>
+<th>Container Runtime</th>
+<th>OS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Development</strong></td>
+<td>3.11+</td>
+<td>Docker/Podman</td>
+<td>macOS, Ubuntu</td>
+</tr>
+<tr>
+<td><strong>RHEL 9</strong></td>
+<td>3.9</td>
+<td>Podman (primary)</td>
+<td>RHEL 9</td>
+</tr>
+<tr>
+<td><strong>RHEL 10</strong></td>
+<td>3.12</td>
+<td>Podman (primary)</td>
+<td>RHEL 10</td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>3.11</td>
+<td>Docker</td>
+<td>Ubuntu</td>
+</tr>
+</tbody>
+</table>
+<p><strong>🔬 Test Categories</strong>:</p>
+<h4 id="unit-tests-85-minimum-coverage"><strong>Unit Tests (85% minimum coverage)</strong><a class="headerlink" href="#unit-tests-85-minimum-coverage" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TestLinterPlugin</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_availability_detection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test linter installation detection&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_error_parsing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test output parsing accuracy&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_fix_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test AI fix generation&quot;&quot;&quot;</span>
+</code></pre></div>
+<h4 id="integration-tests"><strong>Integration Tests</strong><a class="headerlink" href="#integration-tests" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TestLinterCombinations</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_python_linter_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test flake8 + pylint + mypy together&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_javascript_linter_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test ESLint + Prettier together&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_mixed_language_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test Python + JavaScript project&quot;&quot;&quot;</span>
+</code></pre></div>
+<h4 id="container-tests"><strong>Container Tests</strong><a class="headerlink" href="#container-tests" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Build validation</span>
+pytest<span class="w"> </span>tests/container/test_build.py
+
+<span class="c1"># Runtime validation  </span>
+pytest<span class="w"> </span>tests/container/test_runtime.py
+
+<span class="c1"># Security validation</span>
+pytest<span class="w"> </span>tests/container/test_security.py
+</code></pre></div>
+<p><strong>📈 Coverage Goals</strong>:
+- <strong>🎯 Unit Tests</strong>: 85% minimum code coverage
+- <strong>🔗 Integration Tests</strong>: All supported linter combinations
+- <strong>🐳 Container Tests</strong>: Build and runtime validation for all images
+- <strong>🔒 Security Tests</strong>: Vulnerability scanning and credential leak detection</p>
+<h2 id="future-considerations">🔮 Future Considerations<a class="headerlink" href="#future-considerations" title="Permanent link">&para;</a></h2>
+<h3 id="evolution-to-microservices-architecture">Evolution to Microservices Architecture<a class="headerlink" href="#evolution-to-microservices-architecture" title="Permanent link">&para;</a></h3>
+<p><strong>Current State</strong>: Monolithic Python application with plugin architecture</p>
+<p><strong>🎯 Future Vision</strong>: Gradual evolution to microservices as scale demands</p>
+<p><strong>🗺️ Migration Path</strong>:</p>
+<h4 id="phase-1-service-boundaries-current-6-months"><strong>Phase 1: Service Boundaries</strong> (Current → 6 months)<a class="headerlink" href="#phase-1-service-boundaries-current-6-months" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Each linter becomes independent service</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinterService</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linter_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_linter</span><span class="p">(</span><span class="n">linter_type</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">LinterResult</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">linter</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="phase-2-api-gateway-6-12-months"><strong>Phase 2: API Gateway</strong> (6-12 months)<a class="headerlink" href="#phase-2-api-gateway-6-12-months" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Central coordination layer</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinterOrchestrator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">services</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;python&#39;</span><span class="p">:</span> <span class="n">LinterService</span><span class="p">(</span><span class="s1">&#39;flake8&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;javascript&#39;</span><span class="p">:</span> <span class="n">LinterService</span><span class="p">(</span><span class="s1">&#39;eslint&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;ansible&#39;</span><span class="p">:</span> <span class="n">LinterService</span><span class="p">(</span><span class="s1">&#39;ansible-lint&#39;</span><span class="p">)</span>
+        <span class="p">}</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">coordinate_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span> <span class="n">Project</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Results</span><span class="p">:</span>
+        <span class="c1"># Intelligent routing and aggregation</span>
+</code></pre></div>
+<h4 id="phase-3-container-orchestration-12-months"><strong>Phase 3: Container Orchestration</strong> (12+ months)<a class="headerlink" href="#phase-3-container-orchestration-12-months" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Kubernetes-native deployment</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eslint-service</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eslint-service</span>
+</code></pre></div>
+<p><strong>✅ Benefits of Gradual Migration</strong>:
+- <strong>📈 Scalability</strong>: Independent scaling of popular linters
+- <strong>🔧 Technology Diversity</strong>: Each service can use optimal tech stack
+- <strong>⚡ Performance</strong>: Specialized optimizations per linter type
+- <strong>🛡️ Fault Isolation</strong>: Linter failures don't affect other services</p>
+<h3 id="cloud-native-adoption-strategy">Cloud Native Adoption Strategy<a class="headerlink" href="#cloud-native-adoption-strategy" title="Permanent link">&para;</a></h3>
+<p><strong>🎯 Goal</strong>: Seamless deployment across cloud and on-premises environments</p>
+<p><strong>📋 Prepared Capabilities</strong>:</p>
+<h4 id="12-factor-app-compliance"><strong>12-Factor App Compliance</strong><a class="headerlink" href="#12-factor-app-compliance" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Environment-based configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>
+
+<span class="c1"># Stateless design</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StatelessLintRunner</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="c1"># No persistent state</span>
+</code></pre></div>
+<h4 id="health-and-observability"><strong>Health and Observability</strong><a class="headerlink" href="#health-and-observability" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Built-in health checks</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/health/ready&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">readiness_probe</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ready&quot;</span><span class="p">,</span> <span class="s2">&quot;linters&quot;</span><span class="p">:</span> <span class="n">check_linter_availability</span><span class="p">()}</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/health/live&#39;</span><span class="p">)</span>  
+<span class="k">def</span><span class="w"> </span><span class="nf">liveness_probe</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;alive&quot;</span><span class="p">,</span> <span class="s2">&quot;uptime&quot;</span><span class="p">:</span> <span class="n">get_uptime</span><span class="p">()}</span>
+
+<span class="c1"># Metrics endpoint</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/metrics&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prometheus_metrics</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">generate_prometheus_metrics</span><span class="p">()</span>
+</code></pre></div>
+<h4 id="container-first-design"><strong>Container-First Design</strong><a class="headerlink" href="#container-first-design" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c"># Optimized for container deployment</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">python:3.11-slim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="s">builder</span>
+<span class="c"># Build dependencies</span>
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">python:3.11-slim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="s">runtime</span><span class="w">  </span>
+<span class="c"># Runtime only - minimal attack surface</span>
+<span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>builder<span class="w"> </span>/app<span class="w"> </span>/app
+<span class="k">HEALTHCHECK</span><span class="w"> </span><span class="k">CMD</span><span class="w"> </span>curl<span class="w"> </span>-f<span class="w"> </span>http://localhost:8080/health/live
+</code></pre></div>
+<h3 id="ai-evolution-roadmap">AI Evolution Roadmap<a class="headerlink" href="#ai-evolution-roadmap" title="Permanent link">&para;</a></h3>
+<p><strong>Current Integration</strong>: aider.chat wrapper approach</p>
+<p><strong>🔮 Future AI Considerations</strong>:</p>
+<h4 id="direct-llm-integration-if-needed"><strong>Direct LLM Integration</strong> (If needed)<a class="headerlink" href="#direct-llm-integration-if-needed" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DirectLLMIntegration</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fallback if aider.chat limitations emerge&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">provider</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;openai&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_client</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate_fix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="n">LintError</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CodeFix</span><span class="p">:</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_fix_prompt</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_fix</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="domain-specific-ai-models"><strong>Domain-Specific AI Models</strong><a class="headerlink" href="#domain-specific-ai-models" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LintingSpecificModel</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom models trained on linting fix patterns&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;aider-lint-fixer-v1&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_fix_quality</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="n">LintError</span><span class="p">,</span> <span class="n">proposed_fix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="c1"># Predict likelihood of fix success</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">proposed_fix</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="federated-ai-strategy"><strong>Federated AI Strategy</strong><a class="headerlink" href="#federated-ai-strategy" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FederatedAIRouter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Route different error types to specialized AI providers&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">routers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;typescript&#39;</span><span class="p">:</span> <span class="n">TypeScriptSpecializedAI</span><span class="p">(),</span>
+            <span class="s1">&#39;python&#39;</span><span class="p">:</span> <span class="n">PythonSpecializedAI</span><span class="p">(),</span>
+            <span class="s1">&#39;security&#39;</span><span class="p">:</span> <span class="n">SecurityFocusedAI</span><span class="p">()</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">route_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="n">LintError</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AIProvider</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">routers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">language</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_ai</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="decision-impact-metrics">📊 Decision Impact Metrics<a class="headerlink" href="#decision-impact-metrics" title="Permanent link">&para;</a></h2>
+<h3 id="success-metrics-for-key-decisions">Success Metrics for Key Decisions<a class="headerlink" href="#success-metrics-for-key-decisions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Metric</th>
+<th>Target</th>
+<th>Current Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Plugin Architecture</strong></td>
+<td>New linter integration time</td>
+<td>&lt;2 days</td>
+<td>✅ 1.5 days avg</td>
+</tr>
+<tr>
+<td><strong>AI Integration</strong></td>
+<td>Fix success rate</td>
+<td>&gt;70%</td>
+<td>✅ 73.2%</td>
+</tr>
+<tr>
+<td><strong>Container Strategy</strong></td>
+<td>Deployment time</td>
+<td>&lt;5 minutes</td>
+<td>✅ 3.2 minutes</td>
+</tr>
+<tr>
+<td><strong>Parallel Execution</strong></td>
+<td>Performance improvement</td>
+<td>3x speedup</td>
+<td>✅ 4.1x speedup</td>
+</tr>
+<tr>
+<td><strong>Caching Strategy</strong></td>
+<td>Cache hit rate</td>
+<td>&gt;80%</td>
+<td>✅ 85%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="learning-from-decisions">Learning from Decisions<a class="headerlink" href="#learning-from-decisions" title="Permanent link">&para;</a></h3>
+<p><strong>🎯 What Worked Well</strong>:
+- <strong>Plugin Architecture</strong>: Enabled rapid linter additions
+- <strong>aider.chat Integration</strong>: Avoided AI infrastructure complexity
+- <strong>Container Strategy</strong>: Smooth enterprise adoption</p>
+<p><strong>🔄 What We'd Do Differently</strong>:
+- <strong>Earlier Performance Focus</strong>: Could have implemented caching sooner
+- <strong>More Granular Configs</strong>: Configuration hierarchy could be simpler
+- <strong>Better Error Categorization</strong>: Earlier investment in error classification</p>
+<p><strong>🚀 Decisions That Exceeded Expectations</strong>:
+- <strong>Parallel Execution</strong>: 4.1x speedup vs. 3x target
+- <strong>AI Fix Quality</strong>: 73.2% success vs. 70% target
+- <strong>Developer Adoption</strong>: Faster than projected uptake</p>
+<hr />
+<p><em>This document is a living record of our architectural decisions. It's updated as we learn and evolve the system based on real-world usage and feedback.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>
