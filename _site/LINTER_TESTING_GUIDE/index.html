@@ -1,0 +1,2566 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-powered linting tool that automatically detects and fixes code quality issues across multiple programming languages">
+      
+      
+      
+        <link rel="canonical" href="https://tosin2013.github.io/aider-lint-fixer/LINTER_TESTING_GUIDE/">
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Linter Testing Guide - aider-lint-fixer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#linter-testing-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="aider-lint-fixer" class="md-header__button md-logo" aria-label="aider-lint-fixer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            aider-lint-fixer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Linter Testing Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tutorials/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../how-to/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../reference/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../explanation/" class="md-tabs__link">
+          
+  
+  
+  Explanation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../adrs/" class="md-tabs__link">
+          
+  
+  
+  ADRs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="aider-lint-fixer" class="md-nav__button md-logo" aria-label="aider-lint-fixer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    aider-lint-fixer
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tutorials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/getting-started-with-containers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started with Containers
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/setting-up-your-development-environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Development Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/writing-and-running-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Writing and Running Tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/container-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Container Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How-To Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/configure-linters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configure Linters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/how-to-add-a-new-feature/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Add a New Feature
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/how-to-debug-common-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debug Common Issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/deploy-to-production/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy to Production
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/how-to-deploy-your-application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy Your Application
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/setup-development-environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Setup Development Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/integrate-with-aider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integrate with Aider
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/run-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Run Tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/monitor-performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Monitor Performance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/security-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Security Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/command-line-interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Command Line Interface
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/configuration-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/error-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Error Codes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/linter-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Linter Plugins
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Explanation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Explanation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/architecture-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/container-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Container Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/design-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Design Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/technology-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Technology Stack
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            ADRs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0001-record-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0001: Record Architecture Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0002-ai-integration-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0002: AI Integration Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0003-modular-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0003: Modular Plugin System
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0004-python-ecosystem-focus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0004: Python Ecosystem Focus
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0005-python-linter-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0005: Python Linter Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0006-javascript-typescript-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0006: JavaScript TypeScript Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0007-infrastructure-devops-linter-ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0007: Infrastructure DevOps Linter Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0008-deployment-environments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0008: Deployment Environments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adrs/0009-rhel-container-build-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0009: RHEL Container Build Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#testing-framework-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Framework Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Framework Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Tests
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-test-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Test Execution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coverage-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Coverage Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel Testing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unit-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unit Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Unit Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-analyzer-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Analyzer Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-matcher-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pattern Matcher Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-project-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Project Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodejs-project-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Node.js Project Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ansible-project-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ansible Project Testing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#large-project-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Large Project Simulation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-usage-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Memory Usage Testing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-fixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Fixtures
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Fixtures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-test-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating Test Projects
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#continuous-integration-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Continuous Integration Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Continuous Integration Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-actions-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub Actions Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-coverage-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Coverage Goals
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-test-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Test Organization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-mock-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Mock Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-test-data-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Test Data Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-debugging-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Debugging Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linter-compatibility-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linter Compatibility Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-platform-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-Platform Testing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resources
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="linter-testing-guide">Linter Testing Guide<a class="headerlink" href="#linter-testing-guide" title="Permanent link">&para;</a></h1>
+<p>This guide covers comprehensive testing strategies for aider-lint-fixer, including unit tests, integration tests, and validation of linter support across different languages and frameworks.</p>
+<h2 id="testing-framework-overview">Testing Framework Overview<a class="headerlink" href="#testing-framework-overview" title="Permanent link">&para;</a></h2>
+<h3 id="test-structure">Test Structure<a class="headerlink" href="#test-structure" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>tests/
+├── unit/                    # Unit tests for individual modules
+│   ├── test_error_analyzer.py
+│   ├── test_pattern_matcher.py
+│   ├── test_aider_integration.py
+│   └── test_config_manager.py
+├── integration/             # End-to-end integration tests
+│   ├── test_python_projects.py
+│   ├── test_nodejs_projects.py
+│   ├── test_ansible_projects.py
+│   └── test_mixed_projects.py
+├── fixtures/                # Test data and sample projects
+│   ├── python_sample/
+│   ├── nodejs_sample/
+│   ├── ansible_sample/
+│   └── test_files/
+└── performance/             # Performance and load testing
+    ├── test_large_projects.py
+    └── benchmarks/
+</code></pre></div>
+<h3 id="test-dependencies">Test Dependencies<a class="headerlink" href="#test-dependencies" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install test dependencies</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>dev<span class="o">]</span>
+
+<span class="c1"># Core testing tools</span>
+pytest<span class="w">                </span><span class="c1"># Test framework</span>
+pytest-cov<span class="w">          </span><span class="c1"># Coverage reporting</span>
+pytest-mock<span class="w">         </span><span class="c1"># Mocking utilities</span>
+pytest-xdist<span class="w">        </span><span class="c1"># Parallel test execution</span>
+pytest-benchmark<span class="w">    </span><span class="c1"># Performance testing</span>
+</code></pre></div>
+<h2 id="running-tests">Running Tests<a class="headerlink" href="#running-tests" title="Permanent link">&para;</a></h2>
+<h3 id="basic-test-execution">Basic Test Execution<a class="headerlink" href="#basic-test-execution" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run all tests</span>
+pytest
+
+<span class="c1"># Run with verbose output</span>
+pytest<span class="w"> </span>-v
+
+<span class="c1"># Run specific test file</span>
+pytest<span class="w"> </span>tests/unit/test_error_analyzer.py
+
+<span class="c1"># Run specific test function</span>
+pytest<span class="w"> </span>tests/unit/test_error_analyzer.py::test_categorize_error
+</code></pre></div>
+<h3 id="coverage-testing">Coverage Testing<a class="headerlink" href="#coverage-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run with coverage</span>
+pytest<span class="w"> </span>--cov<span class="o">=</span>aider_lint_fixer
+
+<span class="c1"># Generate HTML coverage report</span>
+pytest<span class="w"> </span>--cov<span class="o">=</span>aider_lint_fixer<span class="w"> </span>--cov-report<span class="o">=</span>html
+
+<span class="c1"># Coverage with minimum threshold</span>
+pytest<span class="w"> </span>--cov<span class="o">=</span>aider_lint_fixer<span class="w"> </span>--cov-fail-under<span class="o">=</span><span class="m">80</span>
+</code></pre></div>
+<h3 id="parallel-testing">Parallel Testing<a class="headerlink" href="#parallel-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run tests in parallel</span>
+pytest<span class="w"> </span>-n<span class="w"> </span>auto
+
+<span class="c1"># Specify number of workers</span>
+pytest<span class="w"> </span>-n<span class="w"> </span><span class="m">4</span>
+</code></pre></div>
+<h2 id="unit-testing">Unit Testing<a class="headerlink" href="#unit-testing" title="Permanent link">&para;</a></h2>
+<h3 id="error-analyzer-tests">Error Analyzer Tests<a class="headerlink" href="#error-analyzer-tests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># tests/unit/test_error_analyzer.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aider_lint_fixer.error_analyzer</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorAnalyzer</span><span class="p">,</span> <span class="n">ErrorCategory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aider_lint_fixer.lint_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">LintError</span><span class="p">,</span> <span class="n">ErrorSeverity</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestErrorAnalyzer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_categorize_python_import_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">analyzer</span> <span class="o">=</span> <span class="n">ErrorAnalyzer</span><span class="p">()</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">LintError</span><span class="p">(</span>
+            <span class="n">file_path</span><span class="o">=</span><span class="s2">&quot;test.py&quot;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">rule_id</span><span class="o">=</span><span class="s2">&quot;F401&quot;</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="s2">&quot;&#39;os&#39; imported but unused&quot;</span><span class="p">,</span>
+            <span class="n">severity</span><span class="o">=</span><span class="n">ErrorSeverity</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+            <span class="n">linter</span><span class="o">=</span><span class="s2">&quot;flake8&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">analysis</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">_analyze_error</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="s2">&quot;import os</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">analysis</span><span class="o">.</span><span class="n">category</span> <span class="o">==</span> <span class="n">ErrorCategory</span><span class="o">.</span><span class="n">UNUSED</span>
+        <span class="k">assert</span> <span class="n">analysis</span><span class="o">.</span><span class="n">fixable</span> <span class="o">==</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="n">analysis</span><span class="o">.</span><span class="n">complexity</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;simple&quot;</span>
+</code></pre></div>
+<h3 id="pattern-matcher-tests">Pattern Matcher Tests<a class="headerlink" href="#pattern-matcher-tests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># tests/unit/test_pattern_matcher.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aider_lint_fixer.pattern_matcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">SmartErrorClassifier</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestSmartErrorClassifier</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_javascript_unused_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">classifier</span> <span class="o">=</span> <span class="n">SmartErrorClassifier</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">classify_error</span><span class="p">(</span>
+            <span class="s2">&quot;&#39;unusedVar&#39; is defined but never used&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;javascript&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;eslint&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">fixable</span> <span class="o">==</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">confidence</span> <span class="o">&gt;</span> <span class="mf">0.8</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;pattern_match&quot;</span>
+</code></pre></div>
+<h3 id="configuration-tests">Configuration Tests<a class="headerlink" href="#configuration-tests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># tests/unit/test_config_manager.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aider_lint_fixer.config_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigManager</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestConfigManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_load_default_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">get_profile</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;basic&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;flake8&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">get_enabled_linters</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_typescript_project_detection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">(</span><span class="s2">&quot;./fixtures/typescript_project&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">is_typescript_project</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="s2">&quot;eslint&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">get_enabled_linters</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="integration-testing">Integration Testing<a class="headerlink" href="#integration-testing" title="Permanent link">&para;</a></h2>
+<h3 id="python-project-testing">Python Project Testing<a class="headerlink" href="#python-project-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># tests/integration/test_python_projects.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aider_lint_fixer.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestPythonIntegration</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_flake8_integration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test complete flake8 error detection and fixing flow&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+            <span class="c1"># Create test Python file with errors</span>
+            <span class="n">test_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;test.py&quot;</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import os</span>
+<span class="s2">import sys  # unused import</span>
+
+<span class="s2">def function_with_long_line():</span>
+<span class="s2">    return &quot;this is a very long line that exceeds the maximum line length limit and should be fixed&quot;</span>
+
+<span class="s2">x=1 # missing spaces</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Run aider-lint-fixer</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">main</span><span class="p">([</span>
+                <span class="s2">&quot;--dry-run&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;--linter&quot;</span><span class="p">,</span> <span class="s2">&quot;flake8&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+            <span class="p">])</span>
+
+            <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">total_errors</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="k">assert</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;F401&quot;</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">rule_id</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>  <span class="c1"># unused import</span>
+            <span class="k">assert</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;E501&quot;</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">rule_id</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>  <span class="c1"># line too long</span>
+</code></pre></div>
+<h3 id="nodejs-project-testing">Node.js Project Testing<a class="headerlink" href="#nodejs-project-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># tests/integration/test_nodejs_projects.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aider_lint_fixer.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestNodeJSIntegration</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_eslint_typescript_integration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test ESLint with TypeScript project&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+            <span class="c1"># Create package.json</span>
+            <span class="n">package_json</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test-project&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;devDependencies&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;eslint&quot;</span><span class="p">:</span> <span class="s2">&quot;^8.0.0&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;@typescript-eslint/parser&quot;</span><span class="p">:</span> <span class="s2">&quot;^6.0.0&quot;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;package.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">package_json</span><span class="p">))</span>
+
+            <span class="c1"># Create TypeScript file with errors</span>
+            <span class="n">ts_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;index.ts&quot;</span>
+            <span class="n">ts_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">ts_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">let unusedVariable = &#39;remove me&#39;;</span>
+<span class="s2">const value = &#39;single quotes should be double&#39;</span>
+<span class="s2">function noReturnType() {</span>
+<span class="s2">    return 42</span>
+<span class="s2">}</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Create ESLint config</span>
+            <span class="n">eslint_config</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;parser&quot;</span><span class="p">:</span> <span class="s2">&quot;@typescript-eslint/parser&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;extends&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;@typescript-eslint/recommended&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;rules&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;quotes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;double&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;@typescript-eslint/no-unused-vars&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;.eslintrc.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">eslint_config</span><span class="p">))</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">main</span><span class="p">([</span>
+                <span class="s2">&quot;--dry-run&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;--linter&quot;</span><span class="p">,</span> <span class="s2">&quot;eslint&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+            <span class="p">])</span>
+
+            <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">total_errors</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="c1"># Should detect unused variable and quote style issues</span>
+</code></pre></div>
+<h3 id="ansible-project-testing">Ansible Project Testing<a class="headerlink" href="#ansible-project-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># tests/integration/test_ansible_projects.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aider_lint_fixer.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestAnsibleIntegration</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_ansible_lint_integration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test ansible-lint integration with YAML playbooks&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+            <span class="c1"># Create ansible playbook with errors</span>
+            <span class="n">playbook</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Test playbook&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;tasks&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;shell&quot;</span><span class="p">:</span> <span class="s2">&quot;echo hello&quot;</span><span class="p">,</span>  <span class="c1"># Should use command module</span>
+                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;bad shell usage&quot;</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;copy&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;src&quot;</span><span class="p">:</span> <span class="s2">&quot;file.txt&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;/tmp/file.txt&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;777&quot;</span>  <span class="c1"># Too permissive</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+
+            <span class="n">playbook_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;playbook.yml&quot;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">playbook_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">playbook</span><span class="p">],</span> <span class="n">f</span><span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">main</span><span class="p">([</span>
+                <span class="s2">&quot;--dry-run&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;--linter&quot;</span><span class="p">,</span> <span class="s2">&quot;ansible-lint&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+            <span class="p">])</span>
+
+            <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">total_errors</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="c1"># Should detect shell usage and file permissions issues</span>
+</code></pre></div>
+<h2 id="performance-testing">Performance Testing<a class="headerlink" href="#performance-testing" title="Permanent link">&para;</a></h2>
+<h3 id="large-project-simulation">Large Project Simulation<a class="headerlink" href="#large-project-simulation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># tests/performance/test_large_projects.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aider_lint_fixer.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestPerformance</span><span class="p">:</span>
+    <span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">benchmark</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_large_python_project_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">benchmark</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test performance on large Python project (100+ files)&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+            <span class="c1"># Create 100 Python files with various errors</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;module_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.py&quot;</span>
+                <span class="n">file_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import os  # unused import</span>
+<span class="s2">import sys</span>
+<span class="s2">import json</span>
+
+<span class="s2">def function_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">():</span>
+<span class="s2">    x=1+2+3+4+5  # spacing issues</span>
+<span class="s2">    return &quot;very long line that exceeds maximum length and should trigger line length error&quot;</span>
+
+<span class="s2">class Class</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">:</span>
+<span class="s2">    def method(self):</span>
+<span class="s2">        pass</span>
+<span class="s2">                &quot;&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Benchmark the processing</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">run_linter</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">main</span><span class="p">([</span>
+                    <span class="s2">&quot;--dry-run&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;--linter&quot;</span><span class="p">,</span> <span class="s2">&quot;flake8&quot;</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+                <span class="p">])</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">benchmark</span><span class="p">(</span><span class="n">run_linter</span><span class="p">)</span>
+
+            <span class="c1"># Performance assertions</span>
+            <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">total_errors</span> <span class="o">&gt;</span> <span class="mi">200</span>  <span class="c1"># Should find many errors</span>
+            <span class="k">assert</span> <span class="n">benchmark</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">median</span> <span class="o">&lt;</span> <span class="mf">30.0</span>  <span class="c1"># Should complete in under 30 seconds</span>
+</code></pre></div>
+<h3 id="memory-usage-testing">Memory Usage Testing<a class="headerlink" href="#memory-usage-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># tests/performance/test_memory_usage.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aider_lint_fixer.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestMemoryUsage</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_memory_efficiency_large_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test memory usage doesn&#39;t exceed reasonable limits&quot;&quot;&quot;</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
+        <span class="n">initial_memory</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span><span class="o">.</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>  <span class="c1"># MB</span>
+
+        <span class="c1"># Run on large project</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">main</span><span class="p">([</span>
+            <span class="s2">&quot;--dry-run&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;./tests/fixtures/large_project&quot;</span>
+        <span class="p">])</span>
+
+        <span class="n">final_memory</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span><span class="o">.</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>  <span class="c1"># MB</span>
+        <span class="n">memory_increase</span> <span class="o">=</span> <span class="n">final_memory</span> <span class="o">-</span> <span class="n">initial_memory</span>
+
+        <span class="c1"># Memory usage should not exceed 500MB for typical projects</span>
+        <span class="k">assert</span> <span class="n">memory_increase</span> <span class="o">&lt;</span> <span class="mi">500</span>
+</code></pre></div>
+<h2 id="test-fixtures">Test Fixtures<a class="headerlink" href="#test-fixtures" title="Permanent link">&para;</a></h2>
+<h3 id="creating-test-projects">Creating Test Projects<a class="headerlink" href="#creating-test-projects" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># tests/conftest.py - Shared test fixtures</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">python_project</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a temporary Python project with common errors&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+        <span class="n">project_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+
+        <span class="c1"># Main module</span>
+        <span class="p">(</span><span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;main.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import os</span>
+<span class="s2">import sys  # unused</span>
+
+<span class="s2">def long_function_name():</span>
+<span class="s2">    return &quot;this line is way too long and exceeds the recommended maximum line length for Python code&quot;</span>
+
+<span class="s2">x=1+2  # spacing</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Test file</span>
+        <span class="p">(</span><span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;test_main.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import pytest</span>
+<span class="s2">from main import long_function_name</span>
+
+<span class="s2">def test_function():</span>
+<span class="s2">    assert long_function_name() is not None</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Setup.py</span>
+        <span class="p">(</span><span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;setup.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">from setuptools import setup</span>
+
+<span class="s2">setup(</span>
+<span class="s2">    name=&quot;test-project&quot;,</span>
+<span class="s2">    version=&quot;0.1.0&quot;</span>
+<span class="s2">)</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">yield</span> <span class="n">project_path</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">nodejs_project</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a temporary Node.js project with TypeScript&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+        <span class="n">project_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+
+        <span class="c1"># Package.json</span>
+        <span class="n">package_json</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test-project&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;lint&quot;</span><span class="p">:</span> <span class="s2">&quot;eslint src/**/*.ts&quot;</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;devDependencies&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;eslint&quot;</span><span class="p">:</span> <span class="s2">&quot;^8.0.0&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;@typescript-eslint/parser&quot;</span><span class="p">:</span> <span class="s2">&quot;^6.0.0&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;@typescript-eslint/eslint-plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;^6.0.0&quot;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="p">(</span><span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;package.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">package_json</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="c1"># TypeScript config</span>
+        <span class="n">tsconfig</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;compilerOptions&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;ES2020&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;commonjs&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;strict&quot;</span><span class="p">:</span> <span class="kc">True</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="p">(</span><span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;tsconfig.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">tsconfig</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="c1"># Source file with errors</span>
+        <span class="n">src_dir</span> <span class="o">=</span> <span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span>
+        <span class="n">src_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">src_dir</span> <span class="o">/</span> <span class="s2">&quot;index.ts&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">let unusedVariable = &#39;remove me&#39;;</span>
+<span class="s2">const message = &#39;Hello world&#39;;  // should be double quotes</span>
+<span class="s2">function getValue() {  // missing return type</span>
+<span class="s2">    return 42;</span>
+<span class="s2">}</span>
+<span class="s2">console.log(message)  // missing semicolon</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ESLint config</span>
+        <span class="n">eslintrc</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;parser&quot;</span><span class="p">:</span> <span class="s2">&quot;@typescript-eslint/parser&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plugins&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;@typescript-eslint&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;extends&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;eslint:recommended&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;@typescript-eslint/recommended&quot;</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;rules&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;quotes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;double&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;semi&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;always&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;@typescript-eslint/no-unused-vars&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;@typescript-eslint/explicit-function-return-type&quot;</span><span class="p">:</span> <span class="s2">&quot;warn&quot;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="p">(</span><span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;.eslintrc.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">eslintrc</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="k">yield</span> <span class="n">project_path</span>
+</code></pre></div>
+<h2 id="continuous-integration-testing">Continuous Integration Testing<a class="headerlink" href="#continuous-integration-testing" title="Permanent link">&para;</a></h2>
+<h3 id="github-actions-workflow">GitHub Actions Workflow<a class="headerlink" href="#github-actions-workflow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># .github/workflows/test.yml</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test Suite</span>
+<span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">test</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ matrix.os }}</span>
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">matrix</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">os</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">ubuntu-latest</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">windows-latest</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">macos-latest</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3.11</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3.12</span><span class="p p-Indicator">]</span>
+
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v3</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Python ${{ matrix.python-version }}</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-python@v4</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ matrix.python-version }}</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Node.js</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v3</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">node-version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;18&#39;</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install dependencies</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">python -m pip install --upgrade pip</span>
+<span class="w">          </span><span class="no">pip install -e .[dev,learning]</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run unit tests</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pytest tests/unit/ -v --cov=aider_lint_fixer</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run integration tests</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pytest tests/integration/ -v</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run performance tests</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pytest tests/performance/ -v --benchmark-only</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload coverage</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">codecov/codecov-action@v3</span>
+</code></pre></div>
+<h3 id="test-coverage-goals">Test Coverage Goals<a class="headerlink" href="#test-coverage-goals" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Target Coverage</th>
+<th>Current</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Core modules</td>
+<td>90%+</td>
+<td>85%</td>
+</tr>
+<tr>
+<td>Error analysis</td>
+<td>95%+</td>
+<td>92%</td>
+</tr>
+<tr>
+<td>Pattern matching</td>
+<td>85%+</td>
+<td>88%</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>80%+</td>
+<td>76%</td>
+</tr>
+<tr>
+<td>Overall project</td>
+<td>85%+</td>
+<td>83%</td>
+</tr>
+</tbody>
+</table>
+<h2 id="testing-best-practices">Testing Best Practices<a class="headerlink" href="#testing-best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="1-test-organization">1. Test Organization<a class="headerlink" href="#1-test-organization" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Unit tests</strong>: Test individual functions and classes</li>
+<li><strong>Integration tests</strong>: Test complete workflows</li>
+<li><strong>Performance tests</strong>: Validate scalability</li>
+<li><strong>Regression tests</strong>: Prevent bug reintroduction</li>
+</ul>
+<h3 id="2-mock-usage">2. Mock Usage<a class="headerlink" href="#2-mock-usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Example: Mocking external dependencies</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mock_aider_client</span><span class="p">(</span><span class="n">mocker</span><span class="p">):</span>
+    <span class="n">mock_client</span> <span class="o">=</span> <span class="n">mocker</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+    <span class="n">mock_client</span><span class="o">.</span><span class="n">fix_error</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;fixed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">mock_client</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_error_fixing_with_mock</span><span class="p">(</span><span class="n">mock_aider_client</span><span class="p">):</span>
+    <span class="c1"># Test error fixing logic without actual AI calls</span>
+    <span class="k">pass</span>
+</code></pre></div>
+<h3 id="3-test-data-management">3. Test Data Management<a class="headerlink" href="#3-test-data-management" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use fixtures for reusable test data</li>
+<li>Create realistic test projects</li>
+<li>Include edge cases and error conditions</li>
+<li>Version control test data changes</li>
+</ul>
+<h3 id="4-debugging-tests">4. Debugging Tests<a class="headerlink" href="#4-debugging-tests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run specific test with debug output</span>
+pytest<span class="w"> </span>tests/unit/test_error_analyzer.py::test_specific_function<span class="w"> </span>-v<span class="w"> </span>-s
+
+<span class="c1"># Debug with pdb</span>
+pytest<span class="w"> </span>--pdb<span class="w"> </span>tests/unit/test_error_analyzer.py
+
+<span class="c1"># Run with logging</span>
+pytest<span class="w"> </span>tests/<span class="w"> </span>--log-cli-level<span class="o">=</span>DEBUG
+</code></pre></div>
+<h2 id="validation-testing">Validation Testing<a class="headerlink" href="#validation-testing" title="Permanent link">&para;</a></h2>
+<h3 id="linter-compatibility-testing">Linter Compatibility Testing<a class="headerlink" href="#linter-compatibility-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Automated testing across different linter versions</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;linter_version&quot;</span><span class="p">,</span> <span class="p">[</span>
+    <span class="s2">&quot;flake8==6.0.0&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;flake8==7.0.0&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;eslint@8.45.0&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eslint@9.0.0&quot;</span>
+<span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_linter_compatibility</span><span class="p">(</span><span class="n">linter_version</span><span class="p">):</span>
+    <span class="c1"># Test compatibility with different linter versions</span>
+    <span class="k">pass</span>
+</code></pre></div>
+<h3 id="cross-platform-testing">Cross-Platform Testing<a class="headerlink" href="#cross-platform-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">skipif</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">!=</span> <span class="s2">&quot;win32&quot;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Windows-specific test&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_windows_path_handling</span><span class="p">():</span>
+    <span class="c1"># Test Windows-specific functionality</span>
+    <span class="k">pass</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">skipif</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;win32&quot;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Unix-specific test&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_unix_path_handling</span><span class="p">():</span>
+    <span class="c1"># Test Unix-specific functionality</span>
+    <span class="k">pass</span>
+</code></pre></div>
+<h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://docs.pytest.org/">pytest Documentation</a></li>
+<li><a href="https://coverage.readthedocs.io/">Coverage.py Documentation</a></li>
+<li><a href="../INSTALLATION_GUIDE/">Installation Guide</a></li>
+<li><a href="../CONTRIBUTOR_VERSION_GUIDE/">Contributor Guide</a></li>
+<li><a href="../NODEJS_LINTERS_GUIDE/">Node.js Linters Guide</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>
