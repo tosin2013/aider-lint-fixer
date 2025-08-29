@@ -38,7 +38,7 @@ jobs:
           # Move built docs to _site directory
           mv site_build _site
           
-          # Add and commit the built documentation
-          git add _site/
+          # Add and commit the built documentation (force add since _site is in gitignore)
+          git add -f _site/
           git commit -m "📚 Auto-deploy documentation [skip ci]" || exit 0
           git push
