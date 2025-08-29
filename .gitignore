@@ -14,6 +14,13 @@ secrets/
 .secrets/
 
 # =============================================================================
+# Documentation Build Output (managed by GitHub Actions)
+# =============================================================================
+# _site/ directory is managed by deploy-docs.yml workflow
+# It's ignored during development but committed during deployment
+_site/
+
+# =============================================================================
 # Python
 # =============================================================================
 # Byte-compiled / optimized / DLL files

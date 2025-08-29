@@ -1,0 +1,51 @@
+name: Deploy MkDocs to Main Branch
+
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**', 'mkdocs.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+          
+      - name: Install dependencies
+        run: |
+          pip install -r docs/requirements.txt
+          
+      - name: Build Documentation
+        run: mkdocs build --site-dir site_build
+        
+      - name: Deploy to main branch
+        run: |
+          # Configure git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Remove existing site if it exists
+          rm -rf public/
+          
+          # Move built docs to public directory (GitHub Pages compatible)
+          mv site_build public
+          
+          # Add gitignore entry for source docs during deployment
+          echo "docs/" >> .gitignore || true
+          echo "mkdocs.yml" >> .gitignore || true
+          
+          # Add and commit the built documentation
+          git add public/ .gitignore
+          git commit -m "🚀 Deploy documentation to main branch [skip ci]" || exit 0
+          git push

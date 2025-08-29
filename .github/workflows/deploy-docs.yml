@@ -1,0 +1,44 @@
+name: Deploy MkDocs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+          
+      - name: Install dependencies
+        run: |
+          pip install -r docs/requirements.txt
+          
+      - name: Build Documentation
+        run: mkdocs build --site-dir site_build
+        
+      - name: Deploy to main branch docs folder
+        run: |
+          # Configure git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Remove existing built docs if they exist
+          rm -rf _site/
+          
+          # Move built docs to _site directory
+          mv site_build _site
+          
+          # Add and commit the built documentation
+          git add _site/
+          git commit -m "📚 Auto-deploy documentation [skip ci]" || exit 0
+          git push
