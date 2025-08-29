@@ -1,0 +1,48 @@
+{
+  "name": "DocuMCP Dev",
+  "image": "mcr.microsoft.com/devcontainers/python:dev-3.12",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {}
+  },
+
+  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc",
+
+  "customizations": {
+    "vscode": {
+      "mcp": {
+        "inputs": [
+          {
+            "type": "promptString",
+            "id": "documcp_path",
+            "description": "Path to your project (DOCUMCP_TARGET_REPO)",
+            "password": false
+          }
+        ],
+        "servers": {
+          "docling-uvx": {
+            "type": "stdio",
+            "command": "uvx",
+            "args": ["--from", "docling-mcp", "docling-mcp-server", "--transport", "stdio"],
+            "env": {
+              "DOCUMCP_TARGET_REPO": "${input:documcp_path}"
+            }
+          },
+           "documcp-npx": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["documcp"],
+      "env": {
+        "DOCUMCP_TARGET_REPO": "${input:documcp_path}"
+      }
+    },
+          "playwright": {
+            "type": "stdio",
+            "command": "npx",
+            "args": ["-y", "@microsoft/mcp-server-playwright"]
+          }
+        }
+      }
+    }
+  }
+}
