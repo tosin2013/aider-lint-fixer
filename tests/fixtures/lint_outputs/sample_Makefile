@@ -1,0 +1,30 @@
+.PHONY: lint test clean install
+
+lint:
+	flake8 src/
+	pylint src/
+	mypy src/
+
+lint-quick:
+	flake8 src/
+
+test:
+	pytest tests/
+
+test-coverage:
+	coverage run -m pytest
+	coverage report
+
+install:
+	pip install -e .
+
+clean:
+	rm -rf build/
+	rm -rf dist/
+	rm -rf *.egg-info
+
+build:
+	python setup.py build
+
+dist:
+	python setup.py sdist bdist_wheel

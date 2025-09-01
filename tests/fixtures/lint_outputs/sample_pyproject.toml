@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "sample-python-project"
+version = "0.1.0"
+description = "Sample Python project with lint scripts"
+
+[tool.poetry.scripts]
+lint = "flake8"
+pylint = "pylint src/"
+black-check = "black --check ."
+isort-check = "isort --check-only ."
+mypy-check = "mypy ."
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.0"
+pylint = "^2.0.0"
+black = "^22.0.0"
+isort = "^5.0.0"
+mypy = "^0.910"
