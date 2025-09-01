@@ -354,7 +354,7 @@ class ControlFlowAnalyzer:
         for node in ast.walk(tree):
             if isinstance(node, ast.If):
                 structure = ControlStructure(
-                    structure_type="i",
+                    structure_type="if",
                     start_line=node.lineno,
                     end_line=getattr(node, "end_lineno", node.lineno),
                     condition=(
@@ -398,7 +398,7 @@ class ControlFlowAnalyzer:
                 condition = condition_match.group(1) if condition_match else ""
 
                 structure = ControlStructure(
-                    structure_type="i",
+                    structure_type="if",
                     start_line=i,
                     end_line=i,  # Simplified - would need proper parsing
                     condition=condition,
@@ -437,7 +437,7 @@ class ControlFlowAnalyzer:
         # Additional complexity for specific structures
         if structure.structure_type in ["for", "while"]:
             base_complexity += 1.0
-        elif structure.structure_type == "i":
+        elif structure.structure_type == "if":
             base_complexity += 0.5
         elif structure.structure_type == "try":
             base_complexity += 1.5
