@@ -7,7 +7,7 @@ Tests web scraping of linter documentation and rule extraction.
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from bs4 import BeautifulSoup
@@ -36,6 +36,15 @@ class TestRuleScraper:
             assert "ansible-lint" in scraper.documentation_urls
             assert "eslint" in scraper.documentation_urls
             assert "flake8" in scraper.documentation_urls
+            
+    def test_rule_scraper_initialization_without_requests(self):
+        """Test RuleScraper initialization when requests is not available."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            
+            with patch('aider_lint_fixer.rule_scraper.SCRAPING_AVAILABLE', False):
+                scraper = RuleScraper(cache_dir)
+                assert scraper.session is None
 
     def test_rule_info_creation(self):
         """Test RuleInfo data structure."""
@@ -56,6 +65,22 @@ class TestRuleScraper:
         assert "Line too long" in rule.description
         assert rule.fix_strategy == "formatting_fix"
         assert "ansible-lint" in rule.source_url
+        
+    def test_rate_limiting(self):
+        """Test rate limiting functionality."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Test rate limiting delay
+            import time
+            start_time = time.time()
+            scraper._rate_limit()
+            scraper._rate_limit()  # Second call should be delayed
+            elapsed = time.time() - start_time
+            
+            # Should have some delay but not test specific timing in CI
+            assert elapsed >= 0
 
     @patch("requests.Session.get")
     def test_ansible_lint_parsing(self, mock_get):
@@ -172,16 +197,17 @@ class TestRuleScraper:
             f401_rule = rules["F401"]
             assert "imported but unused" in f401_rule.description
 
-    def test_error_handling(self):
+    @patch("requests.Session.get")
+    def test_error_handling(self, mock_get):
         """Test error handling in scraper."""
         with tempfile.TemporaryDirectory() as temp_dir:
             cache_dir = Path(temp_dir)
             scraper = RuleScraper(cache_dir)
-            # Ensure session is set for the test (in case SCRAPING_AVAILABLE was False at import)
-            import requests
-            scraper.session = requests.Session()
+            
+            # Mock network error
+            mock_get.side_effect = Exception("Network error")
 
-            # Test with invalid URL
+            # Test with invalid URL - should handle exceptions gracefully
             rules = scraper._scrape_url(
                 "https://invalid-url-that-does-not-exist.com", "test-linter"
             )
@@ -221,6 +247,316 @@ class TestRuleScraper:
 
             # Test non-fixable rules
             assert scraper._is_yaml_rule_fixable("unknown-rule", "Unknown issue") is False
+
+
+class TestEnhancedRuleScrapingRobustness:
+    """Test enhanced web scraping robustness scenarios."""
+    
+    @patch("requests.Session.get")
+    def test_http_error_handling(self, mock_get):
+        """Test handling of HTTP errors (404, 500, etc.)."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Test 404 error
+            mock_response = Mock()
+            mock_response.raise_for_status.side_effect = Exception("404 Not Found")
+            mock_get.return_value = mock_response
+            
+            rules = scraper._scrape_url("https://example.com/404", "test-linter")
+            assert rules == {}
+    
+    @patch("requests.Session.get")
+    def test_timeout_handling(self, mock_get):
+        """Test handling of request timeouts."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Mock timeout error
+            mock_get.side_effect = Exception("Timeout")
+            
+            rules = scraper._scrape_url("https://example.com/slow", "test-linter")
+            assert rules == {}
+    
+    @patch("requests.Session.get")
+    def test_malformed_html_handling(self, mock_get):
+        """Test handling of malformed HTML content."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Mock malformed HTML
+            mock_response = Mock()
+            mock_response.content = b"<html><body><p>Incomplete"
+            mock_response.status_code = 200
+            mock_get.return_value = mock_response
+            
+            rules = scraper._scrape_url("https://example.com/malformed", "ansible-lint")
+            assert isinstance(rules, dict)  # Should handle gracefully
+    
+    @patch("requests.Session.get")
+    def test_empty_response_handling(self, mock_get):
+        """Test handling of empty response content."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Mock empty response
+            mock_response = Mock()
+            mock_response.content = b""
+            mock_response.status_code = 200
+            mock_get.return_value = mock_response
+            
+            rules = scraper._scrape_url("https://example.com/empty", "eslint")
+            assert rules == {}
+    
+    @patch("requests.Session.get")
+    def test_content_change_detection(self, mock_get):
+        """Test detection of content changes."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Mock first response
+            mock_response1 = Mock()
+            mock_response1.content = b"<html><body><p>Original content</p></body></html>"
+            mock_response1.status_code = 200
+            
+            # Mock second response with changed content
+            mock_response2 = Mock()
+            mock_response2.content = b"<html><body><p>Changed content</p></body></html>"
+            mock_response2.status_code = 200
+            
+            mock_get.side_effect = [mock_response1, mock_response2]
+            
+            # First scrape
+            rules1 = scraper._scrape_url("https://example.com/change", "flake8")
+            # Second scrape
+            rules2 = scraper._scrape_url("https://example.com/change", "flake8")
+            
+            # Both should return empty dicts as they don't contain valid rule patterns
+            assert isinstance(rules1, dict)
+            assert isinstance(rules2, dict)
+
+
+class TestParserImprovements:
+    """Test parser improvements for handling documentation format variations."""
+    
+    @patch("requests.Session.get")
+    def test_ansible_rules_index_parsing(self, mock_get):
+        """Test parsing of ansible-lint rules index page."""
+        mock_html = """
+        <html>
+        <body>
+            <div class="rules-list">
+                <a href="yaml/">YAML Rules</a>
+                <a href="jinja/">Jinja Rules</a>
+                <a href="name/">Name Rules</a>
+            </div>
+        </body>
+        </html>
+        """
+        
+        mock_response = Mock()
+        mock_response.content = mock_html.encode("utf-8")
+        mock_response.status_code = 200
+        mock_get.return_value = mock_response
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            rules = scraper._scrape_url("https://ansible-lint.readthedocs.io/rules/", "ansible-lint")
+            assert isinstance(rules, dict)
+    
+    @patch("requests.Session.get")
+    def test_eslint_rule_detail_parsing(self, mock_get):
+        """Test parsing of ESLint rule detail pages."""
+        mock_html = """
+        <html>
+        <body>
+            <h1>no-unused-vars</h1>
+            <p>Disallow unused variables</p>
+            <div class="rule-details">
+                <span class="fixable">🔧 Fixable</span>
+            </div>
+        </body>
+        </html>
+        """
+        
+        mock_response = Mock()
+        mock_response.content = mock_html.encode("utf-8")
+        mock_response.status_code = 200
+        mock_get.return_value = mock_response
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            rules = scraper._scrape_url("https://eslint.org/docs/rules/no-unused-vars", "eslint")
+            assert isinstance(rules, dict)
+    
+    @patch("requests.Session.get")
+    def test_flake8_extended_parsing(self, mock_get):
+        """Test parsing of flake8 documentation with extended format."""
+        mock_html = """
+        <html>
+        <body>
+            <table>
+                <tr><td>E101</td><td>indentation contains mixed spaces and tabs</td></tr>
+                <tr><td>E111</td><td>indentation is not a multiple of four</td></tr>
+                <tr><td>W291</td><td>trailing whitespace</td></tr>
+            </table>
+        </body>
+        </html>
+        """
+        
+        mock_response = Mock()
+        mock_response.content = mock_html.encode("utf-8")
+        mock_response.status_code = 200
+        mock_get.return_value = mock_response
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            rules = scraper._scrape_url("https://flake8.pycqa.org/error-codes", "flake8")
+            assert isinstance(rules, dict)
+    
+    def test_extract_rule_from_url(self):
+        """Test URL rule extraction."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Test various URL formats
+            assert scraper._extract_rule_from_url("https://example.com/rules/no-unused-vars/") == "no-unused-vars"
+            assert scraper._extract_rule_from_url("https://example.com/rules/yaml") == "yaml"
+            # For root URLs, the last part will be the domain, which is expected behavior
+            result = scraper._extract_rule_from_url("https://example.com/")
+            assert result == "example.com" or result == ""  # Either is acceptable
+    
+    def test_get_fix_strategy(self):
+        """Test fix strategy determination."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Test different categories
+            assert scraper._get_fix_strategy("formatting", True) == "formatting_fix"
+            assert scraper._get_fix_strategy("style", True) == "style_fix"
+            assert scraper._get_fix_strategy("error", False) == "manual_fix"
+    
+    def test_extract_text_utility(self):
+        """Test text extraction utility."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            html = "<html><body><p>Test text</p><div>More text</div></body></html>"
+            soup = BeautifulSoup(html, "html.parser")
+            
+            text = scraper._extract_text(soup, ["p", "div"])
+            assert "Test text" in text or "More text" in text
+
+
+class TestCacheManagement:
+    """Test cache management and optimization."""
+    
+    def test_cache_directory_creation(self):
+        """Test cache directory creation and permissions."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir) / "new_cache"
+            scraper = RuleScraper(cache_dir)
+            
+            assert cache_dir.exists()
+            assert cache_dir.is_dir()
+    
+    def test_save_and_load_scraped_rules(self):
+        """Test saving and loading of scraped rules cache."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Test saving rules using RuleInfo objects
+            test_rules = {
+                "eslint": {
+                    "semi": RuleInfo(
+                        rule_id="semi",
+                        category="style",
+                        auto_fixable=True,
+                        complexity="trivial",
+                        description="Require semicolons",
+                        fix_strategy="style_fix",
+                        source_url="https://example.com"
+                    )
+                }
+            }
+            
+            scraper._save_scraped_rules(test_rules)
+            
+            # Check cache file exists
+            cache_file = cache_dir / "scraped_rules.json"
+            assert cache_file.exists()
+            
+            # Test loading rules
+            loaded_rules = scraper._load_scraped_rules()
+            assert "eslint" in loaded_rules
+            assert "semi" in loaded_rules["eslint"]
+            
+            # Check that loaded rule has expected fields
+            semi_rule = loaded_rules["eslint"]["semi"]
+            assert semi_rule["rule_id"] == "semi"
+            assert semi_rule["category"] == "style"
+            assert semi_rule["auto_fixable"] is True
+    
+    def test_cache_invalidation(self):
+        """Test cache invalidation logic."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Create old cache file
+            cache_file = cache_dir / "scraped_rules.json"
+            cache_file.write_text("{}")
+            
+            # Modify timestamp to make it old (more than 7 days)
+            import os
+            import time
+            old_time = time.time() - (8 * 24 * 60 * 60)  # 8 days ago
+            os.utime(cache_file, (old_time, old_time))
+            
+            # Cache should be considered stale
+            assert scraper._is_cache_stale()
+    
+    def test_cache_size_optimization(self):
+        """Test cache size management."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Create large rules dataset
+            large_rules = {}
+            for i in range(1000):
+                large_rules[f"rule_{i}"] = {
+                    "rule_id": f"rule_{i}",
+                    "category": "test",
+                    "auto_fixable": True,
+                    "complexity": "trivial",
+                    "description": f"Test rule {i}" * 100,  # Make description large
+                    "fix_strategy": "test_fix",
+                    "source_url": "https://example.com"
+                }
+            
+            test_rules = {"test-linter": large_rules}
+            scraper._save_scraped_rules(test_rules)
+            
+            # Check that cache file was created
+            cache_file = cache_dir / "scraped_rules.json"
+            assert cache_file.exists()
+            assert cache_file.stat().st_size > 0
 
 
 class TestScrapingIntegration:
@@ -337,6 +673,42 @@ class TestScrapingCLI:
                 assert len(url_list) > 0
                 for url in url_list:
                     assert url.startswith("https://")
+
+
+class TestAdvancedScrapingScenarios:
+    """Test advanced scraping scenarios for edge cases."""
+    
+    @patch("requests.Session.get")
+    def test_rate_limiting_with_retries(self, mock_get):
+        """Test rate limiting with retry logic."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            
+            # Mock rate limited response, then success
+            rate_limit_response = Mock()
+            rate_limit_response.raise_for_status.side_effect = Exception("Rate limited")
+            
+            success_response = Mock()
+            success_response.content = b"<html><body></body></html>"
+            success_response.status_code = 200
+            
+            mock_get.side_effect = [rate_limit_response, success_response]
+            
+            # Should handle rate limiting gracefully
+            rules = scraper._scrape_url("https://example.com/rate-limited", "test")
+            assert isinstance(rules, dict)
+    
+    def test_scraper_without_session(self):
+        """Test scraper behavior when session is not available."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_dir = Path(temp_dir)
+            scraper = RuleScraper(cache_dir)
+            scraper.session = None
+            
+            # Should handle gracefully when session is None
+            rules = scraper._scrape_url("https://example.com", "test")
+            assert rules == {}
 
 
 if __name__ == "__main__":

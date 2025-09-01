@@ -185,7 +185,12 @@ class PreLintAssessor:
         }
         for linter, result in lint_results.items():
             for error in result.errors:
-                rule_id = error.rule_id or "unknown"
+                # Handle both dict and object-style errors
+                if isinstance(error, dict):
+                    rule_id = error.get("rule", "unknown")
+                else:
+                    rule_id = getattr(error, "rule_id", None) or getattr(error, "rule", "unknown")
+
                 error_breakdown[rule_id] = error_breakdown.get(rule_id, 0) + 1
                 # Check for dangerous patterns
                 if rule_id in dangerous_patterns:
@@ -374,29 +379,41 @@ def generate_architect_guidance_for_dangerous_errors(lint_results: Dict) -> Dict
     # Analyze each error
     for linter_name, result in lint_results.items():
         for error in result.errors:
-            if error.rule_id in dangerous_rules:
+            # Handle both dict and object-style errors
+            if isinstance(error, dict):
+                rule_id = error.get("rule", "unknown")
+                file_path = error.get("file", "unknown")
+                message = error.get("message", "")
+                line = error.get("line", 0)
+            else:
+                rule_id = getattr(error, "rule_id", None) or getattr(error, "rule", "unknown")
+                file_path = getattr(error, "file_path", None) or getattr(error, "file", "unknown")
+                message = getattr(error, "message", "")
+                line = getattr(error, "line", 0)
+
+            if rule_id in dangerous_rules:
                 guidance["has_dangerous_errors"] = True
-                if error.file_path not in dangerous_files:
-                    dangerous_files[error.file_path] = {
+                if file_path not in dangerous_files:
+                    dangerous_files[file_path] = {
                         "errors": [],
                         "undefined_vars": set(),
                         "error_count": 0,
                     }
-                dangerous_files[error.file_path]["errors"].append(
+                dangerous_files[file_path]["errors"].append(
                     {
-                        "line": error.line,
-                        "rule": error.rule_id,
-                        "message": error.message,
-                        "variable": _extract_variable_name(error.message, error.rule_id),
+                        "line": line,
+                        "rule": rule_id,
+                        "message": message,
+                        "variable": _extract_variable_name(message, rule_id),
                     }
                 )
-                dangerous_files[error.file_path]["error_count"] += 1
+                dangerous_files[file_path]["error_count"] += 1
                 # Track undefined variables specifically
-                if error.rule_id == "no-unde":
-                    var_name = _extract_variable_name(error.message, error.rule_id)
+                if rule_id == "no-unde":
+                    var_name = _extract_variable_name(message, rule_id)
                     if var_name:
-                        dangerous_files[error.file_path]["undefined_vars"].add(var_name)
-            elif error.rule_id in safe_rules:
+                        dangerous_files[file_path]["undefined_vars"].add(var_name)
+            elif rule_id in safe_rules:
                 safe_errors_count += 1
     guidance["dangerous_files"] = dangerous_files
     # Generate recommendations if dangerous errors found

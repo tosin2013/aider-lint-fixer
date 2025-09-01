@@ -203,6 +203,40 @@ class StrategicPreFlightChecker:
 
         return result
 
+    def _should_proceed_with_fixes(self, chaos_level: ChaosLevel, indicators: List) -> bool:
+        """Determine if automated fixes should proceed based on chaos level and indicators."""
+        # Always allow clean projects
+        if chaos_level == ChaosLevel.CLEAN:
+            return True
+
+        # Allow messy projects with caution
+        if chaos_level == ChaosLevel.MESSY:
+            return True
+
+        # Chaotic projects need careful consideration
+        if chaos_level == ChaosLevel.CHAOTIC:
+            # Check for critical blockers
+            critical_indicators = [i for i in indicators if i.severity == "critical"]
+            return len(critical_indicators) == 0
+
+        # Disaster level projects should not proceed without manual intervention
+        if chaos_level == ChaosLevel.DISASTER:
+            return False
+
+        return True
+
+    def perform_preflight_check(
+        self, force_refresh: bool = False, allow_bypass: bool = False
+    ) -> PreFlightResult:
+        """Perform preflight check (alias for run_preflight_check)."""
+        result = self.run_preflight_check(force_recheck=force_refresh)
+
+        # Handle bypass option
+        if allow_bypass and not result.should_proceed:
+            result.bypass_available = True
+
+        return result
+
     def run_enhanced_preflight_check(
         self,
         force_recheck: bool = False,
@@ -454,8 +488,9 @@ class StrategicPreFlightChecker:
         except Exception:
             pass  # Cache failure shouldn't block execution
 
-    def _generate_aider_recommendations(self, chaos_level: ChaosLevel, indicators: List):
+    def _generate_aider_recommendations(self, chaos_level: ChaosLevel, indicators: List) -> dict:
         """Generate aider-powered strategic recommendations."""
+        recommendations = {}
         try:
             from .aider_strategic_recommendations import (
                 AiderStrategicRecommendationEngine,
@@ -470,20 +505,41 @@ class StrategicPreFlightChecker:
             print("\n💡 Manual Cleanup Recommendations:")
             print("Since aider recommendations are not available, here are manual steps:")
 
+            recommendations = {
+                "manual_steps": [],
+                "aider_commands": [],
+                "estimated_time": "30-60 minutes",
+            }
+
             for indicator in indicators:
                 if indicator.severity in ["critical", "major"]:
                     print(f"\n• {indicator.description}")
                     print(f"  Files: {', '.join(indicator.evidence[:3])}")
+
+                    step = {
+                        "description": indicator.description,
+                        "type": indicator.type,
+                        "files": indicator.evidence[:3],
+                    }
+
                     if indicator.type == "file_organization":
                         print("  → Create src/ directory and move Python files")
                         print("  → Organize related files into modules")
+                        step["actions"] = ["create_src_directory", "organize_modules"]
                     elif indicator.type == "code_structure":
                         print("  → Move experimental files to experiments/ directory")
                         print("  → Delete obsolete demo/debug files")
+                        step["actions"] = ["move_experimental_files", "cleanup_debug_files"]
                     elif indicator.type == "documentation":
                         print("  → Update README.md to match actual structure")
                         print("  → Fix references to non-existent files")
+                        step["actions"] = ["update_readme", "fix_references"]
+
+                    recommendations["manual_steps"].append(step)
 
         except Exception as e:
             print(f"\n⚠️  Could not generate aider recommendations: {e}")
             print("Please manually address the strategic issues listed above.")
+            recommendations = {"error": str(e)}
+
+        return recommendations
