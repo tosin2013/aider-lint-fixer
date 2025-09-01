@@ -35,10 +35,33 @@ except ImportError:
             return pytest.mark.skip("hypothesis not available")(func)
         return decorator
     
+    def assume(condition):
+        pass
+    
     class st:
-        text = lambda: None
-        integers = lambda min_value=0, max_value=100: None
-        lists = lambda elements, min_size=0, max_size=10: None
+        @staticmethod
+        def text(min_size=0, max_size=100):
+            return None
+        
+        @staticmethod
+        def integers(min_value=0, max_value=100):
+            return None
+            
+        @staticmethod
+        def lists(elements, min_size=0, max_size=10):
+            return None
+            
+        @staticmethod
+        def dictionaries(keys=None, values=None, min_size=0, max_size=10):
+            return None
+            
+        @staticmethod
+        def sampled_from(elements):
+            return None
+            
+        @staticmethod
+        def one_of(*args):
+            return None
 
 
 class TestParameterizedLintErrors:
