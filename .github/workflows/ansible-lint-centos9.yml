@@ -1,0 +1,26 @@
+name: 🐧 Ansible-Lint in CentOS Stream 9
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  ansible-lint-centos9:
+    name: 🐧 Ansible-Lint (CentOS Stream 9)
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
+
+      - name: 🐳 Run ansible-lint tests in CentOS Stream 9 container
+        run: |
+          docker pull quay.io/centos/centos:stream9
+          docker run --rm -v "${{ github.workspace }}:/workspace" -w /workspace \
+            quay.io/centos/centos:stream9 bash -c '
+              dnf install -y python3 python3-pip git && \
+              pip3 install ansible ansible-lint && \
+              pip3 install -e . && \
+              pip3 install pytest && \
+              pytest tests/test_ansible_lint_integration.py --maxfail=3 --disable-warnings -v
+            '

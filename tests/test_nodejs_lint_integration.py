@@ -76,30 +76,26 @@ module.exports = badFunction;
 
     def test_eslint_detects_errors(self):
         """Test that ESLint can detect errors in JavaScript code."""
-        try:
-            result = self.lint_runner.run_linter("eslint", [self.js_file])
+        result = self.lint_runner.run_linter("eslint", [self.js_file])
 
-            # ESLint should find multiple errors
-            self.assertGreater(len(result.errors), 0, "ESLint should detect errors")
+        # ESLint should find multiple errors
+        self.assertGreater(len(result.errors), 0, "ESLint should detect errors")
 
-            # Check for specific error types we expect
-            error_rules = [error.rule_id for error in result.errors]
+        # Check for specific error types we expect
+        error_rules = [error.rule_id for error in result.errors]
 
-            # Should detect unused variables
-            self.assertIn("no-unused-vars", error_rules, "Should detect unused variables")
+        # Should detect unused variables
+        self.assertIn("no-unused-vars", error_rules, "Should detect unused variables")
 
-            # Should detect == vs === issues
-            self.assertIn("eqeqeq", error_rules, "Should detect == vs === issues")
+        # Should detect == vs === issues
+        self.assertIn("eqeqeq", error_rules, "Should detect == vs === issues")
 
-            # Should detect eval usage
-            self.assertIn("no-eval", error_rules, "Should detect eval usage")
+        # Should detect eval usage
+        self.assertIn("no-eval", error_rules, "Should detect eval usage")
 
-            print(
-                f"✅ ESLint detected {len(result.errors)} errors, {len(result.warnings)} warnings"
-            )
-
-        except Exception as e:
-            self.skipTest(f"ESLint not available or failed: {e}")
+        print(
+            f"✅ ESLint detected {len(result.errors)} errors, {len(result.warnings)} warnings"
+        )
 
     def test_jshint_detects_errors(self):
         """Test that JSHint can detect errors in JavaScript code."""
