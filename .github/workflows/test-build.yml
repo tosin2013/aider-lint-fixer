@@ -173,7 +173,9 @@ jobs:
         # Check if tests directory exists
         if [ -d "tests" ]; then
           echo "Running pytest with coverage..."
-          python -m pytest tests/ -v --tb=short --cov=aider_lint_fixer --cov-report=term-missing || {
+          # Clean up any leftover coverage data to prevent combination errors
+          find . -name ".coverage*" -type f -delete 2>/dev/null || true
+          python -m pytest tests/ -v --tb=short --cov=aider_lint_fixer || {
             echo "⚠️ Some tests failed, but this is expected during development"
             echo "Test failures don't block the build - they help identify areas for improvement"
             exit 0

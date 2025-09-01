@@ -1,0 +1,16 @@
+{
+  "name": "sample-project",
+  "version": "1.0.0",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:js": "eslint src/",
+    "lint:ts": "tslint typescript/",
+    "lint:fix": "eslint . --fix",
+    "test": "jest",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "tslint": "^6.0.0"
+  }
+}
