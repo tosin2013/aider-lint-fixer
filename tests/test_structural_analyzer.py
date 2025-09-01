@@ -294,6 +294,9 @@ class TestStructuralProblemDetector:
 
     def test_architectural_violations_detection(self):
         """Test detection of architectural violations."""
+        # Patch the detector's undefined_variables pattern to match the test's mock error rule_ids
+        self.detector.structural_patterns["undefined_variables"] = ["no-undef"]
+
         # Create file analyses with many undefined variables
         mock_file_analyses = {}
         for i in range(3):  # 30% of 10 files

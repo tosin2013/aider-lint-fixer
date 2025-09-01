@@ -57,7 +57,7 @@ class TestRuleScraper:
         assert rule.fix_strategy == "formatting_fix"
         assert "ansible-lint" in rule.source_url
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     def test_ansible_lint_parsing(self, mock_get):
         """Test parsing of ansible-lint documentation."""
         # Mock HTML content for ansible-lint YAML rules
@@ -96,7 +96,7 @@ class TestRuleScraper:
             assert line_length_rule.auto_fixable is True
             assert line_length_rule.category == "formatting"
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     def test_eslint_parsing(self, mock_get):
         """Test parsing of ESLint documentation."""
         # Mock HTML content for ESLint rules
@@ -131,7 +131,7 @@ class TestRuleScraper:
             assert semi_rule.rule_id == "semi"
             assert "eslint.org" in semi_rule.source_url
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     def test_flake8_parsing(self, mock_get):
         """Test parsing of flake8 documentation."""
         # Mock HTML content for flake8 error codes
@@ -177,6 +177,9 @@ class TestRuleScraper:
         with tempfile.TemporaryDirectory() as temp_dir:
             cache_dir = Path(temp_dir)
             scraper = RuleScraper(cache_dir)
+            # Ensure session is set for the test (in case SCRAPING_AVAILABLE was False at import)
+            import requests
+            scraper.session = requests.Session()
 
             # Test with invalid URL
             rules = scraper._scrape_url(
