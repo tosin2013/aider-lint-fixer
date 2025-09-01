@@ -208,31 +208,33 @@ class StrategicPreFlightChecker:
         # Always allow clean projects
         if chaos_level == ChaosLevel.CLEAN:
             return True
-        
+
         # Allow messy projects with caution
         if chaos_level == ChaosLevel.MESSY:
             return True
-        
+
         # Chaotic projects need careful consideration
         if chaos_level == ChaosLevel.CHAOTIC:
             # Check for critical blockers
             critical_indicators = [i for i in indicators if i.severity == "critical"]
             return len(critical_indicators) == 0
-        
+
         # Disaster level projects should not proceed without manual intervention
         if chaos_level == ChaosLevel.DISASTER:
             return False
-        
+
         return True
 
-    def perform_preflight_check(self, force_refresh: bool = False, allow_bypass: bool = False) -> PreFlightResult:
+    def perform_preflight_check(
+        self, force_refresh: bool = False, allow_bypass: bool = False
+    ) -> PreFlightResult:
         """Perform preflight check (alias for run_preflight_check)."""
         result = self.run_preflight_check(force_recheck=force_refresh)
-        
+
         # Handle bypass option
         if allow_bypass and not result.should_proceed:
             result.bypass_available = True
-        
+
         return result
 
     def run_enhanced_preflight_check(
@@ -506,20 +508,20 @@ class StrategicPreFlightChecker:
             recommendations = {
                 "manual_steps": [],
                 "aider_commands": [],
-                "estimated_time": "30-60 minutes"
+                "estimated_time": "30-60 minutes",
             }
 
             for indicator in indicators:
                 if indicator.severity in ["critical", "major"]:
                     print(f"\n• {indicator.description}")
                     print(f"  Files: {', '.join(indicator.evidence[:3])}")
-                    
+
                     step = {
                         "description": indicator.description,
                         "type": indicator.type,
-                        "files": indicator.evidence[:3]
+                        "files": indicator.evidence[:3],
                     }
-                    
+
                     if indicator.type == "file_organization":
                         print("  → Create src/ directory and move Python files")
                         print("  → Organize related files into modules")
@@ -532,12 +534,12 @@ class StrategicPreFlightChecker:
                         print("  → Update README.md to match actual structure")
                         print("  → Fix references to non-existent files")
                         step["actions"] = ["update_readme", "fix_references"]
-                    
+
                     recommendations["manual_steps"].append(step)
 
         except Exception as e:
             print(f"\n⚠️  Could not generate aider recommendations: {e}")
             print("Please manually address the strategic issues listed above.")
             recommendations = {"error": str(e)}
-        
+
         return recommendations

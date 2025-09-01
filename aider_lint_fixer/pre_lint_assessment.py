@@ -190,7 +190,7 @@ class PreLintAssessor:
                     rule_id = error.get("rule", "unknown")
                 else:
                     rule_id = getattr(error, "rule_id", None) or getattr(error, "rule", "unknown")
-                    
+
                 error_breakdown[rule_id] = error_breakdown.get(rule_id, 0) + 1
                 # Check for dangerous patterns
                 if rule_id in dangerous_patterns:
@@ -390,7 +390,7 @@ def generate_architect_guidance_for_dangerous_errors(lint_results: Dict) -> Dict
                 file_path = getattr(error, "file_path", None) or getattr(error, "file", "unknown")
                 message = getattr(error, "message", "")
                 line = getattr(error, "line", 0)
-                
+
             if rule_id in dangerous_rules:
                 guidance["has_dangerous_errors"] = True
                 if file_path not in dangerous_files:

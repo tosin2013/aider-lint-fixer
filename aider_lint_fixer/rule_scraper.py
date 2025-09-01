@@ -109,7 +109,7 @@ class RuleScraper:
             if not self.session:
                 logger.warning("No session available for scraping")
                 return {}
-                
+
             self._rate_limit()
             response = self.session.get(url, timeout=30)
             response.raise_for_status()
@@ -419,7 +419,7 @@ class RuleScraper:
         cache_file = self.cache_dir / "scraped_rules.json"
         if not cache_file.exists():
             return True
-        
+
         file_age = time.time() - cache_file.stat().st_mtime
         max_age_seconds = max_age_days * 24 * 60 * 60
         return file_age > max_age_seconds
