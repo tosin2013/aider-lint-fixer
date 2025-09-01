@@ -105,17 +105,25 @@ class RuleScraper:
 
     def _scrape_url(self, url: str, linter: str) -> Dict[str, RuleInfo]:
         """Scrape a specific URL for rules."""
-        self._rate_limit()
-        response = self.session.get(url, timeout=30)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, "html.parser")
-        if linter == "ansible-lint":
-            return self._parse_ansible_lint_rules(soup, url)
-        elif linter == "eslint":
-            return self._parse_eslint_rules(soup, url)
-        elif linter == "flake8":
-            return self._parse_flake8_rules(soup, url)
-        return {}
+        try:
+            if not self.session:
+                logger.warning("No session available for scraping")
+                return {}
+                
+            self._rate_limit()
+            response = self.session.get(url, timeout=30)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, "html.parser")
+            if linter == "ansible-lint":
+                return self._parse_ansible_lint_rules(soup, url)
+            elif linter == "eslint":
+                return self._parse_eslint_rules(soup, url)
+            elif linter == "flake8":
+                return self._parse_flake8_rules(soup, url)
+            return {}
+        except Exception as e:
+            logger.warning(f"Failed to scrape {url} for {linter}: {e}")
+            return {}
 
     def _parse_ansible_lint_rules(self, soup, url: str) -> Dict[str, RuleInfo]:
         """Parse ansible-lint documentation with enhanced rule detection."""
@@ -349,11 +357,11 @@ class RuleScraper:
     def _get_fix_strategy(self, category: str, auto_fixable: bool) -> str:
         """Get fix strategy based on category and fixability."""
         if not auto_fixable:
-            return "requires_human_input"
+            return "manual_fix"
         strategy_map = {
-            "formatting": "whitespace_cleanup",
+            "formatting": "formatting_fix",
             "unused": "removal",
-            "style": "style_adjustment",
+            "style": "style_fix",
             "syntax": "syntax_correction",
         }
         return strategy_map.get(category, "automatic_fix")
@@ -374,19 +382,47 @@ class RuleScraper:
         for linter, linter_rules in rules.items():
             serializable_rules[linter] = {}
             for rule_id, rule_info in linter_rules.items():
-                serializable_rules[linter][rule_id] = {
-                    "rule_id": rule_info.rule_id,
-                    "category": rule_info.category,
-                    "auto_fixable": rule_info.auto_fixable,
-                    "complexity": rule_info.complexity,
-                    "description": rule_info.description,
-                    "fix_strategy": rule_info.fix_strategy,
-                    "source_url": rule_info.source_url,
-                    "scraped_at": time.time(),
-                }
+                if isinstance(rule_info, RuleInfo):
+                    serializable_rules[linter][rule_id] = {
+                        "rule_id": rule_info.rule_id,
+                        "category": rule_info.category,
+                        "auto_fixable": rule_info.auto_fixable,
+                        "complexity": rule_info.complexity,
+                        "description": rule_info.description,
+                        "fix_strategy": rule_info.fix_strategy,
+                        "source_url": rule_info.source_url,
+                        "scraped_at": time.time(),
+                    }
+                else:
+                    # Handle case where rule_info is already a dict
+                    rule_dict = rule_info.copy()
+                    rule_dict["scraped_at"] = time.time()
+                    serializable_rules[linter][rule_id] = rule_dict
         with open(cache_file, "w", encoding="utf-8") as f:
             json.dump(serializable_rules, f, indent=2)
         logger.info(f"Saved scraped rules to {cache_file}")
+
+    def _load_scraped_rules(self) -> Dict[str, Dict]:
+        """Load scraped rules from cache."""
+        cache_file = self.cache_dir / "scraped_rules.json"
+        if not cache_file.exists():
+            return {}
+        try:
+            with open(cache_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError) as e:
+            logger.warning(f"Failed to load cache from {cache_file}: {e}")
+            return {}
+
+    def _is_cache_stale(self, max_age_days: int = 7) -> bool:
+        """Check if cache is stale and needs refresh."""
+        cache_file = self.cache_dir / "scraped_rules.json"
+        if not cache_file.exists():
+            return True
+        
+        file_age = time.time() - cache_file.stat().st_mtime
+        max_age_seconds = max_age_days * 24 * 60 * 60
+        return file_age > max_age_seconds
 
 
 def scrape_and_update_knowledge_base(cache_dir: Path = None) -> Dict[str, Dict]:
