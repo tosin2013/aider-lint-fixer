@@ -36,18 +36,6 @@ class RuleInfo:
 
 
 class RuleScraper:
-    def _rate_limit(self):
-        """No-op rate limiter for tests/offline."""
-        pass
-
-    def _categorize_ansible_rule(self, rule_id: str, description: str) -> str:
-        """Stub for ansible rule categorization."""
-        if rule_id.startswith("yaml"):
-            return "formatting"
-        elif rule_id.startswith("name"):
-            return "style"
-        else:
-            return "syntax"
     """Scrapes linter documentation to build rule knowledge base."""
 
     def __init__(self, cache_dir: Path):
@@ -79,6 +67,19 @@ class RuleScraper:
                 "https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html",
             ],
         }
+
+    def _rate_limit(self):
+        """No-op rate limiter for tests/offline."""
+        pass
+
+    def _categorize_ansible_rule(self, rule_id: str, description: str) -> str:
+        """Stub for ansible rule categorization."""
+        if rule_id.startswith("yaml"):
+            return "formatting"
+        elif rule_id.startswith("name"):
+            return "style"
+        else:
+            return "syntax"
 
     def scrape_all_rules(self) -> Dict[str, Dict[str, RuleInfo]]:
         """Scrape all linter documentation and return rule database."""
@@ -303,6 +304,8 @@ class RuleScraper:
                     source_url=url,
                 )
         return rules
+
+    def _is_ansible_rule_fixable(self, rule_id: str, description: str) -> bool:
         """Determine if ansible-lint rule is auto-fixable."""
         fixable_patterns = [
             "line-length",
@@ -363,30 +366,7 @@ class RuleScraper:
                 texts.append(t.get_text(strip=True))
         return " ".join(texts)
 
-    def _parse_flake8_rules(self, soup: "BeautifulSoup", url: str) -> Dict[str, RuleInfo]:
-        """Parse Flake8 documentation. Handles simple <dt>/<dd> HTML as in tests, and skips if not found."""
-        rules = {}
-        dts = soup.find_all("dt")
-        dds = soup.find_all("dd")
-        if not dts or not dds:
-            # Simulate no internet or no rules found
-            return rules
-        for dt, dd in zip(dts, dds):
-            rule_id = dt.text.strip()
-            description = dd.text.strip()
-            if rule_id and description:
-                category = self._categorize_flake8_rule(rule_id, description)
-                auto_fixable = self._is_flake8_rule_fixable(rule_id, description)
-                rules[rule_id] = RuleInfo(
-                    rule_id=rule_id,
-                    category=category,
-                    auto_fixable=auto_fixable,
-                    complexity="trivial" if auto_fixable else "simple",
-                    description=description,
-                    fix_strategy=self._get_fix_strategy(category, auto_fixable),
-                    source_url=url,
-                )
-        return rules
+    def _save_scraped_rules(self, rules: Dict[str, Dict[str, RuleInfo]]) -> None:
         """Save scraped rules to cache."""
         cache_file = self.cache_dir / "scraped_rules.json"
         # Convert RuleInfo objects to dictionaries

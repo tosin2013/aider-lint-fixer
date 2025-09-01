@@ -181,7 +181,7 @@ ignore_missing_imports = true
 # Pytest configuration
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -q --strict-markers --strict-config"
+addopts = "-ra -q --strict-markers --strict-config --tb=short"
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
@@ -190,17 +190,25 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "performance: marks tests as performance benchmarks",
+    "network: marks tests requiring network access",
+    "parameterized: marks tests using parametrization",
+    "property: marks property-based tests using hypothesis",
 ]
 
 # Coverage configuration
 [tool.coverage.run]
 source = ["aider_lint_fixer"]
+branch = true
 omit = [
     "*/tests/*",
     "*/test_*",
     "*/__main__.py",
     "*/setup.py",
+    "*/conftest.py",
 ]
+# Enable parallel coverage when running with pytest-xdist
+parallel = true
 
 [tool.coverage.report]
 exclude_lines = [
@@ -214,4 +222,18 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
+    "except ImportError:",
+    "except ModuleNotFoundError:",
 ]
+show_missing = true
+skip_covered = false
+precision = 1
+# Fail build if coverage below threshold
+fail_under = 85
+
+[tool.coverage.html]
+directory = "htmlcov"
+title = "Aider-Lint-Fixer Coverage Report"
+
+[tool.coverage.xml]
+output = "coverage.xml"
