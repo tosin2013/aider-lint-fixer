@@ -133,11 +133,16 @@ class TestNpmScriptJSONFormatIssues:
 
             linter = ESLintLinter(project_root=str(project_root))
 
-            # Build command will add --format=json which may break
-            command = linter.build_command(["src/index.ts"])
+            # Build command should adapt based on compatibility
+            # Mock that JSON format is not compatible with this setup
+            with patch.object(linter, "_can_use_json_format", return_value=False):
+                command = linter.build_command(["src/index.ts"])
 
-            # Verify the problematic command is generated
-            assert "--format=json" in command
+            # Verify adaptive behavior - should NOT use --format=json for incompatible configs
+            assert "--format=json" not in command
+            # Should fall back to compact format
+            assert "--format=compact" in command
+            # Should still use npm run lint
             assert "npm" in command and "run" in command and "lint" in command
 
 
