@@ -997,34 +997,62 @@ class SmartErrorClassifier:
         if not SKLEARN_AVAILABLE:
             return
 
-        # Store training data
+        # Store training data with file locking for thread safety
         training_file = self.cache_dir / f"{language}_training.json"
-
-        training_data = []
-        if training_file.exists():
-            try:
-                with open(training_file, "r", encoding="utf-8") as f:
-                    training_data = json.load(f)
-            except Exception as e:
-                logger.warning(f"Failed to load training data for {language}: {e}")
-                training_data = []
-
-        training_data.append(
-            {
-                "message": error_message,
-                "language": language,
-                "linter": linter,
-                "fixable": fix_successful,
-                "timestamp": time.time(),
-            }
-        )
-
-        # Keep only recent data (last 1000 examples per language)
-        training_data = training_data[-1000:]
-
+        
+        # Use atomic file operations with temporary file and rename
+        import tempfile
+        import os
+        
         try:
-            with open(training_file, "w", encoding="utf-8") as f:
-                json.dump(training_data, f, indent=2)
+            # Create a temporary file in the same directory for atomic operations
+            temp_fd, temp_path = tempfile.mkstemp(
+                suffix='.tmp',
+                prefix=f'{language}_training_',
+                dir=self.cache_dir
+            )
+            temp_file = Path(temp_path)
+            
+            try:
+                # Read existing data
+                training_data = []
+                if training_file.exists():
+                    try:
+                        with open(training_file, "r", encoding="utf-8") as f:
+                            training_data = json.load(f)
+                    except Exception as e:
+                        logger.warning(f"Failed to load training data for {language}: {e}")
+                        training_data = []
+
+                # Add new training example
+                training_data.append(
+                    {
+                        "message": error_message,
+                        "language": language,
+                        "linter": linter,
+                        "fixable": fix_successful,
+                        "timestamp": time.time(),
+                    }
+                )
+
+                # Keep only recent data (last 1000 examples per language)
+                training_data = training_data[-1000:]
+
+                # Write to temporary file
+                with os.fdopen(temp_fd, "w", encoding="utf-8") as f:
+                    json.dump(training_data, f, indent=2)
+                
+                # Atomic rename - this is atomic on most filesystems
+                temp_file.replace(training_file)
+                
+            except Exception:
+                # Clean up temp file if something went wrong
+                try:
+                    temp_file.unlink()
+                except Exception:
+                    pass
+                raise
+                
         except Exception as e:
             logger.error(f"Failed to save training data for {language}: {e}")
             return
