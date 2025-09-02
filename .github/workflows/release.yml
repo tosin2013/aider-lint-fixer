@@ -62,29 +62,42 @@ jobs:
         pip install pyyaml>=6.0.0
         pip install -e .
         
-    - name: ✅ Validate version consistency
+    - name: 🤖 AI-Powered Version Validation & Auto-Fix
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: |
-        # Check that version in __init__.py matches tag
-        PACKAGE_VERSION=$(python -c "from aider_lint_fixer import __version__; print(__version__)")
-        echo "Package version: $PACKAGE_VERSION"
-        echo "Release version: ${{ steps.version.outputs.version }}"
-        
-        if [[ "$PACKAGE_VERSION" != "${{ steps.version.outputs.version }}" ]]; then
-          echo "❌ Version mismatch: package=$PACKAGE_VERSION, tag=${{ steps.version.outputs.version }}"
+        echo "🤖 Running AI-powered version validation..."
+        python scripts/smart_version_validator.py \
+          --validate-release-version \
+          --tag "${{ steps.version.outputs.tag }}" \
+          --auto-fix-if-needed || {
+          echo "❌ Version validation failed - check output above"
           exit 1
-        fi
+        }
         
-        echo "✅ Version consistency validated"
-        
-    - name: 📋 Check CHANGELOG
+    - name: 🤖 AI-Generated CHANGELOG Validation
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: |
-        # Check that CHANGELOG.md has entry for this version
-        if grep -q "${{ steps.version.outputs.version }}" CHANGELOG.md; then
-          echo "✅ CHANGELOG.md contains entry for ${{ steps.version.outputs.version }}"
-        else
-          echo "❌ CHANGELOG.md missing entry for ${{ steps.version.outputs.version }}"
+        echo "🤖 Validating CHANGELOG with AI auto-generation..."
+        python scripts/smart_changelog_generator.py \
+          --version "${{ steps.version.outputs.version }}" \
+          --validate-completeness \
+          --auto-generate-if-missing || {
+          echo "❌ CHANGELOG validation failed - check output above"
           exit 1
-        fi
+        }
+        
+    - name: 🤖 AI Release Readiness Assessment
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        echo "🤖 Assessing release readiness with AI..."
+        python scripts/release_readiness_analyzer.py \
+          --full-assessment || {
+          echo "⚠️ Release readiness concerns detected - review recommendations above"
+          echo "Proceeding with release but consider addressing issues"
+        }
 
   # Run comprehensive tests
   test-release:
@@ -209,6 +222,9 @@ jobs:
         # Smart version resolution and AI generation
         if [ -n "$GEMINI_API_KEY" ]; then
           echo "🤖 Generating AI-powered release notes with smart resolution..."
+          
+          # Get release readiness info for context
+          python scripts/release_readiness_analyzer.py --full-assessment > readiness_context.txt 2>&1 || true
           
           # First, try smart auto-resolution (AI will detect correct versions)
           python scripts/generate_release_notes.py \
