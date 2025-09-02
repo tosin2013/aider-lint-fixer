@@ -188,9 +188,37 @@ class ESLintLinter(BaseLinter):
             return False
             
         try:
-            # Test with a simple command to see if JSON format works
-            # Use a non-existent file to avoid actual linting, just test format compatibility
-            test_command = ["npx", "eslint", "--format=json", "--print-config", "."]
+            # Build command conditionally based on npx availability
+            if self._has_npx():
+                test_command = ["npx", "eslint"]
+            else:
+                test_command = ["eslint"]
+            
+            # Find a real file to test with --print-config
+            test_target = None
+            
+            # First, try package.json if it exists
+            package_json = self.project_root / "package.json"
+            if package_json.exists():
+                test_target = str(package_json)
+            else:
+                # Try to find any source file
+                for ext in self.supported_extensions:
+                    try:
+                        # Find first file with this extension
+                        first_file = next(self.project_root.rglob(f"*{ext}"), None)
+                        if first_file:
+                            test_target = str(first_file)
+                            break
+                    except StopIteration:
+                        continue
+            
+            # Fall back to "." if no file found
+            if test_target is None:
+                test_target = "."
+            
+            # Add format and print-config flags
+            test_command.extend(["--format=json", "--print-config", test_target])
             
             result = self.run_command(test_command, timeout=10)
             
