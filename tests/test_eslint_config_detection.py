@@ -231,7 +231,7 @@ class TestNpmScriptIntegration:
 
             linter = ESLintLinter(project_root=str(project_root))
 
-            with patch.object(linter, "_build_npm_command") as mock_npm:
+            with patch.object(linter, "_build_adaptive_npm_command") as mock_npm:
                 mock_npm.return_value = ["npm", "run", "lint", "--", "--format=json"]
 
                 command = linter.build_command()

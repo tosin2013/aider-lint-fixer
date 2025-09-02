@@ -92,7 +92,7 @@ jobs:
     - name: 🟨 Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         
     - name: 📦 Test pip installation
       run: |
@@ -146,7 +146,7 @@ jobs:
     - name: 🟨 Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         
     - name: 📦 Install aider-lint-fixer
       run: |
