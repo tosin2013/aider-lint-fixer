@@ -201,13 +201,21 @@ class TestNpmScriptIntegration:
             assert should_use_npm is True
 
     def test_builds_npm_command(self):
-        """Test building npm run lint command."""
+        """Test building npm run lint command.
+        
+        NOTE: This test validates the CURRENT (buggy) behavior where --format=json
+        is hardcoded. This breaks with modern flat configs and some npm scripts.
+        See test_eslint_flat_config_bug.py for tests that expose this issue.
+        
+        TODO: This behavior should be made configurable/adaptive in the future.
+        """
         with tempfile.TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
 
             linter = ESLintLinter(project_root=str(project_root))
             command = linter._build_npm_command(["src/index.js"])
 
+            # This validates the current hardcoded behavior (which is problematic)
             expected = ["npm", "run", "lint", "--", "--format=json", "src/index.js"]
             assert command == expected
 
