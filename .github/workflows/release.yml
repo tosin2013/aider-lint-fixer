@@ -59,6 +59,7 @@ jobs:
     - name: 📦 Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install pyyaml>=6.0.0
         pip install -e .
         
     - name: ✅ Validate version consistency
@@ -118,6 +119,7 @@ jobs:
     - name: 📦 Install and test
       run: |
         python -m pip install --upgrade pip
+        pip install pyyaml>=6.0.0
         pip install -e .
         
         # Test basic functionality
@@ -224,7 +226,7 @@ jobs:
               
               # Last resort: basic release notes
               echo "⚠️ AI generation failed, creating basic release notes..."
-              cat > release_notes.md << EOF
+              cat > release_notes.md << 'EOF'
 # Release v$VERSION
 
 ## Changes
@@ -233,9 +235,9 @@ $(git log v$PREV_VERSION..HEAD --oneline --no-merges | head -20)
 
 ## Installation
 
-\`\`\`bash
+```bash
 pip install aider-lint-fixer==$VERSION
-\`\`\`
+```
 EOF
             }
           }
