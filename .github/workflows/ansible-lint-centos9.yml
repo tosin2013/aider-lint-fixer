@@ -20,7 +20,15 @@ jobs:
             quay.io/centos/centos:stream9 bash -c '
               dnf install -y python3 python3-pip git && \
               pip3 install ansible ansible-lint && \
-              pip3 install -e . && \
+              
+              # Install aider-lint-fixer with graceful dependency resolution
+              echo "🔍 Installing aider-lint-fixer with flexible aider-chat version..."
+              pip3 install -e . || {
+                echo "⚠️ Standard install failed, trying with latest available aider-chat..."
+                pip3 install aider-chat==0.82.3 && pip3 install -e . --no-deps --force-reinstall
+              } && \
+              
               pip3 install pytest && \
+              echo "✅ Installation successful, running tests..." && \
               pytest tests/test_ansible_lint_integration.py --maxfail=3 --disable-warnings -v
             '
