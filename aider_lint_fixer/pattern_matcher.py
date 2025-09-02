@@ -8,7 +8,9 @@ for adaptive pattern recognition.
 
 import json
 import logging
+import os
 import pickle
+import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -1001,9 +1003,6 @@ class SmartErrorClassifier:
         training_file = self.cache_dir / f"{language}_training.json"
         
         # Use atomic file operations with temporary file and rename
-        import tempfile
-        import os
-        
         try:
             # Create a temporary file in the same directory for atomic operations
             temp_fd, temp_path = tempfile.mkstemp(
