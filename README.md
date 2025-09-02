@@ -8,9 +8,11 @@
 
 Aider Lint Fixer is an intelligent tool that automatically detects lint errors in your codebase and fixes them using AI-powered code generation through [aider.chat](https://aider.chat).
 
-## 🎉 **v2.0.0 Release: AI-Powered Intelligence & Enterprise Infrastructure**
+## 🎉 **Latest Release: AI-Powered Intelligence & Enterprise Infrastructure**
 
-### 🚀 **New in v2.0.0 - Major Release**
+> 📋 **See [releases/](./releases/) for detailed release notes and [CHANGELOG.md](./CHANGELOG.md) for complete history**
+
+### 🚀 **What's New in the Latest Release**
 - 🧠 **AI-Powered Intelligence**: Native lint detection, pre-lint risk assessment, and ML-driven force mode
 - 🔗 **Deep Code Analysis**: AST-based dependency analysis, control flow tracking, and structural analysis
 - 🐳 **Enterprise Containers**: Production-ready Docker infrastructure with multi-architecture support
@@ -19,7 +21,7 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 
 ## ✨ **Features**
 
-### 🧠 **New AI-Powered Intelligence (v2.0.0)**
+### 🧠 **AI-Powered Intelligence**
 - 🔍 **Native Lint Detection**: Automatically discovers and integrates with your project's existing lint configurations
 - ⚠️ **Pre-Lint Risk Assessment**: Analyzes codebase health before attempting automated fixes
 - 🤖 **Intelligent Force Mode**: ML-powered force mode with confidence-based auto-forcing and intelligent batching
@@ -27,7 +29,7 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 - 🔗 **AST-Based Analysis**: Deep structural and dependency analysis for better fix quality
 - 📊 **Advanced Analytics**: Control flow tracking, convergence analysis, and comprehensive metrics
 
-### 📊 **Enhanced Interactive Mode & Progress Tracking (v1.8.0)**
+### 📊 **Enhanced Interactive Mode & Progress Tracking**
 - 🎯 **Enhanced Interactive Mode**: Per-error review with override capabilities for "unfixable" errors
 - 📊 **Progress Tracking**: Visual progress bars and real-time metrics for 100+ error projects
 - ⚡ **Session Recovery**: Resume interrupted sessions with `--resume-session`
@@ -36,7 +38,7 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 - 📈 **Performance Metrics**: Files/min, errors/min, success rates, and ETA calculations
 - 💾 **Progress Persistence**: Automatic saving and recovery for long-running operations
 
-### 🧠 **Intelligent Learning System (v1.7.0+)**
+### 🧠 **Intelligent Learning System**
 - 🧠 **Enhanced Learning**: 46.1% fixability rate (up from 0.0% in previous versions)
 - ⚡ **High-Performance**: Aho-Corasick pattern matching for sub-millisecond classification
 - 🎯 **TypeScript Projects**: Smart ESLint integration with project-specific configurations
