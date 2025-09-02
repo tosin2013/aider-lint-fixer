@@ -1001,17 +1001,15 @@ class SmartErrorClassifier:
 
         # Store training data with file locking for thread safety
         training_file = self.cache_dir / f"{language}_training.json"
-        
+
         # Use atomic file operations with temporary file and rename
         try:
             # Create a temporary file in the same directory for atomic operations
             temp_fd, temp_path = tempfile.mkstemp(
-                suffix='.tmp',
-                prefix=f'{language}_training_',
-                dir=self.cache_dir
+                suffix=".tmp", prefix=f"{language}_training_", dir=self.cache_dir
             )
             temp_file = Path(temp_path)
-            
+
             try:
                 # Read existing data
                 training_data = []
@@ -1040,10 +1038,10 @@ class SmartErrorClassifier:
                 # Write to temporary file
                 with os.fdopen(temp_fd, "w", encoding="utf-8") as f:
                     json.dump(training_data, f, indent=2)
-                
+
                 # Atomic rename - this is atomic on most filesystems
                 temp_file.replace(training_file)
-                
+
             except Exception:
                 # Clean up temp file if something went wrong
                 try:
@@ -1051,7 +1049,7 @@ class SmartErrorClassifier:
                 except Exception:
                     pass
                 raise
-                
+
         except Exception as e:
             logger.error(f"Failed to save training data for {language}: {e}")
             return
