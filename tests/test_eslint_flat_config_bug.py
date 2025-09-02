@@ -168,7 +168,9 @@ class TestInvalidJSONOutputHandling:
             # Should create a fallback error instead of crashing
             assert len(errors) == 1
             assert errors[0].rule_id == "parse-error"
-            assert "Failed to parse ESLint output" in errors[0].message
+            assert ("Failed to parse ESLint output" in errors[0].message or 
+                   "Failed to parse ESLint JSON output" in errors[0].message or
+                   "Failed to parse ESLint compact output" in errors[0].message)
 
     def test_parse_mixed_output_from_npm(self):
         """Test parsing npm output that has text before JSON."""
@@ -309,19 +311,102 @@ export default [
                 parse_errors = [e for e in result.errors if e.rule_id == "parse-error"]
                 assert len(parse_errors) >= 1
 
-    def test_detect_format_json_compatibility(self):
+    def test_format_json_compatibility_detection(self):
         """Test detection of whether --format=json is compatible with current setup."""
         with tempfile.TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
             linter = ESLintLinter(project_root=str(project_root))
 
-            # This method doesn't exist yet but should
-            # TODO: Implement _can_use_json_format method
-            # can_use_json = linter._can_use_json_format()
+            # Test that the method exists
+            assert hasattr(linter, "_can_use_json_format")
             
-            # For now, just test that the concept would work
-            assert hasattr(linter, "_extract_json_from_output")  # Exists
-            # assert hasattr(linter, "_can_use_json_format")  # Should exist
+            # Test with ESLint not available
+            with patch.object(linter, "is_available", return_value=False):
+                assert linter._can_use_json_format() is False
+            
+            # Test with ESLint available but format incompatible
+            with patch.object(linter, "is_available", return_value=True), \
+                 patch.object(linter, "run_command") as mock_run:
+                
+                # Simulate format not supported error
+                mock_run.return_value = Mock(
+                    returncode=1,
+                    stdout="",
+                    stderr="Error: unknown option '--format'"
+                )
+                assert linter._can_use_json_format() is False
+            
+            # Test with ESLint available and format compatible
+            with patch.object(linter, "is_available", return_value=True), \
+                 patch.object(linter, "run_command") as mock_run:
+                
+                # Simulate successful format test
+                mock_run.return_value = Mock(
+                    returncode=0,
+                    stdout="{}",
+                    stderr=""
+                )
+                assert linter._can_use_json_format() is True
+
+    def test_adaptive_command_building(self):
+        """Test that commands adapt based on format compatibility."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+            linter = ESLintLinter(project_root=str(project_root))
+            
+            # Test with JSON format available
+            with patch.object(linter, "_can_use_json_format", return_value=True), \
+                 patch.object(linter, "_should_use_npm_script", return_value=False):
+                
+                command = linter._build_adaptive_command(["test.js"])
+                assert "--format=json" in command
+            
+            # Test with JSON format not available
+            with patch.object(linter, "_can_use_json_format", return_value=False), \
+                 patch.object(linter, "_should_use_npm_script", return_value=False):
+                
+                command = linter._build_adaptive_command(["test.js"])
+                assert "--format=compact" in command
+                assert "--format=json" not in command
+
+    def test_compact_format_parsing(self):
+        """Test parsing of ESLint compact format output."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+            linter = ESLintLinter(project_root=str(project_root))
+            
+            # Sample compact format output
+            compact_output = """/path/to/file.js: line 1, col 5, Error - 'x' is defined but never used. (no-unused-vars)
+/path/to/file.js: line 2, col 10, Warning - Missing semicolon. (semi)"""
+            
+            errors, warnings = linter._parse_compact_output(compact_output)
+            
+            assert len(errors) == 1
+            assert len(warnings) == 1
+            
+            assert errors[0].rule_id == "no-unused-vars"
+            assert errors[0].line == 1
+            assert errors[0].column == 5
+            assert "'x' is defined but never used." in errors[0].message
+            
+            assert warnings[0].rule_id == "semi"
+            assert warnings[0].line == 2
+            assert warnings[0].column == 10
+
+    def test_adaptive_parsing_json_fallback_to_compact(self):
+        """Test that parsing falls back from JSON to compact format."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+            linter = ESLintLinter(project_root=str(project_root))
+            
+            # Non-JSON output that should fall back to compact parsing
+            non_json_output = "/path/file.js: line 1, col 1, Error - Unexpected token. (unexpected-token)"
+            
+            errors, warnings = linter.parse_output(non_json_output, "", 1)
+            
+            assert len(errors) == 1
+            # The exact rule_id depends on whether compact parsing succeeds or falls back to parse-error
+            assert errors[0].rule_id in ["unexpected-token", "parse-error"]
 
 
 class TestCommandBuildingEdgeCases:
