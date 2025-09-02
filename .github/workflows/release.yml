@@ -225,20 +225,8 @@ jobs:
               --output release_notes.md || {
               
               # Last resort: basic release notes
-              echo "⚠️ AI generation failed, creating basic release notes..."
-              cat > release_notes.md << 'EOF'
-# Release v$VERSION
-
-## Changes
-
-$(git log v$PREV_VERSION..HEAD --oneline --no-merges | head -20)
-
-## Installation
-
-```bash
-pip install aider-lint-fixer==$VERSION
-```
-EOF
+              echo "⚠️ AI generation failed, using fallback script..."
+              ./scripts/generate_fallback_release_notes.sh "$VERSION" "$PREV_VERSION" release_notes.md
             }
           }
         else
