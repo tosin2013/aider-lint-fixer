@@ -111,10 +111,10 @@ class ESLintLinter(BaseLinter):
     def _detect_eslint_config(self) -> Optional[str]:
         """Auto-detect ESLint configuration file."""
         config_files = [
-            "eslint.config.js",     # Modern flat config (ESLint v9+)
-            "eslint.config.mjs",    # ES modules flat config
-            "eslint.config.cjs",    # CommonJS flat config
-            ".eslintrc.js",         # Legacy configs
+            "eslint.config.js",  # Modern flat config (ESLint v9+)
+            "eslint.config.mjs",  # ES modules flat config
+            "eslint.config.cjs",  # CommonJS flat config
+            ".eslintrc.js",  # Legacy configs
             ".eslintrc.cjs",
             ".eslintrc.yaml",
             ".eslintrc.yml",
@@ -186,17 +186,17 @@ class ESLintLinter(BaseLinter):
         """Test if the current ESLint setup can handle --format=json properly."""
         if not self.is_available():
             return False
-            
+
         try:
             # Build command conditionally based on npx availability
             if self._has_npx():
                 test_command = ["npx", "eslint"]
             else:
                 test_command = ["eslint"]
-            
+
             # Find a real file to test with --print-config
             test_target = None
-            
+
             # First, try package.json if it exists
             package_json = self.project_root / "package.json"
             if package_json.exists():
@@ -212,16 +212,16 @@ class ESLintLinter(BaseLinter):
                             break
                     except StopIteration:
                         continue
-            
+
             # Fall back to "." if no file found
             if test_target is None:
                 test_target = "."
-            
+
             # Add format and print-config flags
             test_command.extend(["--format=json", "--print-config", test_target])
-            
+
             result = self.run_command(test_command, timeout=10)
-            
+
             # If command succeeds or fails gracefully, JSON format is supported
             # ESLint returns exit code 0 for --print-config even with no config
             # Exit code 2 usually means configuration error (still supports JSON)
@@ -229,17 +229,22 @@ class ESLintLinter(BaseLinter):
             if result.returncode in [0, 1, 2]:
                 # Check if output looks like it could be JSON-compatible
                 # If stderr contains "unknown option" or similar, JSON not supported
-                if "unknown option" in result.stderr.lower() or "invalid option" in result.stderr.lower():
+                if (
+                    "unknown option" in result.stderr.lower()
+                    or "invalid option" in result.stderr.lower()
+                ):
                     return False
                 return True
-                
+
             return False
-            
+
         except Exception:
             # If we can't test, assume JSON format might not work
             return False
 
-    def _build_adaptive_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
+    def _build_adaptive_command(
+        self, file_paths: Optional[List[str]] = None, **kwargs
+    ) -> List[str]:
         """Build ESLint command that adapts to format compatibility."""
         # Try to use npm script first if available
         if self._should_use_npm_script():
@@ -278,10 +283,12 @@ class ESLintLinter(BaseLinter):
 
         return command
 
-    def _build_adaptive_npm_command(self, file_paths: Optional[List[str]] = None, **kwargs) -> List[str]:
+    def _build_adaptive_npm_command(
+        self, file_paths: Optional[List[str]] = None, **kwargs
+    ) -> List[str]:
         """Build npm run lint command with adaptive format handling."""
         command = ["npm", "run", "lint", "--"]
-        
+
         # Only add JSON format if it's compatible
         if self._can_use_json_format():
             command.extend(["--format=json"])
@@ -405,29 +412,29 @@ class ESLintLinter(BaseLinter):
         warnings = []
 
         try:
-            lines = stdout.strip().split('\n')
+            lines = stdout.strip().split("\n")
             for line in lines:
                 if not line.strip():
                     continue
-                
+
                 # Compact format: /path/to/file.js: line 1, col 5, Error - 'x' is defined but never used. (no-unused-vars)
                 # Pattern: filepath: line X, col Y, Level - message (rule-id)
                 import re
-                
-                compact_pattern = r'^(.+?):\s*line\s+(\d+),\s*col\s+(\d+),\s*(Error|Warning)\s*-\s*(.+?)\s*\(([^)]+)\)'
+
+                compact_pattern = r"^(.+?):\s*line\s+(\d+),\s*col\s+(\d+),\s*(Error|Warning)\s*-\s*(.+?)\s*\(([^)]+)\)"
                 match = re.match(compact_pattern, line)
-                
+
                 if match:
                     file_path, line_num, column, level, message, rule_id = match.groups()
-                    
+
                     # Convert absolute path to relative
                     project_root_str = str(self.project_root)
                     if file_path.startswith(project_root_str):
-                        file_path = file_path[len(project_root_str):].lstrip("/")
-                    
+                        file_path = file_path[len(project_root_str) :].lstrip("/")
+
                     # Map level to severity
                     severity = ErrorSeverity.ERROR if level == "Error" else ErrorSeverity.WARNING
-                    
+
                     lint_error = LintError(
                         file_path=file_path,
                         line=int(line_num),
@@ -437,12 +444,12 @@ class ESLintLinter(BaseLinter):
                         severity=severity,
                         linter=self.name,
                     )
-                    
+
                     if severity == ErrorSeverity.ERROR:
                         errors.append(lint_error)
                     else:
                         warnings.append(lint_error)
-                        
+
         except Exception as e:
             self.logger.error(f"Failed to parse ESLint compact output: {e}")
             # Create fallback error
