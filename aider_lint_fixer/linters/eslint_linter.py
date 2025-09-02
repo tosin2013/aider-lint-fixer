@@ -147,7 +147,10 @@ class ESLintLinter(BaseLinter):
     def _detect_eslint_config(self) -> Optional[str]:
         """Auto-detect ESLint configuration file."""
         config_files = [
-            ".eslintrc.js",
+            "eslint.config.js",     # Modern flat config (ESLint v9+)
+            "eslint.config.mjs",    # ES modules flat config
+            "eslint.config.cjs",    # CommonJS flat config
+            ".eslintrc.js",         # Legacy configs
             ".eslintrc.cjs",
             ".eslintrc.yaml",
             ".eslintrc.yml",

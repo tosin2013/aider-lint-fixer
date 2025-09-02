@@ -68,6 +68,32 @@ module.exports = badFunction;
 }"""
             )
 
+        # Create ESLint flat config (required for ESLint v9+)
+        self.eslint_config = os.path.join(self.test_dir, "eslint.config.js")
+        with open(self.eslint_config, "w") as f:
+            f.write(
+                """
+export default [
+    {
+        rules: {
+            "no-unused-vars": "error",
+            "eqeqeq": "error", 
+            "no-eval": "error",
+            "semi": "error",
+            "no-undef": "error"
+        },
+        languageOptions: {
+            globals: {
+                require: "readonly",
+                module: "readonly",
+                console: "readonly"
+            }
+        }
+    }
+];
+"""
+            )
+
     def tearDown(self):
         """Clean up test environment."""
         import shutil

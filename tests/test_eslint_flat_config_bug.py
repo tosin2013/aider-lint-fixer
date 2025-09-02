@@ -66,10 +66,8 @@ export default [
             linter = ESLintLinter(project_root=str(project_root))
             config_file = linter._detect_eslint_config()
 
-            # Should detect flat config - BUT CURRENTLY DOESN'T!
-            # This test will FAIL because _detect_eslint_config doesn't look for eslint.config.js
-            assert config_file is None  # Current buggy behavior
-            # TODO: Should be: assert config_file == str(eslint_config)
+            # Should detect flat config - FIXED!
+            assert config_file == str(eslint_config)
 
     def test_flat_config_priority_over_legacy(self):
         """Test that flat config takes priority over legacy config when both exist."""
@@ -86,9 +84,8 @@ export default [
             linter = ESLintLinter(project_root=str(project_root))
             config_file = linter._detect_eslint_config()
 
-            # Currently returns legacy config (bug)
-            assert config_file == str(eslintrc)
-            # TODO: Should prefer flat config when both exist
+            # Should prefer flat config when both exist - FIXED!
+            assert config_file == str(eslint_config)
 
 
 class TestNpmScriptJSONFormatIssues:
