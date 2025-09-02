@@ -283,12 +283,12 @@ export default [
                 assert "--format=json" in command
                 assert "npm" in command
 
-            # Mock both is_available and run_command to simulate the scenario
+            # Mock both is_available and subprocess.run to simulate the scenario
             with patch.object(linter, "is_available", return_value=True), \
-                 patch.object(linter, "run_command") as mock_run:
+                 patch("subprocess.run") as mock_subprocess_run:
                 
                 # Simulate the non-JSON output that breaks parsing
-                mock_run.return_value = Mock(
+                mock_subprocess_run.return_value = Mock(
                     returncode=1,
                     stdout="""
 > project@1.0.0 lint
