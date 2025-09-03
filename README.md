@@ -8,11 +8,11 @@
 
 Aider Lint Fixer is an intelligent tool that automatically detects lint errors in your codebase and fixes them using AI-powered code generation through [aider.chat](https://aider.chat).
 
-## 🎉 **Latest Release: AI-Powered Intelligence & Enterprise Infrastructure**
+## 🎉 **Current Version: 2.0.1**
 
-> 📋 **See [releases/](./releases/) for detailed release notes and [CHANGELOG.md](./CHANGELOG.md) for complete history**
+> 📋 **See [CHANGELOG.md](./CHANGELOG.md) for complete version history and [GitHub Releases](https://github.com/tosin2013/aider-lint-fixer/releases) for detailed release notes**
 
-### 🚀 **What's New in the Latest Release**
+### 🚀 **What's New in v2.0.1**
 - 🧠 **AI-Powered Intelligence**: Native lint detection, pre-lint risk assessment, and ML-driven force mode
 - 🔗 **Deep Code Analysis**: AST-based dependency analysis, control flow tracking, and structural analysis
 - 🐳 **Enterprise Containers**: Production-ready Docker infrastructure with multi-architecture support
@@ -58,15 +58,6 @@ Aider Lint Fixer is an intelligent tool that automatically detects lint errors i
 - 🎮 **Interactive Modes**: Standard and enhanced interactive error review
 - 💾 **Session Management**: Save, resume, and recover interrupted operations
 
-## 📅 **Version History**
-
-| Version | Release Date | Key Features |
-|---------|-------------|--------------|
-| **v2.0.0** | 2025-08 | AI-Powered Intelligence, Deep Code Analysis, Enterprise Infrastructure |
-| **v1.9.0** | 2025-08 | Community Issue Reporting, Docker Support, Pre-built Images |
-| **v1.8.0** | 2025-07 | Enhanced Interactive Mode, Progress Tracking, Session Recovery |
-| **v1.7.0** | 2025-06 | Learning System, Aho-Corasick Pattern Matching, TypeScript Support |
-| **v1.6.0** | 2025-05 | Multi-linter Support, Profile System, Performance Improvements |
 
 ## 📋 **Supported Linter Versions**
 

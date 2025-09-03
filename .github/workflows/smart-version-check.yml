@@ -123,6 +123,38 @@ jobs:
           echo "✅ No new commits since last release"
         fi
         
+    - name: 🔍 Check version references in documentation
+      run: |
+        echo "🔍 Checking version references in documentation..."
+        
+        CURRENT=$(python -c "from aider_lint_fixer import __version__; print(__version__)")
+        
+        # Check for outdated dist file references
+        echo "Checking for outdated dist file references..."
+        
+        # Find any references to old versions in wheel/tar.gz format
+        OUTDATED_REFS=$(grep -r "aider_lint_fixer-[0-9]\+\.[0-9]\+\.[0-9]\+-py3-none-any\.whl\|aider_lint_fixer-[0-9]\+\.[0-9]\+\.[0-9]\+\.tar\.gz" README.md docs/ 2>/dev/null || true)
+        
+        if [ -n "$OUTDATED_REFS" ]; then
+          # Check if they match current version
+          EXPECTED_WHEEL="aider_lint_fixer-${CURRENT}-py3-none-any.whl"
+          EXPECTED_TAR="aider_lint_fixer-${CURRENT}.tar.gz"
+          
+          if ! echo "$OUTDATED_REFS" | grep -q "$EXPECTED_WHEEL" && ! echo "$OUTDATED_REFS" | grep -q "$EXPECTED_TAR"; then
+            echo "⚠️ Found outdated version references in documentation:"
+            echo "$OUTDATED_REFS"
+            echo ""
+            echo "Expected references to:"
+            echo "  - $EXPECTED_WHEEL"
+            echo "  - $EXPECTED_TAR"
+            echo "::warning::Documentation contains outdated version references. These will be updated during release."
+          else
+            echo "✅ Documentation version references are up to date"
+          fi
+        else
+          echo "✅ No dist file version references found in documentation"
+        fi
+        
     - name: 📊 Version Summary
       run: |
         echo "## 📊 Smart Version Analysis Summary" >> $GITHUB_STEP_SUMMARY
@@ -133,6 +165,9 @@ jobs:
         
         echo "- **Current Version**: \`$CURRENT\`" >> $GITHUB_STEP_SUMMARY
         echo "- **Latest Tag**: \`$LATEST_TAG\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Expected dist files**:" >> $GITHUB_STEP_SUMMARY
+        echo "  - \`aider_lint_fixer-${CURRENT}-py3-none-any.whl\`" >> $GITHUB_STEP_SUMMARY
+        echo "  - \`aider_lint_fixer-${CURRENT}.tar.gz\`" >> $GITHUB_STEP_SUMMARY
         echo "- **AI Analysis**: See job output above" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         

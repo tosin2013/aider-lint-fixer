@@ -75,6 +75,48 @@ jobs:
           exit 1
         }
         
+    - name: 📝 Update version references in README and docs
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        echo "📝 Updating version references to $VERSION..."
+        
+        # Update dist file references in README.md
+        if [ -f README.md ]; then
+          # Update the current version header
+          sed -i "s/## 🎉 \*\*Current Version: [0-9]\+\.[0-9]\+\.[0-9]\+\*\*/## 🎉 **Current Version: ${VERSION}**/g" README.md
+          
+          # Update "What's New in vX.X.X" header
+          sed -i "s/### 🚀 \*\*What's New in v[0-9]\+\.[0-9]\+\.[0-9]\+\*\*/### 🚀 **What's New in v${VERSION}**/g" README.md
+          
+          # Update wheel file references
+          sed -i "s/aider_lint_fixer-[0-9]\+\.[0-9]\+\.[0-9]\+-py3-none-any\.whl/aider_lint_fixer-${VERSION}-py3-none-any.whl/g" README.md
+          # Update tar.gz file references  
+          sed -i "s/aider_lint_fixer-[0-9]\+\.[0-9]\+\.[0-9]\+\.tar\.gz/aider_lint_fixer-${VERSION}.tar.gz/g" README.md
+          # Update pip install commands with specific versions
+          sed -i "s/pip install aider-lint-fixer==[0-9]\+\.[0-9]\+\.[0-9]\+/pip install aider-lint-fixer==${VERSION}/g" README.md
+          # Update any other version mentions in specific contexts
+          sed -i "s/Latest v[0-9]\+\.[0-9]\+\.[0-9]\+:/Latest v${VERSION}:/g" README.md
+          sed -i "s/# Latest v[0-9]\+\.[0-9]\+\.[0-9]\+:/# Latest v${VERSION}:/g" README.md
+          echo "✅ Updated README.md with version $VERSION"
+        fi
+        
+        # Update other documentation files if needed
+        for file in docs/*.md; do
+          if [ -f "$file" ]; then
+            sed -i "s/aider_lint_fixer-[0-9]\+\.[0-9]\+\.[0-9]\+-py3-none-any\.whl/aider_lint_fixer-${VERSION}-py3-none-any.whl/g" "$file"
+            sed -i "s/aider_lint_fixer-[0-9]\+\.[0-9]\+\.[0-9]\+\.tar\.gz/aider_lint_fixer-${VERSION}.tar.gz/g" "$file"
+            sed -i "s/pip install aider-lint-fixer==[0-9]\+\.[0-9]\+\.[0-9]\+/pip install aider-lint-fixer==${VERSION}/g" "$file"
+            echo "✅ Updated $file"
+          fi
+        done
+        
+        # Show what was changed
+        echo ""
+        echo "📋 Version update summary:"
+        echo "   - Updated dist file references to version $VERSION"
+        echo "   - Updated pip install commands to use version $VERSION"
+        echo "   - Files will be committed if changes were made"
+        
     - name: 🤖 AI-Generated CHANGELOG Validation
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -182,6 +224,33 @@ jobs:
     - name: 🔍 Check package
       run: |
         twine check dist/*
+        
+    - name: ✅ Verify package versions
+      run: |
+        VERSION="${{ needs.validate-release.outputs.version }}"
+        echo "🔍 Verifying built packages have version $VERSION..."
+        
+        # Check wheel file
+        WHEEL_FILE="dist/aider_lint_fixer-${VERSION}-py3-none-any.whl"
+        if [ ! -f "$WHEEL_FILE" ]; then
+          echo "❌ Expected wheel file not found: $WHEEL_FILE"
+          echo "Found files in dist/:"
+          ls -la dist/
+          exit 1
+        fi
+        
+        # Check tar.gz file
+        TAR_FILE="dist/aider_lint_fixer-${VERSION}.tar.gz"
+        if [ ! -f "$TAR_FILE" ]; then
+          echo "❌ Expected tar.gz file not found: $TAR_FILE"
+          echo "Found files in dist/:"
+          ls -la dist/
+          exit 1
+        fi
+        
+        echo "✅ Package versions verified:"
+        echo "   - $WHEEL_FILE"
+        echo "   - $TAR_FILE"
         
     - name: 📤 Upload build artifacts
       uses: actions/upload-artifact@v4
