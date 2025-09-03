@@ -8,16 +8,9 @@
 
 Aider Lint Fixer is an intelligent tool that automatically detects lint errors in your codebase and fixes them using AI-powered code generation through [aider.chat](https://aider.chat).
 
-## 🎉 **Current Version: 2.0.1**
+## 🎉 **Current Version: 2.0.2**
 
 > 📋 **See [CHANGELOG.md](./CHANGELOG.md) for complete version history and [GitHub Releases](https://github.com/tosin2013/aider-lint-fixer/releases) for detailed release notes**
-
-### 🚀 **What's New in v2.0.1**
-- 🧠 **AI-Powered Intelligence**: Native lint detection, pre-lint risk assessment, and ML-driven force mode
-- 🔗 **Deep Code Analysis**: AST-based dependency analysis, control flow tracking, and structural analysis
-- 🐳 **Enterprise Containers**: Production-ready Docker infrastructure with multi-architecture support
-- 💰 **Cost Management**: Built-in LLM API cost monitoring and budget controls
-- 📈 **Massive Scale**: Handle codebases with 1000+ files and complex architectural patterns
 
 ## ✨ **Features**
 
