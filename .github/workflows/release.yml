@@ -73,8 +73,8 @@ jobs:
         echo "📝 Ensuring __init__.py has version $VERSION..."
         sed -i "s/__version__ = \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/__version__ = \"${VERSION}\"/g" aider_lint_fixer/__init__.py
         
-        # Verify the version was updated
-        CURRENT_VERSION=$(python -c "from aider_lint_fixer import __version__; print(__version__)")
+        # Verify the version was updated by reading the file directly
+        CURRENT_VERSION=$(grep "__version__" aider_lint_fixer/__init__.py | cut -d'"' -f2)
         echo "Current version in __init__.py: $CURRENT_VERSION"
         
         if [ "$CURRENT_VERSION" != "$VERSION" ]; then
@@ -235,17 +235,18 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install build twine
+        pip install pyyaml>=6.0.0  # Required for importing the module
         
     - name: 🔧 Update version in __init__.py
       run: |
         VERSION="${{ needs.validate-release.outputs.version }}"
         echo "🔧 Updating __init__.py to version $VERSION..."
         
-        # Update version in __init__.py
+        # Update version in __init__.py using sed (no imports needed)
         sed -i "s/__version__ = \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/__version__ = \"${VERSION}\"/g" aider_lint_fixer/__init__.py
         
-        # Verify the update
-        UPDATED_VERSION=$(python -c "from aider_lint_fixer import __version__; print(__version__)")
+        # Verify the update by reading the file directly instead of importing
+        UPDATED_VERSION=$(grep "__version__" aider_lint_fixer/__init__.py | cut -d'"' -f2)
         if [ "$UPDATED_VERSION" != "$VERSION" ]; then
           echo "❌ Failed to update version in __init__.py"
           echo "Expected: $VERSION"
