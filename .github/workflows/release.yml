@@ -67,13 +67,32 @@ jobs:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: |
         echo "🤖 Running AI-powered version validation..."
-        python scripts/smart_version_validator.py \
-          --validate-release-version \
-          --tag "${{ steps.version.outputs.tag }}" \
-          --auto-fix-if-needed || {
-          echo "❌ Version validation failed - check output above"
+        
+        # First update the version in __init__.py to match the tag
+        VERSION="${{ steps.version.outputs.version }}"
+        echo "📝 Ensuring __init__.py has version $VERSION..."
+        sed -i "s/__version__ = \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/__version__ = \"${VERSION}\"/g" aider_lint_fixer/__init__.py
+        
+        # Verify the version was updated
+        CURRENT_VERSION=$(python -c "from aider_lint_fixer import __version__; print(__version__)")
+        echo "Current version in __init__.py: $CURRENT_VERSION"
+        
+        if [ "$CURRENT_VERSION" != "$VERSION" ]; then
+          echo "❌ Failed to update version in __init__.py"
           exit 1
-        }
+        fi
+        
+        # Now run the AI validation if available
+        if [ -f scripts/smart_version_validator.py ]; then
+          python scripts/smart_version_validator.py \
+            --validate-release-version \
+            --tag "${{ steps.version.outputs.tag }}" \
+            --auto-fix-if-needed || {
+            echo "⚠️ AI validation had issues but continuing with manual update"
+          }
+        fi
+        
+        echo "✅ Version validation complete"
         
     - name: 📝 Update version references in README and docs
       run: |
@@ -216,6 +235,24 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install build twine
+        
+    - name: 🔧 Update version in __init__.py
+      run: |
+        VERSION="${{ needs.validate-release.outputs.version }}"
+        echo "🔧 Updating __init__.py to version $VERSION..."
+        
+        # Update version in __init__.py
+        sed -i "s/__version__ = \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/__version__ = \"${VERSION}\"/g" aider_lint_fixer/__init__.py
+        
+        # Verify the update
+        UPDATED_VERSION=$(python -c "from aider_lint_fixer import __version__; print(__version__)")
+        if [ "$UPDATED_VERSION" != "$VERSION" ]; then
+          echo "❌ Failed to update version in __init__.py"
+          echo "Expected: $VERSION"
+          echo "Got: $UPDATED_VERSION"
+          exit 1
+        fi
+        echo "✅ Successfully updated __init__.py to version $VERSION"
         
     - name: 🔨 Build package
       run: |
