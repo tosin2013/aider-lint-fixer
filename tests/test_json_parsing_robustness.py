@@ -37,11 +37,14 @@ class TestJSONParsingRobustness:
         """Set up test fixtures."""
         # Mock ProjectInfo for LintRunner
         from unittest.mock import Mock
+        import tempfile
+        
         mock_project_info = Mock()
         mock_project_info.languages = ['javascript', 'typescript']
         
+        self.temp_dir = tempfile.mkdtemp()
         self.lint_runner = LintRunner(project_info=mock_project_info)
-        self.eslint_linter = ESLintLinter()
+        self.eslint_linter = ESLintLinter(project_root=self.temp_dir)
 
     def test_eslint_npm_script_output_parsing(self):
         """Test parsing ESLint output with npm script prefix (MCP framework issue)."""
@@ -348,7 +351,9 @@ class TestFlake8ParsingRobustness:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.flake8_linter = Flake8Linter()
+        import tempfile
+        self.temp_dir = tempfile.mkdtemp()
+        self.flake8_linter = Flake8Linter(project_root=self.temp_dir)
 
     def test_flake8_standard_output_parsing(self):
         """Test parsing standard Flake8 output format."""

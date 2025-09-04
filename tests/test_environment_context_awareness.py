@@ -21,7 +21,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 
 from aider_lint_fixer.lint_runner import LintRunner
-from aider_lint_fixer.pre_lint_assessment import PreLintAssessment
+from aider_lint_fixer.pre_lint_assessment import PreLintAssessor
 from aider_lint_fixer.project_detector import ProjectDetector
 
 
@@ -111,7 +111,10 @@ class TestJSONParsingRobustness:
 [{"filePath":"/test/file.ts","messages":[{"ruleId":"no-undef","severity":2,"message":"'process' is not defined","line":1,"column":1}]}]
         """
         
-        lint_runner = LintRunner()
+        from unittest.mock import Mock
+        mock_project_info = Mock()
+        mock_project_info.languages = ['javascript', 'typescript']
+        lint_runner = LintRunner(project_info=mock_project_info)
         
         with patch.object(lint_runner, '_run_command') as mock_run:
             mock_run.return_value = (mock_output, "", 1)
@@ -129,7 +132,10 @@ class TestJSONParsingRobustness:
         """Test handling of completely malformed ESLint output."""
         malformed_output = "Error: ENOENT: no such file or directory"
         
-        lint_runner = LintRunner()
+        from unittest.mock import Mock
+        mock_project_info = Mock()
+        mock_project_info.languages = ['javascript', 'typescript']
+        lint_runner = LintRunner(project_info=mock_project_info)
         
         # Should not crash, should return empty list or handle gracefully
         result = lint_runner._parse_eslint_json(malformed_output)
@@ -150,7 +156,7 @@ class TestProductionRiskAssessment:
             (project_path / "deployment").mkdir()
             (project_path / "deployment" / "production.yml").write_text("apiVersion: apps/v1")
             
-            assessment = PreLintAssessment()
+            assessment = PreLintAssessor()
             risk_level = assessment._assess_production_risk(str(project_path))
             
             # Should detect production environment
@@ -166,7 +172,7 @@ class TestProductionRiskAssessment:
             (project_path / "src").mkdir()
             (project_path / "tests").mkdir()
             
-            assessment = PreLintAssessment()
+            assessment = PreLintAssessor()
             risk_level = assessment._assess_production_risk(str(project_path))
             
             # Should be low risk
