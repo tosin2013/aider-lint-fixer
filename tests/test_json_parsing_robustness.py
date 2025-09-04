@@ -16,13 +16,14 @@ Key Issues to Test:
 Coverage Target: Fixes the lint_runner.py module (currently 37.4% coverage)
 """
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, call
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, Mock, call, patch
+
+import pytest
 
 from aider_lint_fixer.lint_runner import LintRunner
 from aider_lint_fixer.linters.eslint_linter import ESLintLinter

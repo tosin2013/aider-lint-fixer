@@ -12,16 +12,17 @@ Priority tests identified from MCP framework analysis:
 4. Production vs development environment risk assessment
 """
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
-from aider_lint_fixer.project_detector import ProjectDetector
+import pytest
+
 from aider_lint_fixer.lint_runner import LintRunner
 from aider_lint_fixer.pre_lint_assessment import PreLintAssessment
+from aider_lint_fixer.project_detector import ProjectDetector
 
 
 class TestEnvironmentContextAwareness:

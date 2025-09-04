@@ -16,12 +16,13 @@ Key Classification Areas:
 Coverage Target: Enhances error_analyzer.py (currently 69.8% coverage)
 """
 
-import pytest
 import tempfile
-from pathlib import Path
-from typing import List, Dict, Any
-from unittest.mock import Mock, patch, MagicMock
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 from aider_lint_fixer.error_analyzer import ErrorAnalyzer
 from aider_lint_fixer.pattern_matcher import SmartErrorClassifier
@@ -50,7 +51,7 @@ class TestErrorSeverityClassification:
     def test_critical_error_classification(self):
         """Test identification of critical errors that break functionality."""
         # Create mock LintError objects that match the actual class structure
-        from aider_lint_fixer.lint_runner import LintError, ErrorSeverity
+        from aider_lint_fixer.lint_runner import ErrorSeverity, LintError
         
         critical_errors = [
             LintError(

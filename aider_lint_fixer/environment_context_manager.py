@@ -14,12 +14,11 @@ Key Features:
 
 import copy
 import json
+from collections import namedtuple
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional
-
-from collections import namedtuple
 
 
 class ProjectDetector:
