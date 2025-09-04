@@ -34,28 +34,52 @@ class TestJSONParsingRobustness:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.lint_runner = LintRunner()
+        # Mock ProjectInfo for LintRunner
+        from unittest.mock import Mock
+        mock_project_info = Mock()
+        mock_project_info.languages = ['javascript', 'typescript']
+        
+        self.lint_runner = LintRunner(project_info=mock_project_info)
         self.eslint_linter = ESLintLinter()
 
     def test_eslint_npm_script_output_parsing(self):
         """Test parsing ESLint output with npm script prefix (MCP framework issue)."""
         # Exact output format that caused failure in MCP testing
-        npm_output = """
-> mcp-url-knowledge-graph@0.1.0 lint
-> eslint src/**/*.ts
-
-[{"filePath":"/test/file.ts","messages":[{"ruleId":"no-undef","severity":2,"message":"'process' is not defined","line":1,"column":1,"nodeType":"Identifier","messageId":"undef","endLine":1,"endColumn":8}],"suppressedMessages":[],"errorCount":1,"fatalErrorCount":0,"warningCount":0,"fixableErrorCount":0,"fixableWarningCount":0,"source":"process.env.NODE_ENV"}]
-        """
+        npm_prefix = (
+            "> mcp-url-knowledge-graph@0.1.0 lint\n"
+            "> eslint src/**/*.ts\n\n"
+        )
+        payload = [{
+            "filePath": "/test/file.ts",
+            "messages": [{
+                "ruleId": "no-undef",
+                "severity": 2,
+                "message": "'process' is not defined",
+                "line": 1,
+                "column": 1,
+                "nodeType": "Identifier",
+                "messageId": "undef",
+                "endLine": 1,
+                "endColumn": 8
+            }],
+            "suppressedMessages": [],
+            "errorCount": 1,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "source": "process.env.NODE_ENV"
+        }]
+        npm_output = npm_prefix + json.dumps(payload)
         
-        result = self.eslint_linter._parse_json_output(npm_output)
+        errors, warnings = self.eslint_linter._parse_json_output(npm_output)
         
         # Should successfully extract JSON despite npm prefix
-        assert result is not None
-        assert len(result) == 1
-        assert result[0]['filePath'] == '/test/file.ts'
-        assert result[0]['errorCount'] == 1
-        assert result[0]['messages'][0]['ruleId'] == 'no-undef'
-        assert result[0]['messages'][0]['message'] == "'process' is not defined"
+        assert errors is not None
+        assert len(errors) == 1
+        assert errors[0].file_path == '/test/file.ts'
+        assert errors[0].rule_id == 'no-undef'
+        assert errors[0].message == "'process' is not defined"
 
     def test_eslint_json_with_warnings_and_errors(self):
         """Test parsing complex ESLint JSON with multiple issue types."""

@@ -401,9 +401,18 @@ class TestErrorGroupingAndPrioritization:
     def test_error_grouping_by_rule(self):
         """Test grouping of similar errors by rule ID."""
         similar_errors = [
-            MockLintError("/test/file1.ts", 1, 1, "no-undef", "'process' not defined", "error", "eslint"),
-            MockLintError("/test/file2.ts", 5, 10, "no-undef", "'Buffer' not defined", "error", "eslint"),
-            MockLintError("/test/file3.ts", 10, 5, "no-undef", "'NodeJS' not defined", "error", "eslint"),
+            MockLintError(
+                "/test/file1.ts", 1, 1, "no-undef",
+                "'process' not defined", "error", "eslint"
+            ),
+            MockLintError(
+                "/test/file2.ts", 5, 10, "no-undef",
+                "'Buffer' not defined", "error", "eslint"
+            ),
+            MockLintError(
+                "/test/file3.ts", 10, 5, "no-undef",
+                "'NodeJS' not defined", "error", "eslint"
+            ),
         ]
         
         groups = self.error_analyzer.group_errors_by_pattern(similar_errors)
@@ -440,6 +449,7 @@ class TestMLEnhancedClassification:
     def setup_method(self):
         """Set up test fixtures."""
         self.pattern_matcher = SmartErrorClassifier()
+        self.error_analyzer = ErrorAnalyzer()
 
     def test_pattern_learning_from_fixes(self):
         """Test learning patterns from successful fixes."""

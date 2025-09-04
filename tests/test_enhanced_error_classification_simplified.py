@@ -174,8 +174,8 @@ class TestPriorityCalculation:
         category = self.error_analyzer._categorize_error(syntax_error)
         priority = self.error_analyzer._calculate_priority(syntax_error, category)
         
-        # Syntax errors should have high priority (higher number = higher priority)
-        assert priority >= 80
+        # Syntax errors should have high priority on the 1–10 scale
+        assert priority >= 8
 
     def test_low_priority_warnings(self):
         """Test that style warnings get lower priority."""
@@ -191,8 +191,8 @@ class TestPriorityCalculation:
         category = self.error_analyzer._categorize_error(style_warning)
         priority = self.error_analyzer._calculate_priority(style_warning, category)
         
-        # Style warnings should have lower priority
-        assert priority <= 50
+        # Style/formatting warnings should be toward the lower end of 1–10
+        assert priority <= 5
 
 
 class TestContextExtraction:
@@ -311,7 +311,7 @@ class TestFileAnalysisIntegration:
         assert hasattr(self.error_analyzer, 'get_structural_recommendations')
         
         # These should not raise exceptions when called
-        analysis = self.error_analyzer.get_structural_analysis()
+        self.error_analyzer.get_structural_analysis()
         has_problems = self.error_analyzer.has_structural_problems()
         recommendations = self.error_analyzer.get_structural_recommendations()
         

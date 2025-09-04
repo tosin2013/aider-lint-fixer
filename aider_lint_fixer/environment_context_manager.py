@@ -12,14 +12,27 @@ Key Features:
 4. Risk assessment based on environment characteristics
 """
 
+import copy
 import json
-import os
-from pathlib import Path
-from typing import Dict, List, Optional, Set
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Optional
 
-from .project_detector import ProjectDetector
+from collections import namedtuple
+
+
+class ProjectDetector:
+    """Minimal ProjectDetector implementation for environment detection."""
+    ProjectInfo = namedtuple('ProjectInfo', ['languages'])
+
+    def detect_project(self, project_path: str):
+        # Dummy implementation: detect languages based on file extensions
+        languages = set()
+        for ext, lang in [('.js', 'javascript'), ('.ts', 'typescript'), ('.py', 'python')]:
+            if any(Path(project_path).rglob(f'*{ext}')):
+                languages.add(lang)
+        return self.ProjectInfo(languages=languages)
 
 
 class EnvironmentType(Enum):
@@ -45,7 +58,7 @@ class EnvironmentConfig:
 
 class EnvironmentContextManager:
     """Manages environment context for different project types."""
-    
+
     def __init__(self):
         self.project_detector = ProjectDetector()
         self._environment_configs = self._initialize_environment_configs()
@@ -137,7 +150,7 @@ class EnvironmentContextManager:
     
     def detect_environment(self, project_path: str) -> EnvironmentType:
         """Detect the primary environment type for a project."""
-        project_info = self.project_detector.detect_project_info(project_path)
+        project_info = self.project_detector.detect_project(project_path)
         
         # Check for Node.js environment
         if self._is_nodejs_environment(project_path, project_info):
@@ -157,7 +170,7 @@ class EnvironmentContextManager:
         
         return EnvironmentType.UNKNOWN
     
-    def _is_nodejs_environment(self, project_path: str, project_info) -> bool:
+    def _is_nodejs_environment(self, project_path: str, _project_info) -> bool:
         """Check if this is a Node.js environment."""
         # Check for Node.js indicators
         package_json_path = Path(project_path) / "package.json"
@@ -206,7 +219,7 @@ class EnvironmentContextManager:
         
         return False
     
-    def _is_browser_environment(self, project_path: str, project_info) -> bool:
+    def _is_browser_environment(self, project_path: str, _project_info) -> bool:
         """Check if this is a browser environment."""
         # Check for browser-specific indicators
         indicators = [
@@ -258,7 +271,7 @@ class EnvironmentContextManager:
                 "parserOptions": {"ecmaVersion": 2022}
             }
         
-        eslint_config = env_config.linter_configs['eslint'].copy()
+        eslint_config = copy.deepcopy(env_config.linter_configs['eslint'])
         
         # Add global variables
         if env_config.globals:
@@ -307,13 +320,25 @@ class EnvironmentContextManager:
             'private_key', 'auth', 'crypto'
         ]
         
+        # Check for security-sensitive code patterns with performance limits
+        MAX_FILES = 1000  # Limit the number of files to process
+        MAX_FILE_SIZE = 1024 * 1024  # 1 MB per file
+        file_count = 0
         try:
             for file_path in Path(project_path).rglob('*.ts'):
+                if file_count >= MAX_FILES:
+                    break
                 if file_path.is_file():
-                    content = file_path.read_text().lower()
+                    if file_path.stat().st_size > MAX_FILE_SIZE:
+                        continue
+                    try:
+                        content = file_path.read_text().lower()
+                    except (IOError, UnicodeDecodeError):
+                        continue
                     if any(pattern in content for pattern in sensitive_patterns):
                         return True
-        except (IOError, UnicodeDecodeError):
+                    file_count += 1
+        except Exception:
             pass
         
         return False

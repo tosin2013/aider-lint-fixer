@@ -51,7 +51,7 @@ console.log('Server starting...');
             """)
             
             detector = ProjectDetector()
-            project_info = detector.detect_project_info(str(project_path))
+            project_info = detector.detect_project(str(project_path))
             
             # Assertions
             assert 'javascript' in project_info.languages
@@ -89,7 +89,7 @@ def main() -> None:
             """)
             
             detector = ProjectDetector()
-            project_info = detector.detect_project_info(str(project_path))
+            project_info = detector.detect_project(str(project_path))
             
             # Assertions
             assert 'python' in project_info.languages
