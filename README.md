@@ -8,7 +8,7 @@
 
 Aider Lint Fixer is an intelligent tool that automatically detects lint errors in your codebase and fixes them using AI-powered code generation through [aider.chat](https://aider.chat).
 
-## 🎉 **Current Version: 2.0.2**
+## 🎉 **Current Version: 2.0.3**
 
 > 📋 **See [CHANGELOG.md](./CHANGELOG.md) for complete version history and [GitHub Releases](https://github.com/tosin2013/aider-lint-fixer/releases) for detailed release notes**
 
