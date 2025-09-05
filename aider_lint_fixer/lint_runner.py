@@ -938,33 +938,33 @@ class LintRunner:
         bracket_count = 0
         in_string = False
         escape_next = False
-        
+
         for line in lines[json_start:]:
             json_lines.append(line)
-            
+
             # Track bracket depth to find the end of JSON
             for char in line:
                 if escape_next:
                     escape_next = False
                     continue
-                    
-                if char == '\\':
+
+                if char == "\\":
                     escape_next = True
                     continue
-                    
+
                 if char == '"' and not escape_next:
                     in_string = not in_string
                     continue
-                    
+
                 if not in_string:
-                    if char == '[':
+                    if char == "[":
                         bracket_count += 1
-                    elif char == ']':
+                    elif char == "]":
                         bracket_count -= 1
                         if bracket_count == 0:
                             # Found the end of the JSON array
                             return "\n".join(json_lines)
-        
+
         # If we didn't find a matching bracket, return what we have
         return "\n".join(json_lines)
 
