@@ -316,8 +316,40 @@ class ESLintLinter(BaseLinter):
         if json_start == -1:
             return output  # No JSON array found, return original
 
-        # Extract from JSON start to end
-        json_lines = lines[json_start:]
+        # Find the matching closing bracket for the JSON array
+        # This handles both single-line and multi-line JSON
+        json_lines = []
+        bracket_count = 0
+        in_string = False
+        escape_next = False
+
+        for line in lines[json_start:]:
+            json_lines.append(line)
+
+            # Track bracket depth to find the end of JSON
+            for char in line:
+                if escape_next:
+                    escape_next = False
+                    continue
+
+                if char == "\\":
+                    escape_next = True
+                    continue
+
+                if char == '"' and not escape_next:
+                    in_string = not in_string
+                    continue
+
+                if not in_string:
+                    if char == "[":
+                        bracket_count += 1
+                    elif char == "]":
+                        bracket_count -= 1
+                        if bracket_count == 0:
+                            # Found the end of the JSON array
+                            return "\n".join(json_lines)
+
+        # If we didn't find a matching bracket, return what we have
         return "\n".join(json_lines)
 
     def parse_output(

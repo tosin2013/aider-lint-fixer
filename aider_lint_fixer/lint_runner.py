@@ -310,7 +310,9 @@ class LintRunner:
         warnings = []
         try:
             if stdout.strip():
-                data = json.loads(stdout)
+                # Extract JSON from npm script output which may contain extra text
+                json_output = self._extract_json_from_output(stdout)
+                data = json.loads(json_output)
                 for file_result in data:
                     file_path = file_result.get("filePath", "unknown")
                     messages = file_result.get("messages", [])
@@ -916,6 +918,56 @@ class LintRunner:
             linter_name, command, config.get("output_format", "text")
         )
 
+    def _extract_json_from_output(self, output: str) -> str:
+        """Extract JSON from npm script output which may contain extra text."""
+        lines = output.strip().split("\n")
+
+        # Look for JSON array start
+        json_start = -1
+        for i, line in enumerate(lines):
+            if line.strip().startswith("["):
+                json_start = i
+                break
+
+        if json_start == -1:
+            return output  # No JSON array found, return original
+
+        # Find the matching closing bracket for the JSON array
+        # This handles both single-line and multi-line JSON
+        json_lines = []
+        bracket_count = 0
+        in_string = False
+        escape_next = False
+
+        for line in lines[json_start:]:
+            json_lines.append(line)
+
+            # Track bracket depth to find the end of JSON
+            for char in line:
+                if escape_next:
+                    escape_next = False
+                    continue
+
+                if char == "\\":
+                    escape_next = True
+                    continue
+
+                if char == '"' and not escape_next:
+                    in_string = not in_string
+                    continue
+
+                if not in_string:
+                    if char == "[":
+                        bracket_count += 1
+                    elif char == "]":
+                        bracket_count -= 1
+                        if bracket_count == 0:
+                            # Found the end of the JSON array
+                            return "\n".join(json_lines)
+
+        # If we didn't find a matching bracket, return what we have
+        return "\n".join(json_lines)
+
     def _parse_json_output(
         self, linter_name: str, output: str
     ) -> Tuple[List[LintError], List[LintError]]:
@@ -972,7 +1024,9 @@ class LintRunner:
                         warnings.append(lint_error)
             elif linter_name == "eslint":
                 # ESLint JSON format
-                data = json.loads(output)
+                # Extract JSON from npm script output which may contain extra text
+                json_output = self._extract_json_from_output(output)
+                data = json.loads(json_output)
                 for file_result in data:
                     file_path = file_result.get("filePath", "")
                     for message in file_result.get("messages", []):
