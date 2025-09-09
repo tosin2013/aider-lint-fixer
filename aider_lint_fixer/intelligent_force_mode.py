@@ -336,7 +336,7 @@ class IntelligentForceMode:
                         if edge_data:
                             # Calculate cascade risk based on dependency type and error type
                             risk_score = self._calculate_cascade_risk(error_type, edge_data)
-                            if risk_score > 0.3:  # Only include significant risks
+                            if risk_score > 0.2:  # Only include significant risks
                                 predicted_cascades.append(
                                     {
                                         "file": dep_file,
