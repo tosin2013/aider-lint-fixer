@@ -710,3 +710,148 @@ class TestIntelligentForceMode(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestIntelligentForceModeIntegration(unittest.TestCase):
+    """Integration tests for IntelligentForceMode class."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.temp_dir = tempfile.mkdtemp()
+        self.force_mode = IntelligentForceMode(self.temp_dir)
+
+    def tearDown(self):
+        """Clean up test fixtures."""
+        import shutil
+        try:
+            shutil.rmtree(self.temp_dir)
+        except OSError:
+            pass
+
+    def _create_mock_error_analysis(self, rule_id="test-rule", severity=ErrorSeverity.WARNING,
+                                   file_path="test.py", line=10, message="Test error",
+                                   fixable=True, priority=1, effort=1):
+        """Create a mock ErrorAnalysis object."""
+        mock_error = Mock()
+        mock_error.rule_id = rule_id
+        mock_error.severity = severity
+        mock_error.file_path = file_path
+        mock_error.line = line
+        mock_error.message = message
+
+        mock_analysis = Mock(spec=ErrorAnalysis)
+        mock_analysis.error = mock_error
+        mock_analysis.file_path = file_path
+        mock_analysis.fixable = fixable
+        mock_analysis.priority = priority
+        mock_analysis.estimated_effort = effort
+        mock_analysis.complexity = Mock()
+        mock_analysis.complexity.value = 1
+        mock_analysis.context_lines = ["line1", "line2"]
+        mock_analysis.related_errors = []
+
+        return mock_analysis
+
+    def test_get_base_confidence_complex_js_string(self):
+        """Test _get_base_confidence with a complex JavaScript string."""
+        # Create a mock error analysis for a JS file with a complex string
+        error_analysis = self._create_mock_error_analysis(
+            rule_id="max-len",
+            file_path="test.js",
+            fixable=True
+        )
+
+        # Mock _is_complex_javascript_string to return True
+        with patch.object(self.force_mode, '_is_complex_javascript_string', return_value=True):
+            confidence = self.force_mode._get_base_confidence(error_analysis)
+            self.assertEqual(confidence, 0.75)
+
+    def test_is_complex_javascript_string_exception(self):
+        """Test _is_complex_javascript_string when an exception occurs."""
+        error_analysis = self._create_mock_error_analysis(file_path="non_existent_file.js")
+        # This should not raise an exception, but return False
+        self.assertFalse(self.force_mode._is_complex_javascript_string(error_analysis))
+
+    def test_is_complex_javascript_string_detection(self):
+        """Test the detection of complex JavaScript strings."""
+        complex_line = 'const long_string = "part1" + `part2 with ${variable}` + "part3"; // REPOSITORY CONTEXT'
+        simple_line = 'const simple_string = "hello world";'
+
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".js") as tmpfile:
+            tmpfile.write(complex_line)
+            tmpfile_path = tmpfile.name
+
+        error_analysis_complex = self._create_mock_error_analysis(file_path=tmpfile_path, line=1)
+        self.assertTrue(self.force_mode._is_complex_javascript_string(error_analysis_complex))
+
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".js") as tmpfile:
+            tmpfile.write(simple_line)
+            tmpfile_path_simple = tmpfile.name
+
+        error_analysis_simple = self._create_mock_error_analysis(file_path=tmpfile_path_simple, line=1)
+        self.assertFalse(self.force_mode._is_complex_javascript_string(error_analysis_simple))
+
+        import os
+        os.remove(tmpfile_path)
+        os.remove(tmpfile_path_simple)
+
+    def test_identify_risk_factors(self):
+        """Test the _identify_risk_factors method."""
+        # Test undefined variable risk
+        error_analysis_unde = self._create_mock_error_analysis(rule_id="no-unde")
+        risk_factors = self.force_mode._identify_risk_factors(error_analysis_unde, 0.5)
+        self.assertIn("Undefined variable may break runtime", risk_factors)
+        self.assertIn("Could be missing import or global", risk_factors)
+
+        # Test config file risk
+        error_analysis_config = self._create_mock_error_analysis(file_path="config/settings.py")
+        risk_factors = self.force_mode._identify_risk_factors(error_analysis_config, 0.5)
+        self.assertIn("Configuration file - changes affect entire system", risk_factors)
+
+        # Test production code risk
+        error_analysis_prod = self._create_mock_error_analysis(file_path="src/main.py")
+        risk_factors = self.force_mode._identify_risk_factors(error_analysis_prod, 0.5)
+        self.assertIn("Production code - changes affect users", risk_factors)
+
+        # Test high complexity risk
+        error_analysis_complex = self._create_mock_error_analysis(effort=4)
+        risk_factors = self.force_mode._identify_risk_factors(error_analysis_complex, 0.5)
+        self.assertIn("High complexity fix - multiple changes needed", risk_factors)
+
+        # Test related errors risk
+        error_analysis_related = self._create_mock_error_analysis()
+        error_analysis_related.related_errors = [Mock(), Mock(), Mock()]
+        risk_factors = self.force_mode._identify_risk_factors(error_analysis_related, 0.5)
+        self.assertIn("Multiple related errors - cascading effects possible", risk_factors)
+
+    def test_predict_cascades(self):
+        """Test the _predict_cascades method."""
+        # Create a dependency graph
+        self.force_mode.dependency_graph.add_node("file1.py")
+        self.force_mode.dependency_graph.add_node("file2.py")
+        self.force_mode.dependency_graph.add_node("file3.py")
+        self.force_mode.dependency_graph.add_edge("file1.py", "file2.py", type="import")
+        self.force_mode.dependency_graph.add_edge("file2.py", "file3.py", type="import")
+
+        # Create a force decision
+        error_analysis = self._create_mock_error_analysis(file_path="file1.py", rule_id="import/no-unresolved")
+        decision = ForceDecision(
+            error_analysis=error_analysis,
+            action="auto_force",
+            confidence=0.9,
+            risk_factors=[],
+            predicted_cascades=None
+        )
+
+        # Predict cascades
+        self.force_mode._predict_cascades([decision])
+
+        # Assert that cascades are predicted
+        self.assertIsNotNone(decision.predicted_cascades)
+        self.assertIn("file2.py", decision.predicted_cascades)
+
+    def test_calculate_cascade_risk_with_imported_names(self):
+        """Test _calculate_cascade_risk with imported names."""
+        edge_data = {"type": "import", "imported_names": ["my_func"]}
+        risk = self.force_mode._calculate_cascade_risk("some-rule", edge_data)
+        self.assertGreater(risk, 0.0)
