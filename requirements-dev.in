@@ -1,0 +1,25 @@
+# Development dependencies from pyproject.toml[dev]
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+black>=23.0.0
+isort>=5.12.0
+flake8>=6.0.0
+mypy>=1.0.0
+pre-commit>=3.0.0
+coverage>=7.0.0
+mock>=4.0.0
+responses>=0.23.0
+
+# Additional dev dependencies
+build>=0.10.0
+twine>=4.0.0
+google-genai>=0.8.0
+
+# Enhanced testing
+tqdm>=4.64.0
+networkx>=2.8.0
+numpy>=1.21.0
+hypothesis>=6.0.0
+pytest-xdist>=3.0.0
+pytest-benchmark>=4.0.0
