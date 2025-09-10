@@ -65,7 +65,7 @@ class ImportDependency:
 class PythonASTAnalyzer:
     """AST analyzer for Python files."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.functions: Dict[str, FunctionDependency] = {}
         self.variables: Dict[str, VariableDependency] = {}
         self.imports: List[ImportDependency] = []
@@ -92,7 +92,7 @@ class PythonASTAnalyzer:
             logger.warning(f"Failed to analyze Python file {file_path}: {e}")
             return {}, {}, []
 
-    def _analyze_node(self, node: ast.AST, file_path: str, scope: str = "global"):
+    def _analyze_node(self, node: ast.AST, file_path: str, scope: str = "global") -> None:
         """Recursively analyze AST nodes."""
 
         if isinstance(node, ast.FunctionDef):
@@ -114,7 +114,7 @@ class PythonASTAnalyzer:
         for child in ast.iter_child_nodes(node):
             self._analyze_node(child, file_path, scope)
 
-    def _analyze_function(self, node: ast.FunctionDef, file_path: str, scope: str):
+    def _analyze_function(self, node: ast.FunctionDef, file_path: str, scope: str) -> None:
         """Analyze function definition."""
         func_name = node.name
         func_key = f"{file_path}:{func_name}"
@@ -133,7 +133,7 @@ class PythonASTAnalyzer:
 
         self.functions[func_key] = func_dep
 
-    def _analyze_class(self, node: ast.ClassDef, file_path: str, scope: str):
+    def _analyze_class(self, node: ast.ClassDef, file_path: str, scope: str) -> None:
         """Analyze class definition."""
         class_scope = f"{scope}.{node.name}" if scope != "global" else node.name
 
@@ -142,7 +142,7 @@ class PythonASTAnalyzer:
             if isinstance(child, ast.FunctionDef):
                 self._analyze_function(child, file_path, class_scope)
 
-    def _analyze_import(self, node: Union[ast.Import, ast.ImportFrom], file_path: str):
+    def _analyze_import(self, node: Union[ast.Import, ast.ImportFrom], file_path: str) -> None:
         """Analyze import statements."""
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -166,7 +166,7 @@ class PythonASTAnalyzer:
             )
             self.imports.append(import_dep)
 
-    def _analyze_assignment(self, node: ast.Assign, file_path: str, scope: str):
+    def _analyze_assignment(self, node: ast.Assign, file_path: str, scope: str) -> None:
         """Analyze variable assignments."""
         for target in node.targets:
             if isinstance(target, ast.Name):
@@ -183,7 +183,7 @@ class PythonASTAnalyzer:
                     # Update definition line if this is a redefinition
                     self.variables[var_key].definition_line = node.lineno
 
-    def _analyze_function_call(self, node: ast.Call, file_path: str, scope: str):
+    def _analyze_function_call(self, node: ast.Call, file_path: str, scope: str) -> None:
         """Analyze function calls."""
         # This is handled in _analyze_function for now
         pass
@@ -192,7 +192,7 @@ class PythonASTAnalyzer:
 class JavaScriptASTAnalyzer:
     """AST analyzer for JavaScript/TypeScript files using regex patterns."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.functions: Dict[str, FunctionDependency] = {}
         self.variables: Dict[str, VariableDependency] = {}
         self.imports: List[ImportDependency] = []
@@ -219,7 +219,7 @@ class JavaScriptASTAnalyzer:
             logger.warning(f"Failed to analyze JavaScript file {file_path}: {e}")
             return {}, {}, []
 
-    def _analyze_functions(self, content: str, file_path: str):
+    def _analyze_functions(self, content: str, file_path: str) -> None:
         """Analyze function definitions using regex."""
         # Function declaration patterns
         patterns = [
@@ -241,7 +241,7 @@ class JavaScriptASTAnalyzer:
                     name=func_name, file_path=file_path, line_number=line_number
                 )
 
-    def _analyze_variables(self, content: str, file_path: str):
+    def _analyze_variables(self, content: str, file_path: str) -> None:
         """Analyze variable declarations using regex."""
         # Variable declaration patterns
         patterns = [
@@ -261,7 +261,7 @@ class JavaScriptASTAnalyzer:
                         name=var_name, file_path=file_path, definition_line=line_number
                     )
 
-    def _analyze_imports(self, content: str, file_path: str):
+    def _analyze_imports(self, content: str, file_path: str) -> None:
         """Analyze import statements using regex."""
         # Import patterns
         import_patterns = [
@@ -292,7 +292,7 @@ class JavaScriptASTAnalyzer:
 class EnhancedDependencyAnalyzer:
     """Enhanced dependency analyzer that integrates AST analysis with NetworkX graphs."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.dependency_graph = nx.DiGraph()
         self.function_graph = nx.DiGraph()
         self.variable_graph = nx.DiGraph()
@@ -345,7 +345,7 @@ class EnhancedDependencyAnalyzer:
         self.file_cache[file_path] = result
         return result
 
-    def _build_file_dependency_graph(self, imports: List[ImportDependency]):
+    def _build_file_dependency_graph(self, imports: List[ImportDependency]) -> None:
         """Build file-level dependency graph from imports."""
         for import_dep in imports:
             self.dependency_graph.add_node(import_dep.from_file, type="file")
@@ -361,7 +361,7 @@ class EnhancedDependencyAnalyzer:
                     imported_names=import_dep.imported_names,
                 )
 
-    def _build_function_dependency_graph(self, functions: Dict[str, FunctionDependency]):
+    def _build_function_dependency_graph(self, functions: Dict[str, FunctionDependency]) -> None:
         """Build function-level dependency graph."""
         for func_key, func_dep in functions.items():
             self.function_graph.add_node(func_key, **func_dep.__dict__)
@@ -373,7 +373,7 @@ class EnhancedDependencyAnalyzer:
                     if other_func.name == called_func:
                         self.function_graph.add_edge(func_key, other_key, type="calls")
 
-    def _build_variable_dependency_graph(self, variables: Dict[str, VariableDependency]):
+    def _build_variable_dependency_graph(self, variables: Dict[str, VariableDependency]) -> None:
         """Build variable-level dependency graph."""
         for var_key, var_dep in variables.items():
             self.variable_graph.add_node(var_key, **var_dep.__dict__)
