@@ -96,7 +96,7 @@ class EnhancedProgressTracker:
 
         self._log_stage_change(ProgressStage.INITIALIZING)
 
-    def _init_progress_bars(self):
+    def _init_progress_bars(self) -> None:
         """Initialize progress bars for large projects."""
         if not TQDM_AVAILABLE:
             return
@@ -126,7 +126,7 @@ class EnhancedProgressTracker:
             bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]",
         )
 
-    def set_total_files(self, total_files: int):
+    def set_total_files(self, total_files: int) -> None:
         """Set the total number of files to process."""
         self.session.metrics.total_files = total_files
 
@@ -134,7 +134,7 @@ class EnhancedProgressTracker:
             self.file_progress_bar.total = total_files
             self.file_progress_bar.refresh()
 
-    def update_stage(self, stage: ProgressStage, details: Optional[Dict] = None):
+    def update_stage(self, stage: ProgressStage, details: Optional[Dict] = None) -> None:
         """Update the current processing stage."""
         self.session.metrics.current_stage = stage
         self._log_stage_change(stage, details)
@@ -150,7 +150,7 @@ class EnhancedProgressTracker:
 
             print(f"\n{Fore.YELLOW}{stage_msg}{Style.RESET_ALL}")
 
-    def update_file_progress(self, current_file: str, file_errors: int):
+    def update_file_progress(self, current_file: str, file_errors: int) -> None:
         """Update progress for file processing."""
         self.session.metrics.current_file = current_file
         self.session.metrics.processed_files += 1
@@ -163,7 +163,7 @@ class EnhancedProgressTracker:
         if self.error_progress_bar:
             self.error_progress_bar.set_description(f"🔧 Fixing {file_errors} errors")
 
-    def update_error_progress(self, fixed: int = 0, failed: int = 0):
+    def update_error_progress(self, fixed: int = 0, failed: int = 0) -> None:
         """Update progress for error fixing."""
         self.session.metrics.fixed_errors += fixed
         self.session.metrics.failed_errors += failed
@@ -181,7 +181,7 @@ class EnhancedProgressTracker:
             )
             self.error_progress_bar.set_description(f"🔧 Errors (Success: {success_rate:.1f}%)")
 
-    def update_time_estimate(self):
+    def update_time_estimate(self) -> None:
         """Update estimated completion time."""
         if self.session.metrics.processed_errors == 0:
             return
@@ -224,7 +224,7 @@ class EnhancedProgressTracker:
             "is_large_project": self.is_large_project,
         }
 
-    def print_progress_summary(self):
+    def print_progress_summary(self) -> None:
         """Print a detailed progress summary."""
         summary = self.get_progress_summary()
         elapsed_str = str(timedelta(seconds=int(summary["elapsed_time"])))
@@ -240,7 +240,7 @@ class EnhancedProgressTracker:
             eta = datetime.fromisoformat(summary["estimated_completion"])
             print(f"   ETA: {eta.strftime('%H:%M:%S')}")
 
-    def print_real_time_status(self):
+    def print_real_time_status(self) -> None:
         """Print real-time status update for large projects."""
         if not self.is_large_project:
             return
@@ -290,7 +290,7 @@ class EnhancedProgressTracker:
             "elapsed_minutes": elapsed / 60,
         }
 
-    def _log_stage_change(self, stage: ProgressStage, details: Optional[Dict] = None):
+    def _log_stage_change(self, stage: ProgressStage, details: Optional[Dict] = None) -> None:
         """Log stage changes for debugging and analysis."""
         stage_entry = {
             "stage": stage.value,
@@ -300,7 +300,7 @@ class EnhancedProgressTracker:
         }
         self.session.stage_history.append(stage_entry)
 
-    def save_progress(self, cache_dir: Optional[Path] = None):
+    def save_progress(self, cache_dir: Optional[Path] = None) -> None:
         """Save progress to disk for recovery."""
         if not cache_dir:
             cache_dir = Path(self.project_path) / ".aider-lint-cache"
@@ -393,7 +393,7 @@ class EnhancedProgressTracker:
 
         return sorted(sessions, key=lambda x: x["start_time"], reverse=True)
 
-    def cleanup_old_sessions(self, max_age_days: int = 7, cache_dir: Optional[Path] = None):
+    def cleanup_old_sessions(self, max_age_days: int = 7, cache_dir: Optional[Path] = None) -> None:
         """Clean up old progress sessions."""
         if not cache_dir:
             cache_dir = Path(self.project_path) / ".aider-lint-cache"
@@ -416,7 +416,7 @@ class EnhancedProgressTracker:
         if cleaned_count > 0:
             print(f"   🧹 Cleaned up {cleaned_count} old progress sessions")
 
-    def close(self):
+    def close(self) -> None:
         """Close progress bars and finalize tracking."""
         if self.file_progress_bar:
             self.file_progress_bar.close()
