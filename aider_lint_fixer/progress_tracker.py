@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from colorama import Fore, Style
 
@@ -429,10 +429,10 @@ class EnhancedProgressTracker:
             self.print_progress_summary()
 
 
-def create_enhanced_progress_callback(tracker: EnhancedProgressTracker, verbose: bool = False):
+def create_enhanced_progress_callback(tracker: EnhancedProgressTracker, verbose: bool = False) -> Callable[[dict], None]:
     """Create an enhanced progress callback that works with the existing system."""
 
-    def enhanced_progress_callback(progress_info: dict):
+    def enhanced_progress_callback(progress_info: dict) -> None:
         """Enhanced progress callback with visual indicators."""
         stage = progress_info.get("stage", "unknown")
 
