@@ -429,7 +429,9 @@ class EnhancedProgressTracker:
             self.print_progress_summary()
 
 
-def create_enhanced_progress_callback(tracker: EnhancedProgressTracker, verbose: bool = False) -> Callable[[dict], None]:
+def create_enhanced_progress_callback(
+    tracker: EnhancedProgressTracker, verbose: bool = False
+) -> Callable[[dict], None]:
     """Create an enhanced progress callback that works with the existing system."""
 
     def enhanced_progress_callback(progress_info: dict) -> None:
